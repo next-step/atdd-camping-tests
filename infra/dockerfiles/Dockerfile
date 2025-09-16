@@ -4,10 +4,18 @@
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /workspace
 
-# 프로젝트 소스 전체를 빌드 컨텍스트로 받아와 부트 JAR 빌드
+# Gradle wrapper 먼저 복사 및 캐싱
+COPY gradlew ./
+COPY gradle/ gradle/
+RUN chmod +x ./gradlew
+
+# Build script 복사 및 의존성 다운로드 (캐시 최적화)
+COPY build.gradle settings.gradle ./
+RUN ./gradlew --no-daemon dependencies
+
+# 소스 코드 복사 및 빌드
 COPY . .
-RUN chmod +x ./gradlew \
-    && ./gradlew --no-daemon clean bootJar -x test
+RUN ./gradlew --no-daemon clean bootJar -x test
 
 ############
 # Runtime  #
