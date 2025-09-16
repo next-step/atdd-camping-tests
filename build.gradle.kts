@@ -79,4 +79,33 @@ tasks.register("setupRepos") {
     }
 }
 
+tasks.register<Exec>("composeUp") {
+    group = "docker"
+    description = "docker compose up -d --build (atdd-tests)"
+    commandLine(
+            "docker", "compose",
+            "-f", "infra/docker-compose.yml",
+            "up", "-d", "--build"
+    )
+}
+
+
+tasks.register<Exec>("composePs") {
+    group = "docker"
+    description = "docker compose ps (atdd-tests)"
+    commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "ps")
+}
+
+tasks.register<Exec>("composeLogs") {
+    group = "docker"
+    description = "docker logs kiosk-app --tail 100"
+    commandLine("docker", "logs", "kiosk-app", "--tail", "100")
+}
+
+tasks.register<Exec>("composeDown") {
+    group = "docker"
+    description = "docker compose down -v (atdd-tests)"
+    commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "down", "-v")
+}
+
 
