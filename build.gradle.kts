@@ -36,3 +36,5 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+apply(from = "gradle/setup-tasks.gradle.kts")
