@@ -1,0 +1,9 @@
+services:
+  kiosk:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-kiosk
+    ports:
+      - "8081:8080"
+    environment:
+      - PAYMENTS_SECRET_KEY=test_sk_dummy
