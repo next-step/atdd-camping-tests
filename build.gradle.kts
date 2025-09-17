@@ -36,3 +36,30 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Exec>("SetupKiosk"){
+    group = "setup kiosk"
+    description = "Setup Kiosk by cloneing the repository and running the setup script"
+
+    val reposDir = File("${project.rootDir}/repos")
+    val serviceDir = File("${reposDir}/atdd-camping-kiosk")
+
+    doFirst {
+        if (!reposDir.exists()) {
+            println("Creating repos directory")
+            reposDir.mkdir()
+        }
+    }
+
+    commandLine = if (serviceDir.exists()) {
+        println("Repository already exists, pulling latest changes")
+        listOf("sh", "-c", "cd $serviceDir && git pull && git checkout main")
+    } else {
+        println("Cloning repository")
+        listOf("sh", "-c", "git clone https://github.com/next-step/atdd-camping-kiosk.git ${serviceDir.absolutePath} && cd $serviceDir && git checkout main")
+    }
+
+    doLast {
+        println("Service code setup completed")
+    }
+}
