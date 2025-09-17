@@ -4,6 +4,7 @@ tasks.register("setupTestInfra") {
     createReposDirectory()
     cloneKioskRepository()
     buildKioskDockerImage()
+    dockerComposeUp()
 }
 
 fun createReposDirectory() {
@@ -44,6 +45,16 @@ fun buildKioskDockerImage() {
             "build", "./repos/atdd-camping-kiosk",
             "-f", "./dockerfiles/Dockerfile-kiosk",
             "-t", "atdd-camping-kiosk",
+        )
+    }
+}
+
+fun dockerComposeUp() {
+    exec {
+        commandLine(
+            "docker-compose",
+            "-f", "atdd-tests/infra/docker-compose.yml",
+            "up", "-d",
         )
     }
 }
