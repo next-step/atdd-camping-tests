@@ -36,3 +36,76 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register("setupRepos") {
+    doLast {
+        val reposDir = file("${rootProject.projectDir}/repos")
+        if (!reposDir.exists()) {
+            reposDir.mkdirs()
+            println("Created repos directory: $reposDir")
+        }
+
+        val gitignore = file("${rootProject.projectDir}/.gitignore")
+        val ignoreEntry = "repos/"
+
+        if (!gitignore.exists()) {
+            gitignore.createNewFile()
+            println(".gitignore created")
+        }
+
+        val lines = gitignore.readLines()
+        if (!lines.contains(ignoreEntry)) {
+            gitignore.appendText(ignoreEntry + "\n")
+            println("Added '$ignoreEntry' to .gitignore")
+        } else {
+            println("'$ignoreEntry' already exists in .gitignore")
+        }
+
+        val reposToClone = listOf(
+                "https://github.com/next-step/atdd-camping-kiosk.git" to "atdd-camping-kiosk",
+        )
+
+        reposToClone.forEach { (repoUrl, dirName) ->
+            val repoDir = reposDir.resolve(dirName)
+            if (!repoDir.exists()) {
+                println("Cloning $repoUrl into $repoDir")
+                exec {
+                    commandLine("git", "clone", repoUrl, repoDir.absolutePath)
+                }
+            } else {
+                println("Repo already exists: $repoDir")
+            }
+        }
+    }
+}
+
+tasks.register<Exec>("composeUp") {
+    group = "docker"
+    description = "docker compose up -d --build (atdd-tests)"
+    commandLine(
+            "docker", "compose",
+            "-f", "infra/docker-compose.yml",
+            "up", "-d", "--build"
+    )
+}
+
+
+tasks.register<Exec>("composePs") {
+    group = "docker"
+    description = "docker compose ps (atdd-tests)"
+    commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "ps")
+}
+
+tasks.register<Exec>("composeLogs") {
+    group = "docker"
+    description = "docker logs kiosk-app --tail 100"
+    commandLine("docker", "logs", "kiosk-app", "--tail", "100")
+}
+
+tasks.register<Exec>("composeDown") {
+    group = "docker"
+    description = "docker compose down -v (atdd-tests)"
+    commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "down", "-v")
+}
+
+
