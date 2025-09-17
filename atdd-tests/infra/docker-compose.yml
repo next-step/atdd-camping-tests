@@ -1,6 +1,0 @@
-services:
-  atdd-camping-kiosk:
-    container_name: atdd-camping-kiosk
-    image: "atdd-camping-kiosk:latest"
-    ports:
-      - "8080:8080"
