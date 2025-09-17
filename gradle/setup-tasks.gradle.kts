@@ -3,7 +3,6 @@ tasks.register("setupTestInfra") {
 
     createReposDirectory()
     cloneKioskRepository()
-    buildKioskDockerImage()
     dockerComposeUp()
 }
 
@@ -38,23 +37,13 @@ fun cloneKioskRepository() {
     }
 }
 
-fun buildKioskDockerImage() {
-    exec {
-        commandLine(
-            "docker",
-            "build", "./repos/atdd-camping-kiosk",
-            "-f", "./dockerfiles/Dockerfile-kiosk",
-            "-t", "atdd-camping-kiosk",
-        )
-    }
-}
-
 fun dockerComposeUp() {
     exec {
         commandLine(
             "docker-compose",
-            "-f", "atdd-tests/infra/docker-compose.yml",
+            "-f", "./infra/docker-compose.yml",
             "up", "-d",
         )
     }
+    println("Docker containers are up and running")
 }
