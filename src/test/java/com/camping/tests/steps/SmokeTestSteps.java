@@ -15,7 +15,6 @@ public class SmokeTestSteps {
 
     @When("kiosk 서비스에 요청을 보낸다")
     public void kiosk_서비스에_요청을_보낸다() {
-
         kioskServiceResponse = given()
             .when().get(KIOSK_BASE_URL)
             .thenReturn();
