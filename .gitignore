@@ -1,4 +1,8 @@
+# AI related
+CLAUDE.md
 .claude/
+.serena/
+
 .gradle/
 .idea/
 build/
