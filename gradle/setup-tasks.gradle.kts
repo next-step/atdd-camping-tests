@@ -3,6 +3,7 @@ tasks.register("setupTestInfra") {
 
     createReposDirectory()
     cloneKioskRepository()
+    buildKioskDockerImage()
 }
 
 fun createReposDirectory() {
@@ -27,11 +28,22 @@ fun cloneKioskRepository() {
                 "--single-branch",
                 "--branch", "main",
                 "https://github.com/next-step/atdd-camping-kiosk.git",
-                "repos/atdd-camping-kiosk"
+                "repos/atdd-camping-kiosk",
             )
         }
         println("Successfully cloned atdd-camping-kiosk repository")
     } else {
         println("atdd-camping-kiosk repository already exists")
+    }
+}
+
+fun buildKioskDockerImage() {
+    exec {
+        commandLine(
+            "docker",
+            "build", "./repos/atdd-camping-kiosk",
+            "-f", "./dockerfiles/Dockerfile-kiosk",
+            "-t", "atdd-camping-kiosk",
+        )
     }
 }
