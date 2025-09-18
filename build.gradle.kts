@@ -36,3 +36,26 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register("cloneKioskRepo") {
+    group = "repository"
+    description = "Clone https://github.com/next-step/atdd-camping-kiosk into repo/ at project root."
+    doLast {
+        val repoDir = project.rootProject.layout.projectDirectory.dir("repo").asFile
+        println("[repoDir]: $repoDir")
+        val kioskRepoDir = repoDir.resolve("atdd-camping-kiosk")
+        println("[kioskRepoDir]: $kioskRepoDir")
+
+        if (kioskRepoDir.exists()) {
+            println("atdd-camping-kiosk repository already exists in repo/, skipping clone.")
+        } else {
+            if (!repoDir.exists()) {
+                repoDir.mkdirs()
+            }
+            project.exec {
+                workingDir = repoDir
+                commandLine("git", "clone", "https://github.com/next-step/atdd-camping-kiosk")
+            }
+        }
+    }
+}
