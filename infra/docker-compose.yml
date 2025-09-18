@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  kiosk:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-kiosk
+    ports:
+      - "8080:8080"
