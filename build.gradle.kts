@@ -27,6 +27,7 @@ dependencies {
     testImplementation("org.junit.platform:junit-platform-suite:1.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.assertj:assertj-core:3.24.2")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
 
     // JDBC driver for test hooks
@@ -38,4 +39,6 @@ tasks.test {
 }
 
 apply(from = "gradle/task/kiosk-setup.gradle.kts")
+apply(from = "gradle/task/admin-setup.gradle.kts")
+apply(from = "gradle/task/reservation-setup.gradle.kts")
 apply(from = "gradle/task/compose.gradle.kts")

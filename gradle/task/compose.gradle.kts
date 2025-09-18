@@ -1,5 +1,5 @@
-tasks.register<Exec>("kioskComposeUp") {
-         group = "infra"
+tasks.register<Exec>("dockerComposeUp") {
+         group = "compose"
          description = "Run kiosk via docker compose (build + up)"
          commandLine(
                      "docker", "compose",
@@ -8,8 +8,8 @@ tasks.register<Exec>("kioskComposeUp") {
          )
      }
 
- tasks.register<Exec>("kioskComposeDown") {
-         group = "infra"
+ tasks.register<Exec>("dockerComposeDown") {
+         group = "compose"
          description = "Stop kiosk compose and remove volumes"
          commandLine(
                      "docker", "compose",
