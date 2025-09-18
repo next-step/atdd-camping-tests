@@ -29,6 +29,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
 
+    // AssertJ
+    testImplementation("org.assertj:assertj-core:3.27.4")
+
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
@@ -36,3 +39,5 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+apply(from = "gradle/setup-tasks.gradle.kts")

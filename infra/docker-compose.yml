@@ -1,0 +1,8 @@
+services:
+  atdd-camping-kiosk:
+    container_name: atdd-camping-kiosk
+    build:
+      context: ../repos/atdd-camping-kiosk
+      dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk # context 기준 상대경로
+    ports:
+      - "8080:8080"
