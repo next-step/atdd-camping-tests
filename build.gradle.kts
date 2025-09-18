@@ -37,32 +37,79 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.register<Exec>("SetupKiosk"){
+tasks.register("PrepareKioskDirectory") {
     group = "setup kiosk"
-    description = "Setup Kiosk by cloneing the repository and running the setup script"
+    description = "Prepare directory for kiosk repository"
+
+    val reposDir = File("${project.rootDir}/repos")
+
+    doLast {
+        if (!reposDir.exists()) {
+            println("📁 Creating repos directory: ${reposDir.absolutePath}")
+            reposDir.mkdir()
+            println("✅ Directory created successfully")
+        } else {
+            println("📁 Repos directory already exists: ${reposDir.absolutePath}")
+        }
+    }
+}
+
+tasks.register<Exec>("CloneKioskRepository") {
+    group = "setup kiosk"
+    description = "Clone kiosk repository if it doesn't exist"
+
+    dependsOn("PrepareKioskDirectory")
 
     val reposDir = File("${project.rootDir}/repos")
     val serviceDir = File("${reposDir}/atdd-camping-kiosk")
 
+    onlyIf { !serviceDir.exists() }
+
     doFirst {
-        if (!reposDir.exists()) {
-            println("Creating repos directory")
-            reposDir.mkdir()
-        }
+        println("🔄 Cloning repository from GitHub...")
     }
 
-    commandLine = if (serviceDir.exists()) {
-        println("Repository already exists, pulling latest changes")
-        listOf("sh", "-c", "cd $serviceDir && git pull && git checkout main")
-    } else {
-        println("Cloning repository")
-        listOf("sh", "-c", "git clone https://github.com/next-step/atdd-camping-kiosk.git ${serviceDir.absolutePath} && cd $serviceDir && git checkout main")
-    }
+    commandLine = listOf("sh", "-c", "git clone https://github.com/next-step/atdd-camping-kiosk.git ${serviceDir.absolutePath} && cd $serviceDir && git checkout main")
 
     doLast {
-        println("Service code setup completed")
+        println("✅ Repository cloned successfully to: ${serviceDir.absolutePath}")
     }
 }
+
+tasks.register<Exec>("UpdateKioskRepository") {
+    group = "setup kiosk"
+    description = "Pull latest changes if repository already exists"
+
+    dependsOn("PrepareKioskDirectory")
+
+    val reposDir = File("${project.rootDir}/repos")
+    val serviceDir = File("${reposDir}/atdd-camping-kiosk")
+
+    onlyIf { serviceDir.exists() }
+
+    doFirst {
+        println("🔄 Updating existing repository...")
+    }
+
+    commandLine = listOf("sh", "-c", "cd $serviceDir && git pull && git checkout main")
+
+    doLast {
+        println("✅ Repository updated successfully")
+    }
+}
+
+tasks.register("SetupKiosk") {
+    group = "setup kiosk"
+    description = "Setup Kiosk by cloning or updating the repository"
+
+    dependsOn("PrepareKioskDirectory", "CloneKioskRepository", "UpdateKioskRepository")
+
+    doLast {
+        println("🎉 Kiosk service setup completed!")
+        println("ℹ️ You can now run the kiosk service using: ./gradlew kioskComposeUp")
+    }
+}
+
 
 tasks.register<Exec>("kioskComposeUp") {
          group = "infra"
