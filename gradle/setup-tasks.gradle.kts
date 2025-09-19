@@ -2,9 +2,9 @@ tasks.register("setupTestInfra") {
     group = "setup"
 
     createReposDirectory()
-    setupKioskRepository()
-    setupAdminRepository()
-    setupReservationRepository()
+    setupRepository("atdd-camping-kiosk")
+    setupRepository("atdd-camping-admin")
+    setupRepository("atdd-camping-reservation")
     dockerComposeUp()
 }
 
@@ -20,16 +20,16 @@ fun createReposDirectory() {
     println("Created 'repos' directory")
 }
 
-fun setupKioskRepository() {
-    val kioskRepoDir = file("repos/atdd-camping-kiosk")
+fun setupRepository(repositoryName: String) {
+    val repositoryDir = file("repos/${repositoryName}")
 
-    if (kioskRepoDir.exists()) {
-        println("atdd-camping-kiosk repository already exists, pulling latest changes...")
+    if (repositoryDir.exists()) {
+        println("${repositoryName} repository already exists, pulling latest changes...")
         exec {
-            workingDir = kioskRepoDir
+            workingDir = repositoryDir
             commandLine("git", "pull", "origin", "main")
         }
-        println("Successfully updated atdd-camping-kiosk repository")
+        println("Successfully updated ${repositoryName} repository")
         return
     }
 
@@ -39,63 +39,11 @@ fun setupKioskRepository() {
             "--depth", "1",
             "--single-branch",
             "--branch", "main",
-            "https://github.com/next-step/atdd-camping-kiosk.git",
-            "repos/atdd-camping-kiosk",
+            "https://github.com/next-step/${repositoryName}.git",
+            "repos/${repositoryName}",
         )
     }
-    println("Successfully cloned atdd-camping-kiosk repository")
-}
-
-fun setupAdminRepository() {
-    val adminRepoDir = file("repos/atdd-camping-admin")
-
-    if (adminRepoDir.exists()) {
-        println("atdd-camping-admin repository already exists, pulling latest changes...")
-        exec {
-            workingDir = adminRepoDir
-            commandLine("git", "pull", "origin", "main")
-        }
-        println("Successfully updated atdd-camping-admin repository")
-        return
-    }
-
-    exec {
-        commandLine(
-            "git", "clone",
-            "--depth", "1",
-            "--single-branch",
-            "--branch", "main",
-            "https://github.com/next-step/atdd-camping-admin.git",
-            "repos/atdd-camping-admin",
-        )
-    }
-    println("Successfully cloned atdd-camping-admin repository")
-}
-
-fun setupReservationRepository() {
-    val reservationRepoDir = file("repos/atdd-camping-reservation")
-
-    if (reservationRepoDir.exists()) {
-        println("atdd-camping-reservation repository already exists, pulling latest changes...")
-        exec {
-            workingDir = reservationRepoDir
-            commandLine("git", "pull", "origin", "main")
-        }
-        println("Successfully updated atdd-camping-reservation repository")
-        return
-    }
-
-    exec {
-        commandLine(
-            "git", "clone",
-            "--depth", "1",
-            "--single-branch",
-            "--branch", "main",
-            "https://github.com/next-step/atdd-camping-reservation.git",
-            "repos/atdd-camping-reservation",
-        )
-    }
-    println("Successfully cloned atdd-camping-reservation repository")
+    println("Successfully cloned ${repositoryName} repository")
 }
 
 fun dockerComposeUp() {
