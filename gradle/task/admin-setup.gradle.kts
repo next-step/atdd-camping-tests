@@ -1,48 +1,85 @@
 val reposDir = File("${project.rootDir}/repos")
 val serviceDir = File("${reposDir}/atdd-camping-admin")
 
-tasks.register<Exec>("CloneAdminRepo") {
-    group = "setup admin"
-    description = "Clones the atdd-camping-admin repository if it doesn't exist."
+fun setupRepository(
+    project: Project,
+    repoUrl: String,
+    targetDir: File,
+    branchName: String = "parkSeryu"
+) {
+    if (!targetDir.parentFile.exists()) {
+        println("Creating repos directory")
+        targetDir.parentFile.mkdir()
+    }
 
-    doFirst {
-        if (!reposDir.exists()) {
-            println("Creating repos directory")
-            reposDir.mkdir()
+    if (!targetDir.exists()) {
+        cloneRepository(project, repoUrl, targetDir)
+    } else {
+        updateRepository(project, targetDir, branchName)
+    }
+
+    checkoutBranch(project, targetDir, branchName)
+    println("Repository setup completed")
+}
+
+fun cloneRepository(project: Project, repoUrl: String, targetDir: File) {
+    println("Cloning repository...")
+    project.exec {
+        commandLine("git", "clone", repoUrl, targetDir.absolutePath)
+    }
+    // 클론 직후 원격 브랜치 정보 업데이트
+    project.exec {
+        commandLine("git", "-C", targetDir.absolutePath, "fetch", "origin")
+    }
+}
+
+fun updateRepository(project: Project, targetDir: File, branchName: String) {
+    println("Repository exists. Pulling latest changes...")
+    project.exec {
+        commandLine("git", "-C", targetDir.absolutePath, "fetch", "origin")
+    }
+    project.exec {
+        commandLine("git", "-C", targetDir.absolutePath, "pull", "origin", branchName)
+        isIgnoreExitValue = true
+    }
+}
+
+fun checkoutBranch(project: Project, targetDir: File, branchName: String) {
+    val remoteBranchExists = project.exec {
+        commandLine("git", "-C", targetDir.absolutePath, "show-ref", "--verify", "--quiet", "refs/remotes/origin/$branchName")
+        isIgnoreExitValue = true
+    }
+
+    if (remoteBranchExists.exitValue == 0) {
+        println("Checking out $branchName branch from origin...")
+        project.exec {
+            commandLine("git", "-C", targetDir.absolutePath, "checkout", "-B", branchName, "origin/$branchName")
+        }
+    } else {
+        println("Creating and checking out $branchName branch...")
+        project.exec {
+            commandLine("git", "-C", targetDir.absolutePath, "checkout", "-b", branchName)
         }
     }
-
-    onlyIf {
-        !serviceDir.exists()
-    }
-
-    commandLine("git", "clone", "https://github.com/next-step/atdd-camping-admin.git", serviceDir.absolutePath)
 }
 
-tasks.register<Exec>("PullAdminRepo") {
+tasks.register("SetupAdminRepo") {
     group = "setup admin"
-    description = "Pulls the latest changes for atdd-camping-admin repository if it exists."
+    description = "Clones or pulls the atdd-camping-admin repository and checks out parkSeryu branch."
 
-    onlyIf {
-        serviceDir.exists()
+    doLast {
+        setupRepository(
+            project,
+            "https://github.com/ParkSeryu/atdd-camping-admin.git",
+            serviceDir
+        )
     }
-
-    commandLine("git", "-C", serviceDir.absolutePath, "pull")
-}
-
-tasks.register<Exec>("CheckoutAdminMainBranch") {
-    group = "setup admin"
-    description = "Checks out the main branch of the atdd-camping-admin repository."
-
-    dependsOn("CloneAdminRepo", "PullAdminRepo")
-
-    commandLine("git", "-C", serviceDir.absolutePath, "checkout", "main")
 }
 
 tasks.register("SetupAdmin") {
     group = "setup admin"
-    description = "Sets up the atdd-camping-admin by cloning/pulling and checking out the main branch."
-    dependsOn("CheckoutAdminMainBranch")
+    description = "Sets up the atdd-camping-admin by cloning/pulling and checking out the parkSeryu branch."
+    dependsOn("SetupAdminRepo")
     doLast {
         println("Service code setup completed")
     }
