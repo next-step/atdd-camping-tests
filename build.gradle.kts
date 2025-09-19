@@ -54,7 +54,12 @@ tasks.register("cloneKioskRepo") {
             }
             project.exec {
                 workingDir = repoDir
-                commandLine("git", "clone", "https://github.com/next-step/atdd-camping-kiosk")
+                commandLine(
+                    "git", "clone",
+                    "--branch", "main",
+                    "--single-branch",
+                    "https://github.com/next-step/atdd-camping-kiosk"
+                )
             }
         }
     }
