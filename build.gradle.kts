@@ -37,6 +37,37 @@ tasks.test {
     useJUnitPlatform()
 }
 
+// Helper properties for docker compose tasks
+val defaultComposeFile = project.rootProject.layout.projectDirectory.file("infra/docker-compose.yml").asFile.absolutePath
+
+// Application up (including image build)
+tasks.register<Exec>("up") {
+    group = "docker"
+    description = "Run 'docker compose up -d --build' for the specified compose file (default: infra/docker-compose.yml). Override with -PcomposeFile=..."
+    commandLine("docker", "compose", "-f", defaultComposeFile, "up", "-d", "--build")
+}
+
+// Application down
+tasks.register<Exec>("down") {
+    group = "docker"
+    description = "Run 'docker compose down' for the specified compose file (default: infra/docker-compose.yml). Override with -PcomposeFile=..."
+    commandLine("docker", "compose", "-f", defaultComposeFile, "down")
+}
+
+// Status check (ps)
+tasks.register<Exec>("ps") {
+    group = "docker"
+    description = "Run 'docker compose ps' for the specified compose file (default: infra/docker-compose.yml). Override with -PcomposeFile=..."
+    commandLine("docker", "compose", "-f", defaultComposeFile, "ps")
+}
+
+// Logs (kiosk only, tail 100)
+tasks.register<Exec>("logs") {
+    group = "docker"
+    description = "Show last 100 lines of kiosk container logs. Default container: 'atdd-kiosk'. Override with -PkioskContainerName=..."
+    commandLine("docker", "logs", "atdd-kiosk", "--tail", "100")
+}
+
 tasks.register("cloneKioskRepo") {
     group = "repository"
     description = "Clone https://github.com/next-step/atdd-camping-kiosk into repo/ at project root."
