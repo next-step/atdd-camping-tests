@@ -6,16 +6,20 @@ networks:
     external: true
 
 services:
-  atdd-tests:
+  # Kiosk 서비스
+  kiosk:
     build:
-      context: ..
-      dockerfile: infra/dockerfiles/Dockerfile
-    container_name: atdd-tests
+      context: ../../atdd-camping-reservation-4
+      dockerfile: ../atdd-camping-tests/infra/dockerfiles/Dockerfile
+    container_name: atdd-kiosk
+    ports:
+      - "18081:8080"
     networks:
       - atdd-net
     environment:
-      - DB_HOST=atdd-db
-      - DB_PORT=3306
-      - DB_NAME=atdd
-      - DB_USER=root
-      - DB_PASSWORD=secret
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect

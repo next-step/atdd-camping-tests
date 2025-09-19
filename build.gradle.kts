@@ -38,38 +38,23 @@ tasks.test {
 }
 
 // Docker Compose 태스크
-tasks.register<Exec>("infraUp") {
+tasks.register<Exec>("composeUp") {
     group = "docker"
-    description = "Start infrastructure services"
-    workingDir = file("infra")
-    commandLine("docker", "compose", "-f", "docker-compose-infra.yml", "up", "-d")
-}
-
-tasks.register<Exec>("appUp") {
-    group = "docker"
-    description = "Start application services"
+    description = "Start all services"
     workingDir = file("infra")
     commandLine("docker", "compose", "up", "-d")
-    dependsOn("infraUp")
-}
-
-tasks.register("composeUp") {
-    group = "docker"
-    description = "Start all services (infra + app)"
-    dependsOn("infraUp", "appUp")
 }
 
 tasks.register<Exec>("composeDown") {
     group = "docker"
-    description = "Stop all services (app + infra)"
+    description = "Stop all services"
     workingDir = file("infra")
     commandLine("docker", "compose", "down")
-    finalizedBy("infraDown")
 }
 
-tasks.register<Exec>("infraDown") {
-    group = "docker"
-    description = "Stop infrastructure services"
-    workingDir = file("infra")
-    commandLine("docker", "compose", "-f", "docker-compose-infra.yml", "down")
+tasks.register("smokeTest") {
+    group = "verification"
+    description = "Run smoke tests"
+    dependsOn("composeUp", "test")
+    finalizedBy("composeDown")
 }
