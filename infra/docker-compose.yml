@@ -6,4 +6,4 @@ services:
       context: ..
       dockerfile: infra/dockerfiles/Dockerfile-kiosk
     ports:
-      - "8080:8080"
+      - "18081:8080"
