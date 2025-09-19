@@ -23,6 +23,11 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - SPRING_SQL_INIT_MODE=never
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   reservation:
     container_name: reservation
@@ -41,6 +46,11 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - SPRING_SQL_INIT_MODE=never
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   kiosk:
     container_name: kiosk
@@ -55,4 +65,9 @@ services:
       - PAYMENTS_SECRET_KEY=test_sk_dummy
     depends_on:
       admin:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
