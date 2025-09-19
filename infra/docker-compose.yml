@@ -1,15 +1,11 @@
 name: atdd-compose
 
+networks:
+  atdd-net:
+    name: atdd-net
+    external: true
+
 services:
-  kiosk:
-    container_name: kiosk
-    build:
-      context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-kiosk
-    ports:
-      - "8081:8080"
-    environment:
-      - PAYMENTS_SECRET_KEY=test_sk_dummy
   admin:
     container_name: admin
     build:
@@ -17,6 +13,17 @@ services:
       dockerfile: infra/dockerfiles/Dockerfile-admin
     ports:
       - "8082:8080"
+    networks:
+      - atdd-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_SQL_INIT_MODE=never
+
   reservation:
     container_name: reservation
     build:
@@ -24,3 +31,28 @@ services:
       dockerfile: infra/dockerfiles/Dockerfile-reservation
     ports:
       - "8083:8080"
+    networks:
+      - atdd-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_SQL_INIT_MODE=never
+
+  kiosk:
+    container_name: kiosk
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-kiosk
+    ports:
+      - "8081:8080"
+    networks:
+      - atdd-net
+    environment:
+      - PAYMENTS_SECRET_KEY=test_sk_dummy
+    depends_on:
+      admin:
+        condition: service_started
