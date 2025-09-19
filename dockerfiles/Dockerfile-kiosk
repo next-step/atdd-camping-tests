@@ -5,7 +5,7 @@ WORKDIR /app
 # 소스 복사 (빌드 컨텍스트는 repo/atdd-camping-kiosk)
 COPY . .
 # 부트 실행 가능 JAR 빌드 (이미지 빌드 속도를 위해 테스트 생략)
-RUN chmod +x ./gradlew && ./gradlew bootJar -x test
+RUN chmod +x ./gradlew && ./gradlew --no-daemon clean bootJar -x test
 
 # 2) 런타임 단계
 FROM eclipse-temurin:17-jdk
