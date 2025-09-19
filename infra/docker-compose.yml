@@ -1,0 +1,21 @@
+name: atdd-app
+
+networks:
+  atdd-net:
+    name: atdd-net
+    external: true
+
+services:
+  atdd-tests:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile
+    container_name: atdd-tests
+    networks:
+      - atdd-net
+    environment:
+      - DB_HOST=atdd-db
+      - DB_PORT=3306
+      - DB_NAME=atdd
+      - DB_USER=root
+      - DB_PASSWORD=secret
