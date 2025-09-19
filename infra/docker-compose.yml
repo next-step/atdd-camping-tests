@@ -1,0 +1,22 @@
+name: atdd-kiosk
+
+networks:
+  atdd-net:
+    name: atdd-net
+    external: false
+
+services:
+  kiosk:
+    build:
+      context: ../repo/atdd-camping-kiosk
+      dockerfile: ../../dockerfiles/Dockerfile-kiosk
+      args:
+        - JAR_FILE=build/libs/*.jar
+    image: atdd/kiosk:latest
+    container_name: atdd-kiosk
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=
+    networks:
+      - atdd-net
