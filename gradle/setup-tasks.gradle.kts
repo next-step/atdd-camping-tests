@@ -2,10 +2,15 @@ tasks.register("setupTestInfra") {
     group = "setup"
 
     createReposDirectory()
-    setupRepository("atdd-camping-kiosk")
-    setupRepository("atdd-camping-admin")
-    setupRepository("atdd-camping-reservation")
-    dockerComposeUp()
+    listOf(
+        Repository(name = "atdd-camping-kiosk", url = "https://github.com/next-step/atdd-camping-kiosk", branch = "main"),
+        Repository(name = "atdd-camping-admin", url = "https://github.com/ivvve/atdd-camping-admin", branch = "mysql"),
+        Repository(name = "atdd-camping-reservation", url = "https://github.com/ivvve/atdd-camping-reservation", branch = "mysql"),
+    ).forEach { setupRepository(it) }
+
+    runInfraContainers()
+    Thread.sleep(5000) // Wait for infra containers to be fully up
+    runServiceContainers()
 }
 
 fun createReposDirectory() {
@@ -20,16 +25,22 @@ fun createReposDirectory() {
     println("Created 'repos' directory")
 }
 
-fun setupRepository(repositoryName: String) {
-    val repositoryDir = file("repos/${repositoryName}")
+data class Repository(
+    val name: String,
+    val url: String,
+    val branch: String,
+)
+
+fun setupRepository(repository: Repository) {
+    val repositoryDir = file("repos/${repository.name}")
 
     if (repositoryDir.exists()) {
-        println("${repositoryName} repository already exists, pulling latest changes...")
+        println("${repository.name} repository already exists, pulling latest changes...")
         exec {
             workingDir = repositoryDir
-            commandLine("git", "pull", "origin", "main")
+            commandLine("git", "pull", "origin", repository.branch)
         }
-        println("Successfully updated ${repositoryName} repository")
+        println("Successfully updated ${repository.name} repository")
         return
     }
 
@@ -38,15 +49,25 @@ fun setupRepository(repositoryName: String) {
             "git", "clone",
             "--depth", "1",
             "--single-branch",
-            "--branch", "main",
-            "https://github.com/next-step/${repositoryName}.git",
-            "repos/${repositoryName}",
+            "--branch", repository.branch,
+            repository.url,
+            "repos/${repository.name}",
         )
     }
-    println("Successfully cloned ${repositoryName} repository")
+    println("Successfully cloned ${repository.name} repository")
 }
 
-fun dockerComposeUp() {
+fun runInfraContainers() {
+    exec {
+        commandLine(
+            "docker-compose",
+            "-f", "./infra/docker-compose-infra.yml",
+            "up", "-d",
+        )
+    }
+}
+
+fun runServiceContainers() {
     exec {
         commandLine(
             "docker-compose",
