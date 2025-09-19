@@ -1,0 +1,19 @@
+# build stage
+FROM bellsoft/liberica-openjdk-alpine:17.0.16 AS build
+
+WORKDIR /app
+COPY gradlew gradlew.bat build.gradle settings.gradle ./
+COPY gradle ./gradle
+COPY src ./src
+
+RUN chmod +x ./gradlew
+RUN ./gradlew bootJar --no-daemon --parallel
+
+# runtime stage
+FROM bellsoft/liberica-openjre-alpine:17.0.16 AS runtime
+
+WORKDIR /app
+COPY --from=build /app/build/libs/atdd-camping-reservation-0.0.1-SNAPSHOT.jar ./
+
+ENTRYPOINT ["java", "-jar", "atdd-camping-reservation-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8080

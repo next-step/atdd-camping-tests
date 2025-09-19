@@ -6,3 +6,19 @@ services:
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk # context 기준 상대경로
     ports:
       - "8080:8080"
+
+  atdd-camping-admin:
+    container_name: atdd-camping-admin
+    build:
+      context: ../repos/atdd-camping-admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile-admin # context 기준 상대경로
+    ports:
+      - "8081:8080"
+
+  atdd-camping-reservation:
+    container_name: atdd-camping-reservation
+    build:
+      context: ../repos/atdd-camping-reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation # context 기준 상대경로
+    ports:
+      - "8082:8080"
