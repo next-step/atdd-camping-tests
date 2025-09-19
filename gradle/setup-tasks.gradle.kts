@@ -2,7 +2,7 @@ tasks.register("setupTestInfra") {
     group = "setup"
 
     createReposDirectory()
-    cloneKioskRepository()
+    setupKioskRepository()
     dockerComposeUp()
 }
 
@@ -18,11 +18,16 @@ fun createReposDirectory() {
     println("Created 'repos' directory")
 }
 
-fun cloneKioskRepository() {
+fun setupKioskRepository() {
     val kioskRepoDir = file("repos/atdd-camping-kiosk")
 
     if (kioskRepoDir.exists()) {
-        println("atdd-camping-kiosk repository already exists")
+        println("atdd-camping-kiosk repository already exists, pulling latest changes...")
+        exec {
+            workingDir = kioskRepoDir
+            commandLine("git", "pull", "origin", "main")
+        }
+        println("Successfully updated atdd-camping-kiosk repository")
         return
     }
 
