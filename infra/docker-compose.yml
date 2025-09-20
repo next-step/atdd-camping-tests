@@ -22,3 +22,37 @@ services:
       - JAVA_OPTS=-Dkiosk.base-url=${KIOSK_BASE_URL:-http://localhost:${KIOSK_PORT:-18081}}
     networks:
       - atdd-net
+
+  admin:
+    build:
+      context: ../repo/atdd-camping-admin
+      dockerfile: ../../dockerfiles/Dockerfile-admin
+      args:
+        - JAR_FILE=build/libs/*.jar
+    image: atdd/admin:latest
+    container_name: atdd-admin
+    ports:
+      - "${ADMIN_PORT:-18082}:8080"
+    environment:
+      - ADMIN_PORT=${ADMIN_PORT:-18082}
+      - ADMIN_BASE_URL=${ADMIN_BASE_URL:-http://localhost:${ADMIN_PORT:-18082}}
+      - JAVA_OPTS=-Dadmin.base-url=${ADMIN_BASE_URL:-http://localhost:${ADMIN_PORT:-18082}}
+    networks:
+      - atdd-net
+
+  reservation:
+    build:
+      context: ../repo/atdd-camping-reservation
+      dockerfile: ../../dockerfiles/Dockerfile-reservation
+      args:
+        - JAR_FILE=build/libs/*.jar
+    image: atdd/reservation:latest
+    container_name: atdd-reservation
+    ports:
+      - "${RESERVATION_PORT:-18083}:8080"
+    environment:
+      - RESERVATION_PORT=${RESERVATION_PORT:-18083}
+      - RESERVATION_BASE_URL=${RESERVATION_BASE_URL:-http://localhost:${RESERVATION_PORT:-18083}}
+      - JAVA_OPTS=-Dreservation.base-url=${RESERVATION_BASE_URL:-http://localhost:${RESERVATION_PORT:-18083}}
+    networks:
+      - atdd-net

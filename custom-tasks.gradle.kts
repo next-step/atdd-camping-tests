@@ -4,9 +4,8 @@ import org.gradle.api.tasks.Exec
 val defaultComposeFile = project.rootProject.layout.projectDirectory
     .file("infra/docker-compose.yml").asFile.absolutePath
 
-//////////////////// Kiosk Application Docker Tasks ////////////////////
 // Application up (including image build)
-tasks.register<Exec>("kioskAppUp") {
+tasks.register<Exec>("appUp") {
     group = "docker"
     description = "Run 'docker compose up -d --build' for the specified compose file (default: infra/docker-compose.yml)"
     commandLine(
@@ -17,7 +16,7 @@ tasks.register<Exec>("kioskAppUp") {
 }
 
 // Application down
-tasks.register<Exec>("kioskAppDown") {
+tasks.register<Exec>("appDown") {
     group = "docker"
     description = "Run 'docker compose down' for the specified compose file (default: infra/docker-compose.yml)"
     commandLine(
@@ -38,10 +37,11 @@ tasks.register<Exec>("ps") {
     )
 }
 
-// Logs (kiosk only, tail 100)
-tasks.register<Exec>("logs") {
+
+// Kiosk Logs
+tasks.register<Exec>("kioskLogs") {
     group = "docker"
-    description = "Show last 100 lines of kiosk container logs. Default container: 'atdd-kiosk'. Override with -PkioskContainerName=..."
+    description = "Show last 100 lines of kiosk container logs. Default container: 'atdd-kiosk'"
     commandLine(
         "docker", "logs",
         "atdd-kiosk", "--tail", "100"
@@ -70,7 +70,17 @@ tasks.register<Exec>("cloneKioskRepo") {
         }
     }
 }
-//////////////////// Admin Application Docker Tasks ////////////////////
+
+// Admin Logs
+tasks.register<Exec>("adminLogs") {
+    group = "docker"
+    description = "Show last 100 lines of admin container logs. Default container: 'atdd-admin'"
+    commandLine(
+        "docker", "logs",
+        "atdd-admin", "--tail", "100"
+    )
+}
+
 // Clone or update the admin repository
 tasks.register<Exec>("cloneAdminRepo") {
     description = "Clone or update https://github.com/mdy0501/atdd-camping-admin under repo/ at project root."
@@ -94,7 +104,16 @@ tasks.register<Exec>("cloneAdminRepo") {
     }
 }
 
-//////////////////// Reservation Application Docker Tasks ////////////////////
+// Reservation Logs
+tasks.register<Exec>("reservationLogs") {
+    group = "docker"
+    description = "Show last 100 lines of reservation container logs. Default container: 'atdd-reservation'"
+    commandLine(
+        "docker", "logs",
+        "atdd-reservation", "--tail", "100"
+    )
+}
+
 // Clone or update the reservation repository
 tasks.register<Exec>("cloneReservationRepo") {
     description = "Clone or update https://github.com/mdy0501/atdd-camping-reservation under repo/ at project root."
