@@ -5,10 +5,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Builder
-public record CreateProductRequest(
+public record UpdateAdminProductRequest(
     String name,
     String description,
-    ProductType productType,
+    AdminProductType productType,
     int price,
     int stockQuantity
 ) {
@@ -22,12 +22,12 @@ public record CreateProductRequest(
     public static class Fixture {
         private String name = "텐트";
         private String description = "4인용 텐트";
-        private ProductType productType = ProductType.RENTAL;
+        private AdminProductType productType = AdminProductType.RENTAL;
         private int price = 200_000;
         private int stockQuantity = 10;
 
-        public CreateProductRequest create() {
-            return CreateProductRequest.builder()
+        public UpdateAdminProductRequest create() {
+            return UpdateAdminProductRequest.builder()
                 .name(name)
                 .description(description)
                 .productType(productType)

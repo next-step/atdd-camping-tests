@@ -1,7 +1,7 @@
 package com.camping.tests.steps.kiosk.dto;
 
-public record ProductDetail(
-    int id,
+public record KioskProductDetail(
+    long id,
     String name,
     int price,
     int stockQuantity,

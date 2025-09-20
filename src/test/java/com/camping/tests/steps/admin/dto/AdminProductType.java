@@ -1,6 +1,6 @@
 package com.camping.tests.steps.admin.dto;
 
-public enum ProductType {
+public enum AdminProductType {
     SALE,
     RENTAL
 }
