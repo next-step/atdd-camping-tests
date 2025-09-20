@@ -10,6 +10,13 @@ import org.apache.http.HttpStatus;
 
 public class KioskProductTestSteps {
     // 상품 목록 조회
+    public static Response 상품_목록에서_상품이_조회된다(String targetName) {
+        var 상품_목록_조회_응답 = 상품_목록을_조회한다();
+        상품_목록_조회가_성공한다(상품_목록_조회_응답);
+        상품_목록에_상품이_있다(상품_목록_조회_응답, targetName);
+        return 상품_목록_조회_응답;
+    }
+
     public static Response 상품_목록을_조회한다() {
         return KioskClient.given()
             .get("/api/products")
