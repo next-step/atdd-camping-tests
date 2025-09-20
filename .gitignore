@@ -1,5 +1,6 @@
-.claude/
 .gradle/
 .idea/
 build/
-repos/
+
+# Ignore cloned repository directory
+repo/
