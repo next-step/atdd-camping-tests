@@ -4,10 +4,19 @@
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /workspace
 
-# 프로젝트 소스 전체를 빌드 컨텍스트로 받아와 부트 JAR 빌드
-COPY . .
-RUN chmod +x ./gradlew \
-    && ./gradlew --no-daemon clean bootJar -x test
+# Gradle Wrapper와 빌드 스크립트 먼저 복사
+COPY gradlew gradlew.bat ./
+COPY gradle ./gradle/
+COPY build.gradle* settings.gradle* ./
+
+# 줄바꿈 문자 변환 및 실행 권한 부여
+RUN sed -i 's/\r$//' ./gradlew && chmod +x ./gradlew
+
+# 소스 코드 복사
+COPY src ./src/
+
+# Spring Boot JAR 빌드
+RUN ./gradlew --no-daemon clean bootJar -x test
 
 ############
 # Runtime  #
@@ -15,8 +24,8 @@ RUN chmod +x ./gradlew \
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 
-# 빌드 결과 JAR 복사
+# 빌드된 JAR 파일 복사
 COPY --from=builder /workspace/build/libs/*.jar /app/app.jar
 
-# 실행
-ENTRYPOINT ["sh", "-c", "java -jar /app/app.jar"]
+# Spring Boot 애플리케이션 실행
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
