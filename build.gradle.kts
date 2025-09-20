@@ -38,4 +38,4 @@ tasks.test {
 }
 
 // Apply separated custom tasks (docker & setup)
-apply(from = "kiosk-tasks.gradle.kts")
+apply(from = "custom-tasks.gradle.kts")
