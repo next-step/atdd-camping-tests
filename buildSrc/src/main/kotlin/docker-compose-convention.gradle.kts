@@ -3,6 +3,36 @@ tasks.register<Exec>("composeUp") {
     group = "docker"
     description = "Start all services"
     workingDir = file("infra")
+
+    doFirst {
+        val kioskRepoDir = file("infra/repos/atdd-camping-kiosk")
+        if (!kioskRepoDir.exists()) {
+            file("repos").mkdirs()
+            exec {
+                commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
+                          "git@github.com:next-step/atdd-camping-kiosk.git", "infra/repos/atdd-camping-kiosk")
+            }
+        }
+
+        val adminRepoDir = file("infra/repos/atdd-camping-admin")
+        if (!adminRepoDir.exists()) {
+            file("repos").mkdirs()
+            exec {
+                commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
+                          "git@github.com:suzhanlee/atdd-camping-admin.git", "infra/repos/atdd-camping-admin")
+            }
+        }
+
+        val reservationRepoDir = file("infra/repos/atdd-camping-reservation")
+        if (!reservationRepoDir.exists()) {
+            file("repos").mkdirs()
+            exec {
+                commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
+                          "git@github.com:suzhanlee/atdd-camping-reservation.git", "infra/repos/atdd-camping-reservation")
+            }
+        }
+    }
+
     commandLine("docker", "compose", "up", "-d")
 }
 
