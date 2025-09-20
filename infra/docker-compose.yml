@@ -23,6 +23,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+      - KIOSK_ADMIN_BASE_URL=http://admin:8080
 
   # Admin 서비스
   admin:
