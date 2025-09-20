@@ -13,6 +13,7 @@ repositories {
 val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
 val jacksonVersion = "2.17.2"
+val lombokVersion = "1.18.42"
 
 dependencies {
     // Cucumber
@@ -34,6 +35,10 @@ dependencies {
 
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
+
+    // Lombok
+    testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
+    testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
 }
 
 tasks.test {
