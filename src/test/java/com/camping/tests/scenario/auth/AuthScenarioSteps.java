@@ -1,4 +1,4 @@
-package com.camping.tests.scenario;
+package com.camping.tests.scenario.auth;
 
 import static com.camping.tests.steps.admin.AdminAuthTestSteps.어드민으로_로그인이_되어있다;
 

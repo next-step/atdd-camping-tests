@@ -1,4 +1,4 @@
-package com.camping.tests.scenario.smoke;
+package com.camping.tests.scenario;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;

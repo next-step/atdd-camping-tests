@@ -1,4 +1,4 @@
-package com.camping.tests.scenario;
+package com.camping.tests.scenario.product;
 
 import static com.camping.tests.steps.admin.AdminProductTestSteps.상품_등록이_성공한다;
 import static com.camping.tests.steps.admin.AdminProductTestSteps.상품_이름을_수정한다;
