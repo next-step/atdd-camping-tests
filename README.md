@@ -16,13 +16,24 @@
 ### setupTestInfra task
 
 1. **createReposDirectory()**: `repos` 디렉토리 생성
-2. **cloneKioskRepository()**: GitHub에서 camping kiosk 애플리케이션 복제
-   - 저장소: `https://github.com/next-step/atdd-camping-kiosk.git`
-   - 위치: `repos/atdd-camping-kiosk`
-3. **dockerComposeUp()**: Docker Compose로 전체 환경 실행
+2. **setupRepository()**: GitHub에서 서비스 애플리케이션 복제
+   - `repos/atdd-camping-kiosk` (main branch)
+   - `repos/atdd-camping-admin` (mysql branch)
+   - `repos/atdd-camping-reservation` (mysql branch)
+3. **runInfraContainers()**: MySQL 등 인프라 컨테이너 실행
+4. **runServiceContainers()**: 전체 서비스 컨테이너 실행
+
+### MySQL (in docker-compose.yml)
+- port: 3306
 
 ### Kiosk 애플리케이션 (in docker-compose.yml)
 - port: 8080
+
+### Admin 애플리케이션 (in docker-compose.yml)
+- port: 8081
+
+### Reservation 애플리케이션 (in docker-compose.yml)
+- port: 8082
 
 ## 테스트 실행
 
