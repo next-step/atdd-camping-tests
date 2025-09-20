@@ -56,3 +56,40 @@ tasks.register<Exec>("kioskComposeDown") {
         "down", "-v"
     )
 }
+
+tasks.register<Exec>("cloneKioskRepo") {
+    group = "repos"
+    description = "Clone the kiosk repository if it doesn't exist"
+
+    onlyIf {
+        !file("repos/atdd-camping-kiosk/.git").exists()
+    }
+
+    doFirst {
+        file("repos").mkdirs()
+    }
+
+    commandLine(
+        "git", "clone",
+        "https://github.com/donggi-lee-bit/atdd-camping-kiosk.git",
+        "repos/atdd-camping-kiosk"
+    )
+}
+
+tasks.register<Exec>("updateKioskRepo") {
+    group = "repos"
+    description = "Update the kiosk repository to latest version"
+
+    onlyIf {
+        file("repos/atdd-camping-kiosk/.git").exists()
+    }
+
+    workingDir = file("repos/atdd-camping-kiosk")
+    commandLine("git", "pull", "origin", "donggi-lee-bit")
+}
+
+tasks.register<Delete>("cleanKioskRepo") {
+    group = "repos"
+    description = "Clean the repos directory"
+    delete("repos")
+}
