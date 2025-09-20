@@ -10,7 +10,7 @@ import io.restassured.specification.RequestSpecification;
 import java.util.List;
 
 public class AdminClient {
-    private static final RequestSpecification spec = new RequestSpecBuilder()
+    private static RequestSpecification spec = new RequestSpecBuilder()
         .setBaseUri(Service.ADMIN.getBaseUrl())
         .setContentType(ContentType.JSON)
         .setAccept(ContentType.JSON)
@@ -21,6 +21,10 @@ public class AdminClient {
             )
         )
         .build();
+
+    public static void setAuthToken(String authToken) {
+        spec = spec.auth().oauth2(authToken);
+    }
 
     public static RequestSpecification given() {
         return RestAssured.given(spec);

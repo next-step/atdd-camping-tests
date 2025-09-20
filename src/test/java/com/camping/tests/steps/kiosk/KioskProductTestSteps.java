@@ -1,0 +1,30 @@
+package com.camping.tests.steps.kiosk;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.camping.tests.steps.kiosk.dto.ProductDetail;
+import io.restassured.common.mapper.TypeRef;
+import io.restassured.response.Response;
+import java.util.List;
+import org.apache.http.HttpStatus;
+
+public class KioskProductTestSteps {
+    // 상품 목록 조회
+    public static Response 상품_목록을_조회한다() {
+        return KioskClient.given()
+            .get("/api/products")
+            .thenReturn();
+    }
+
+    public static void 상품_목록_조회가_성공한다(Response response) {
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.SC_OK);
+    }
+
+    public static void 상품_목록에_상품이_있다(Response response, String targetName) {
+        var productDetails = response.as(new TypeRef<List<ProductDetail>>() {
+        });
+        assertThat(productDetails)
+            .extracting("name")
+            .contains(targetName);
+    }
+}

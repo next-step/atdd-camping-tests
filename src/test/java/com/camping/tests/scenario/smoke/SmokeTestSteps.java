@@ -1,8 +1,9 @@
-package com.camping.tests.steps;
+package com.camping.tests.scenario.smoke;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.camping.tests.Service;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

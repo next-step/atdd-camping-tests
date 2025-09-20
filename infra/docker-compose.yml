@@ -10,6 +10,8 @@ services:
     build:
       context: ../repos/atdd-camping-kiosk
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk # context 기준 상대경로
+    environment:
+      - kiosk.admin.base-url=http://atdd-camping-admin:8080
     ports:
       - "8080:8080"
     networks:

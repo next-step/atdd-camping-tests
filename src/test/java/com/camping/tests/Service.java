@@ -1,4 +1,4 @@
-package com.camping.tests.steps;
+package com.camping.tests;
 
 import lombok.RequiredArgsConstructor;
 
