@@ -1,0 +1,31 @@
+###########
+# Builder #
+###########
+FROM eclipse-temurin:17-jdk AS builder
+WORKDIR /workspace
+
+# Gradle Wrapper와 빌드 스크립트 먼저 복사
+COPY repos/atdd-camping-kiosk/gradlew repos/atdd-camping-kiosk/gradlew.bat ./
+COPY repos/atdd-camping-kiosk/gradle ./gradle/
+COPY repos/atdd-camping-kiosk/build.gradle* repos/atdd-camping-kiosk/settings.gradle* ./
+
+# 줄바꿈 문자 변환 및 실행 권한 부여
+RUN sed -i 's/\r$//' ./gradlew && chmod +x ./gradlew
+
+# 소스 코드 복사
+COPY repos/atdd-camping-kiosk/src ./src/
+
+# Spring Boot JAR 빌드
+RUN ./gradlew --no-daemon clean bootJar -x test
+
+############
+# Runtime  #
+############
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+
+# 빌드된 JAR 파일 복사
+COPY --from=builder /workspace/build/libs/*.jar /app/app.jar
+
+# Spring Boot 애플리케이션 실행
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
