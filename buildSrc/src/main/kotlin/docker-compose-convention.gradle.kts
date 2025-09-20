@@ -7,8 +7,8 @@ tasks.register<Exec>("composeUp") {
     doFirst {
         val kioskRepoDir = file("infra/repos/atdd-camping-kiosk")
         if (!kioskRepoDir.exists()) {
-            file("repos").mkdirs()
-            exec {
+            file("infra/repos").mkdirs()
+            project.exec {
                 commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
                           "git@github.com:next-step/atdd-camping-kiosk.git", "infra/repos/atdd-camping-kiosk")
             }
@@ -16,8 +16,8 @@ tasks.register<Exec>("composeUp") {
 
         val adminRepoDir = file("infra/repos/atdd-camping-admin")
         if (!adminRepoDir.exists()) {
-            file("repos").mkdirs()
-            exec {
+            file("infra/repos").mkdirs()
+            project.exec {
                 commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
                           "git@github.com:suzhanlee/atdd-camping-admin.git", "infra/repos/atdd-camping-admin")
             }
@@ -25,8 +25,8 @@ tasks.register<Exec>("composeUp") {
 
         val reservationRepoDir = file("infra/repos/atdd-camping-reservation")
         if (!reservationRepoDir.exists()) {
-            file("repos").mkdirs()
-            exec {
+            file("infra/repos").mkdirs()
+            project.exec {
                 commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
                           "git@github.com:suzhanlee/atdd-camping-reservation.git", "infra/repos/atdd-camping-reservation")
             }

@@ -9,8 +9,8 @@ services:
   # Kiosk 서비스
   kiosk:
     build:
-      context: ../../atdd-camping-reservation-4
-      dockerfile: ../atdd-camping-tests/infra/dockerfiles/Dockerfile
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-kiosk
     container_name: atdd-kiosk
     ports:
       - "18081:8080"
@@ -18,7 +18,43 @@ services:
       - atdd-net
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:kioskdb
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+
+  # Admin 서비스
+  admin:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-admin
+    container_name: atdd-admin
+    ports:
+      - "18082:8080"
+    networks:
+      - atdd-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:admindb
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+
+  # Reservation 서비스
+  reservation:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-reservation
+    container_name: atdd-reservation
+    ports:
+      - "18083:8080"
+    networks:
+      - atdd-net
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:reservationdb
       - SPRING_DATASOURCE_USERNAME=sa
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
