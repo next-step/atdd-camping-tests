@@ -83,19 +83,23 @@ tasks.register<Exec>("logs") {
 }
 
 tasks.register<Exec>("cloneKioskRepo") {
-    description = "Clone https://github.com/next-step/atdd-camping-kiosk into repo/ at project root."
+    description = "Clone or update https://github.com/next-step/atdd-camping-kiosk under repo/ at project root."
     group = "setup"
 
-    val repoDir = project.file("repo/kiosk")
+    val repoDir = project.file("repo/atdd-camping-kiosk")
 
-    onlyIf { !repoDir.exists() }
-
-    doFirst { repoDir.parentFile.mkdirs() }
-
-    workingDir(repoDir.parentFile)
-    commandLine(
-        "git", "clone",
-        "--branch", "main",
-        "https://github.com/next-step/atdd-camping-kiosk"
-    )
+    doFirst {
+        repoDir.parentFile.mkdirs()
+        if (repoDir.exists()) {
+            workingDir(repoDir)
+            commandLine("git", "pull")
+        } else {
+            workingDir(repoDir.parentFile)
+            commandLine(
+                "git", "clone",
+                "--branch", "main",
+                "https://github.com/next-step/atdd-camping-kiosk"
+            )
+        }
+    }
 }
