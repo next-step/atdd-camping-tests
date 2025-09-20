@@ -4,6 +4,7 @@ import org.gradle.api.tasks.Exec
 val defaultComposeFile = project.rootProject.layout.projectDirectory
     .file("infra/docker-compose.yml").asFile.absolutePath
 
+//////////////////// Kiosk Application Docker Tasks ////////////////////
 // Application up (including image build)
 tasks.register<Exec>("kioskAppUp") {
     group = "docker"
@@ -49,7 +50,7 @@ tasks.register<Exec>("logs") {
 
 // Clone or update the kiosk repository
 tasks.register<Exec>("cloneKioskRepo") {
-    description = "Clone or update https://github.com/next-step/atdd-camping-kiosk under repo/ at project root."
+    description = "Clone or update https://github.com/mdy0501/atdd-camping-kiosk under repo/ at project root."
     group = "setup"
 
     val repoDir = project.file("repo/atdd-camping-kiosk")
@@ -64,7 +65,54 @@ tasks.register<Exec>("cloneKioskRepo") {
             commandLine(
                 "git", "clone",
                 "--branch", "main",
-                "https://github.com/next-step/atdd-camping-kiosk"
+                "https://github.com/mdy0501/atdd-camping-kiosk"
+            )
+        }
+    }
+}
+//////////////////// Admin Application Docker Tasks ////////////////////
+// Clone or update the admin repository
+tasks.register<Exec>("cloneAdminRepo") {
+    description = "Clone or update https://github.com/mdy0501/atdd-camping-admin under repo/ at project root."
+    group = "setup"
+
+    val repoDir = project.file("repo/atdd-camping-admin")
+
+    doFirst {
+        repoDir.parentFile.mkdirs()
+        if (repoDir.exists()) {
+            workingDir(repoDir)
+            commandLine("git", "pull")
+        } else {
+            workingDir(repoDir.parentFile)
+            commandLine(
+                "git", "clone",
+                "--branch", "main",
+                "https://github.com/mdy0501/atdd-camping-admin"
+            )
+        }
+    }
+}
+
+//////////////////// Reservation Application Docker Tasks ////////////////////
+// Clone or update the reservation repository
+tasks.register<Exec>("cloneReservationRepo") {
+    description = "Clone or update https://github.com/mdy0501/atdd-camping-reservation under repo/ at project root."
+    group = "setup"
+
+    val repoDir = project.file("repo/atdd-camping-reservation")
+
+    doFirst {
+        repoDir.parentFile.mkdirs()
+        if (repoDir.exists()) {
+            workingDir(repoDir)
+            commandLine("git", "pull")
+        } else {
+            workingDir(repoDir.parentFile)
+            commandLine(
+                "git", "clone",
+                "--branch", "main",
+                "https://github.com/mdy0501/atdd-camping-reservation"
             )
         }
     }
