@@ -4,16 +4,20 @@
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /workspace
 
+# 빌드 인자로 서비스 이름 받기
+ARG SERVICE_NAME
+RUN test -n "$SERVICE_NAME" || (echo "SERVICE_NAME argument is required" && false)
+
 # Gradle Wrapper와 빌드 스크립트 먼저 복사
-COPY infra/repos/atdd-camping-admin/gradlew infra/repos/atdd-camping-admin/gradlew.bat ./
-COPY infra/repos/atdd-camping-admin/gradle ./gradle/
-COPY infra/repos/atdd-camping-admin/build.gradle* infra/repos/atdd-camping-admin/settings.gradle* ./
+COPY infra/repos/atdd-camping-${SERVICE_NAME}/gradlew infra/repos/atdd-camping-${SERVICE_NAME}/gradlew.bat ./
+COPY infra/repos/atdd-camping-${SERVICE_NAME}/gradle ./gradle/
+COPY infra/repos/atdd-camping-${SERVICE_NAME}/build.gradle* infra/repos/atdd-camping-${SERVICE_NAME}/settings.gradle* ./
 
 # 줄바꿈 문자 변환 및 실행 권한 부여
 RUN sed -i 's/\r$//' ./gradlew && chmod +x ./gradlew
 
 # 소스 코드 복사
-COPY infra/repos/atdd-camping-admin/src ./src/
+COPY infra/repos/atdd-camping-${SERVICE_NAME}/src ./src/
 
 # Spring Boot JAR 빌드
 RUN ./gradlew --no-daemon clean bootJar -x test

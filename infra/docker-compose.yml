@@ -17,7 +17,9 @@ services:
   kiosk:
     build:
       context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-kiosk
+      dockerfile: dockerfiles/Dockerfile-svc
+      args:
+        SERVICE_NAME: kiosk
     container_name: atdd-kiosk
     ports:
       - "18081:8080"
@@ -32,7 +34,9 @@ services:
   admin:
     build:
       context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-admin
+      dockerfile: dockerfiles/Dockerfile-svc
+      args:
+        SERVICE_NAME: admin
     container_name: atdd-admin
     ports:
       - "18082:8080"
@@ -46,7 +50,9 @@ services:
   reservation:
     build:
       context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-reservation
+      dockerfile: dockerfiles/Dockerfile-svc
+      args:
+        SERVICE_NAME: reservation
     container_name: atdd-reservation
     ports:
       - "18083:8080"
