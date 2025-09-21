@@ -1,34 +1,14 @@
-fun cloneRepoIfNotExists(repoName: String, repoUrl: String) {
-    val repoDir = file("infra/repos/$repoName")
-    if (!repoDir.exists()) {
-        file("infra/repos").mkdirs()
-        project.exec {
-            commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
-                      repoUrl, "infra/repos/$repoName")
-        }
-    }
+// Convenience 태스크
+tasks.register<Task>("composeUp") {
+    group = "docker"
+    description = "Start all services (infra + app)"
+    dependsOn("infraUp", "appUp")
 }
 
-// Docker Compose 태스크
-tasks.register<Exec>("composeUp") {
+tasks.register<Task>("composeDown") {
     group = "docker"
-    description = "Start all services"
-    workingDir = file("infra")
-
-    doFirst {
-        cloneRepoIfNotExists("atdd-camping-kiosk", "git@github.com:next-step/atdd-camping-kiosk.git")
-        cloneRepoIfNotExists("atdd-camping-admin", "git@github.com:suzhanlee/atdd-camping-admin.git")
-        cloneRepoIfNotExists("atdd-camping-reservation", "git@github.com:suzhanlee/atdd-camping-reservation.git")
-    }
-
-    commandLine("docker", "compose", "up", "-d")
-}
-
-tasks.register<Exec>("composeDown") {
-    group = "docker"
-    description = "Stop all services"
-    workingDir = file("infra")
-    commandLine("docker", "compose", "down")
+    description = "Stop all services (app + infra)"
+    dependsOn("appDown", "infraDown")
 }
 
 tasks.register("smokeTest") {

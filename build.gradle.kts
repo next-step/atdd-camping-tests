@@ -1,5 +1,7 @@
 plugins {
     java
+    id("infra-convention")
+    id("app-convention")
     id("docker-compose-convention")
 }
 
