@@ -55,6 +55,36 @@ tasks.register<Exec>("cloneKioskRepository") {
     commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-kiosk", repoDir)
 }
 
+tasks.register<Exec>("cloneAdminRepository") {
+    group = "setup"
+    description = "Clones the admin repository."
+
+    val repoDir = file("repos/admin")
+
+    onlyIf { !repoDir.exists() }
+
+    doFirst {
+        repoDir.parentFile.mkdirs()
+    }
+
+    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-admin", repoDir)
+}
+
+tasks.register<Exec>("cloneReservationRepository") {
+    group = "setup"
+    description = "Clones the reservation repository."
+
+    val repoDir = file("repos/reservation")
+
+    onlyIf { !repoDir.exists() }
+
+    doFirst {
+        repoDir.parentFile.mkdirs()
+    }
+
+    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-reservation", repoDir)
+}
+
 tasks.register<Exec>("dockerComposeUp") {
     group = "docker"
     description = "Starts the services using docker-compose."
