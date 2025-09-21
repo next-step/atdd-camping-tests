@@ -88,6 +88,8 @@ tasks.register<Exec>("cloneReservationRepository") {
 tasks.register<Exec>("dockerComposeUp") {
     group = "docker"
     description = "Starts the services using docker-compose."
+    dependsOn("startInfraContainer")
+    mustRunAfter("startInfraContainer")
     commandLine("sh", "-c", "docker compose -f infra/docker-compose.yml up -d")
 }
 
