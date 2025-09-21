@@ -5,6 +5,13 @@ networks:
     name: atdd-net
     external: true
 
+x-common-spring-env: &common-spring-env
+  SPRING_PROFILES_ACTIVE: docker
+  SPRING_DATASOURCE_USERNAME: sa
+  SPRING_DATASOURCE_PASSWORD: ""
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+  SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+
 services:
   # Kiosk 서비스
   kiosk:
@@ -17,13 +24,9 @@ services:
     networks:
       - atdd-net
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:kioskdb
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
-      - KIOSK_ADMIN_BASE_URL=http://admin:8080
+      <<: *common-spring-env
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:kioskdb
+      KIOSK_ADMIN_BASE_URL: http://admin:8080
 
   # Admin 서비스
   admin:
@@ -36,12 +39,8 @@ services:
     networks:
       - atdd-net
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:admindb
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+      <<: *common-spring-env
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:admindb
 
   # Reservation 서비스
   reservation:
@@ -54,9 +53,5 @@ services:
     networks:
       - atdd-net
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:reservationdb
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+      <<: *common-spring-env
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:reservationdb
