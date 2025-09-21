@@ -96,3 +96,15 @@ tasks.register<Exec>("dockerComposeDown") {
     description = "Stops the services using docker-compose."
     commandLine("sh", "-c", "docker compose -f infra/docker-compose.yml down")
 }
+
+tasks.register<Exec>("startInfraContainer") {
+    group = "docker"
+    description = "Starts only the infra container using docker-compose-infra.yml."
+    commandLine("sh", "-c", "docker compose -f infra/docker-compose-infra.yml up -d db")
+}
+
+tasks.register<Exec>("stopInfraContainers") {
+    group = "docker"
+    description = "Stops the services from docker-compose-infra.yml."
+    commandLine("sh", "-c", "docker compose -f infra/docker-compose-infra.yml down")
+}
