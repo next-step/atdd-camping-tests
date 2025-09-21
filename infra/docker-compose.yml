@@ -12,6 +12,8 @@ services:
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk # context 기준 상대경로
     environment:
       - kiosk.admin.base-url=http://atdd-camping-admin:8080
+      - kiosk.payment.base-url=http://payments-mock:8080
+      - kiosk.payment.secret-key=test-secret-key
     ports:
       - "8080:8080"
     networks:
