@@ -1,3 +1,14 @@
+fun cloneRepoIfNotExists(repoName: String, repoUrl: String) {
+    val repoDir = file("infra/repos/$repoName")
+    if (!repoDir.exists()) {
+        file("infra/repos").mkdirs()
+        project.exec {
+            commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
+                      repoUrl, "infra/repos/$repoName")
+        }
+    }
+}
+
 // Docker Compose 태스크
 tasks.register<Exec>("composeUp") {
     group = "docker"
@@ -5,32 +16,9 @@ tasks.register<Exec>("composeUp") {
     workingDir = file("infra")
 
     doFirst {
-        val kioskRepoDir = file("infra/repos/atdd-camping-kiosk")
-        if (!kioskRepoDir.exists()) {
-            file("infra/repos").mkdirs()
-            project.exec {
-                commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
-                          "git@github.com:next-step/atdd-camping-kiosk.git", "infra/repos/atdd-camping-kiosk")
-            }
-        }
-
-        val adminRepoDir = file("infra/repos/atdd-camping-admin")
-        if (!adminRepoDir.exists()) {
-            file("infra/repos").mkdirs()
-            project.exec {
-                commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
-                          "git@github.com:suzhanlee/atdd-camping-admin.git", "infra/repos/atdd-camping-admin")
-            }
-        }
-
-        val reservationRepoDir = file("infra/repos/atdd-camping-reservation")
-        if (!reservationRepoDir.exists()) {
-            file("infra/repos").mkdirs()
-            project.exec {
-                commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1",
-                          "git@github.com:suzhanlee/atdd-camping-reservation.git", "infra/repos/atdd-camping-reservation")
-            }
-        }
+        cloneRepoIfNotExists("atdd-camping-kiosk", "git@github.com:next-step/atdd-camping-kiosk.git")
+        cloneRepoIfNotExists("atdd-camping-admin", "git@github.com:suzhanlee/atdd-camping-admin.git")
+        cloneRepoIfNotExists("atdd-camping-reservation", "git@github.com:suzhanlee/atdd-camping-reservation.git")
     }
 
     commandLine("docker", "compose", "up", "-d")
