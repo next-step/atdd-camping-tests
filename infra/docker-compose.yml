@@ -4,8 +4,30 @@ services:
       context: ../repos/kiosk
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
     ports:
-      - "18080:8081"
+      - "18080:8080"
     container_name: kiosk
     environment:
       - SPRING_PROFILES_ACTIVE=local
+      - SERVER_PORT=8080
+
+  admin:
+    build:
+      context: ../repos/admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile-admin
+    ports:
+      - "18081:8081"
+    container_name: admin
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8081
+
+  reservation:
+    build:
+      context: ../repos/reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation
+    ports:
+      - "18082:8082"
+    container_name: reservation
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SERVER_PORT=8082
