@@ -57,38 +57,43 @@ tasks.register<Exec>("kioskComposeDown") {
     )
 }
 
-tasks.register<Exec>("cloneKioskRepo") {
+tasks.register("syncRepos") {
     group = "repos"
-    description = "Clone the kiosk repository if it doesn't exist"
+    description = "Clone or update all repositories (admin, reservation, kiosk)"
 
-    onlyIf {
-        !file("repos/atdd-camping-kiosk/.git").exists()
-    }
-
-    doFirst {
+    doLast {
         file("repos").mkdirs()
-    }
 
-    commandLine(
-        "git", "clone",
-        "https://github.com/donggi-lee-bit/atdd-camping-kiosk.git",
-        "repos/atdd-camping-kiosk"
-    )
+        val repositories = mapOf(
+            "atdd-camping-admin" to "https://github.com/donggi-lee-bit/atdd-camping-admin.git",
+            "atdd-camping-reservation" to "https://github.com/donggi-lee-bit/atdd-camping-reservation.git",
+            "atdd-camping-kiosk" to "https://github.com/donggi-lee-bit/atdd-camping-kiosk.git"
+        )
+
+        repositories.forEach { (repoName, repoUrl) ->
+            val repoDir = file("repos/$repoName")
+            val gitDir = file("repos/$repoName/.git")
+
+
+            // 저장소가 존재하지 않으면 clone
+            if (!gitDir.exists()) {
+                ProcessBuilder("git", "clone", repoUrl, repoDir.path)
+                    .inheritIO()
+                    .start()
+                    .waitFor()
+            } else {
+                // 존재하면 update
+                ProcessBuilder("git", "pull", "origin", "donggi-lee-bit")
+                    .directory(repoDir)
+                    .inheritIO()
+                    .start()
+                    .waitFor()
+            }
+        }
+    }
 }
 
-tasks.register<Exec>("updateKioskRepo") {
-    group = "repos"
-    description = "Update the kiosk repository to latest version"
-
-    onlyIf {
-        file("repos/atdd-camping-kiosk/.git").exists()
-    }
-
-    workingDir = file("repos/atdd-camping-kiosk")
-    commandLine("git", "pull", "origin", "donggi-lee-bit")
-}
-
-tasks.register<Delete>("cleanKioskRepo") {
+tasks.register<Delete>("cleanRepos") {
     group = "repos"
     description = "Clean the repos directory"
     delete("repos")
