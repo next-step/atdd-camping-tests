@@ -36,3 +36,33 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// kiosk 저장소를 repos 하위 경로에 clone 한다
+// url은 https://github.com/MoonJeWoong/atdd-camping-kiosk 를 사용한다
+// clone 시 기본적으로 main 브랜치를 사용하도록 한다
+tasks.register<Exec>("cloneKioskRepository") {
+    group = "setup"
+    description = "Clones the kiosk repository."
+
+    val repoDir = file("repos/kiosk")
+
+    onlyIf { !repoDir.exists() }
+
+    doFirst {
+        repoDir.parentFile.mkdirs()
+    }
+
+    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-kiosk", repoDir)
+}
+
+tasks.register<Exec>("dockerComposeUp") {
+    group = "docker"
+    description = "Starts the services using docker-compose."
+    commandLine("sh", "-c", "docker compose -f infra/docker-compose.yml up -d")
+}
+
+tasks.register<Exec>("dockerComposeDown") {
+    group = "docker"
+    description = "Stops the services using docker-compose."
+    commandLine("sh", "-c", "docker compose -f infra/docker-compose.yml down")
+}

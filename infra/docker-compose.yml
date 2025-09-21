@@ -1,0 +1,11 @@
+services:
+  kiosk:
+    build:
+      context: ../repos/kiosk
+      dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
+    ports:
+      - "18080:8081"
+    container_name: kiosk
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SERVER_PORT=8081
