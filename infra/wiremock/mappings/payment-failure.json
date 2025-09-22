@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/api/payments",
+    "urlPath": "/v1/payments",
     "headers": {
       "Content-Type": {
         "equalTo": "application/json"
@@ -9,16 +9,16 @@
     },
     "bodyPatterns": [
       {
-        "matchesJsonPath": "$.amount[?(@.amount == 0)]"
+        "matchesJsonPath": "$[?(@.amount == 0)]"
       }
     ]
   },
   "response": {
-    "status": 400,
+    "status": 200,
     "headers": {
       "Content-Type": "application/json"
     },
     "bodyFileName": "payment-failure-response.json"
   },
-  "priority": 2
+  "priority": 1
 }

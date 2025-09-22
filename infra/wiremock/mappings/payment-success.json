@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/api/payments",
+    "urlPath": "/v1/payments",
     "headers": {
       "Content-Type": {
         "equalTo": "application/json"
@@ -9,13 +9,13 @@
     },
     "bodyPatterns": [
       {
+        "matchesJsonPath": "$.paymentKey"
+      },
+      {
+        "matchesJsonPath": "$.orderId"
+      },
+      {
         "matchesJsonPath": "$.amount"
-      },
-      {
-        "matchesJsonPath": "$.method"
-      },
-      {
-        "matchesJsonPath": "$.description"
       }
     ]
   },
@@ -26,5 +26,5 @@
     },
     "bodyFileName": "payment-success-response.json"
   },
-  "priority": 3
+  "priority": 2
 }
