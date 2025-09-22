@@ -108,7 +108,7 @@ tasks.register<Exec>("kiosk-logs") {
     description = "Show last 100 lines of kiosk container logs. Default container: 'atdd-kiosk'"
     commandLine(
         "docker", "logs",
-        "atdd-kiosk", "--tail", "100"
+        "atdd-kiosk", "--tail", "1000"
     )
 }
 
@@ -118,7 +118,7 @@ tasks.register<Exec>("admin-logs") {
     description = "Show last 100 lines of admin container logs. Default container: 'atdd-admin'"
     commandLine(
         "docker", "logs",
-        "atdd-admin", "--tail", "100"
+        "atdd-admin", "--tail", "1000"
     )
 }
 
@@ -128,7 +128,7 @@ tasks.register<Exec>("reservation-logs") {
     description = "Show last 100 lines of reservation container logs. Default container: 'atdd-reservation'"
     commandLine(
         "docker", "logs",
-        "atdd-reservation", "--tail", "100"
+        "atdd-reservation", "--tail", "1000"
     )
 }
 

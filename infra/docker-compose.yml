@@ -15,10 +15,11 @@ services:
     image: atdd/kiosk:latest
     container_name: atdd-kiosk
     ports:
-      - "18081:8080"
+      - "18081:8081"
     environment:
       - KIOSK_PORT=18081
       - KIOSK_BASE_URL=http://localhost:18081
+      - KIOSK_ADMIN_BASE_URL=http://atdd-admin:8082
     networks:
       - atdd-net
 
@@ -31,11 +32,11 @@ services:
     image: atdd/admin:latest
     container_name: atdd-admin
     ports:
-      - "18082:8080"
+      - "18082:8082"
     environment:
       - ADMIN_PORT=18082
       - ADMIN_BASE_URL=http://localhost:18082
-      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/camping?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/camping?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root1234
     networks:
@@ -50,11 +51,11 @@ services:
     image: atdd/reservation:latest
     container_name: atdd-reservation
     ports:
-      - "18083:8080"
+      - "18083:8083"
     environment:
       - RESERVATION_PORT=18083
       - RESERVATION_BASE_URL=http://localhost:18083
-      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/camping?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/camping?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root1234
     networks:
