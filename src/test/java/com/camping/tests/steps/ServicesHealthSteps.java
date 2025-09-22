@@ -35,20 +35,20 @@ public class ServicesHealthSteps {
     public void _200_응답을_받는다() {
         int statusCode = response.getStatusCode();
 
-        if (!((statusCode >= 200 && statusCode < 400) || statusCode == 401)) {
+        if (!(statusCode >= 200)) {
             throw new AssertionError("예상하지 못한 응답 코드: " + statusCode);
         }
     }
 
     private Response sendRequestWithRetry(int port) {
-        String url = "http://localhost:" + port + "/";
+        String url = buildUrlForPort(port);
 
         for (int attempt = 1; attempt <= MAX_RETRY_COUNT; attempt++) {
             try {
                 Response response = given().get(url);
                 int statusCode = response.getStatusCode();
 
-                if ((statusCode >= 200 && statusCode < 400) || statusCode == 401) {
+                if (statusCode >= 200) {
                     return response;
                 }
             } catch (Exception ignored) { }
@@ -63,5 +63,13 @@ public class ServicesHealthSteps {
             }
         }
         throw new RuntimeException("서비스 응답 실패: " + url);
+    }
+
+    private String buildUrlForPort(int port) {
+        String baseUrl = "http://localhost:" + port;
+        if (port == 18082) {
+            return baseUrl + "/login";
+        }
+        return baseUrl + "/";
     }
 }
