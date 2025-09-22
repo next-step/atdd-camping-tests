@@ -1,0 +1,5 @@
+{
+  "paymentKey": "tgen_20240101120000_ABCD1234",
+  "orderId": "order_{{randomValue length=8 type='ALPHANUMERIC'}}",
+  "status": "READY"
+}
