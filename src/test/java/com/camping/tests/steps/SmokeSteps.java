@@ -7,7 +7,7 @@ import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class KioskSmokeSteps {
+public class SmokeSteps {
 
     private Response response;
 

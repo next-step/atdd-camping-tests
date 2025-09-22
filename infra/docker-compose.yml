@@ -5,21 +5,59 @@ networks:
     name: atdd-net
     external: true
 
+x-common-spring-env: &common-spring-env
+  SPRING_PROFILES_ACTIVE: docker
+  SPRING_DATASOURCE_USERNAME: sa
+  SPRING_DATASOURCE_PASSWORD: ""
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+  SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+
 services:
   # Kiosk 서비스
   kiosk:
     build:
-      context: ../../atdd-camping-reservation-4
-      dockerfile: ../atdd-camping-tests/infra/dockerfiles/Dockerfile
+      context: ..
+      dockerfile: dockerfiles/Dockerfile-svc
+      args:
+        SERVICE_NAME: kiosk
     container_name: atdd-kiosk
     ports:
       - "18081:8080"
     networks:
       - atdd-net
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb
-      - SPRING_DATASOURCE_USERNAME=sa
-      - SPRING_DATASOURCE_PASSWORD=
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.H2Dialect
+      <<: *common-spring-env
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:kioskdb
+      KIOSK_ADMIN_BASE_URL: http://admin:8080
+
+  # Admin 서비스
+  admin:
+    build:
+      context: ..
+      dockerfile: dockerfiles/Dockerfile-svc
+      args:
+        SERVICE_NAME: admin
+    container_name: atdd-admin
+    ports:
+      - "18082:8080"
+    networks:
+      - atdd-net
+    environment:
+      <<: *common-spring-env
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:admindb
+
+  # Reservation 서비스
+  reservation:
+    build:
+      context: ..
+      dockerfile: dockerfiles/Dockerfile-svc
+      args:
+        SERVICE_NAME: reservation
+    container_name: atdd-reservation
+    ports:
+      - "18083:8080"
+    networks:
+      - atdd-net
+    environment:
+      <<: *common-spring-env
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:reservationdb

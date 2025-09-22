@@ -1,5 +1,8 @@
 plugins {
     java
+    id("infra-convention")
+    id("app-convention")
+    id("docker-compose-convention")
 }
 
 group = "com.camping"
@@ -13,6 +16,7 @@ repositories {
 val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
 val jacksonVersion = "2.17.2"
+val jjwtVersion = "0.11.5"
 
 dependencies {
     // Cucumber
@@ -28,33 +32,20 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
+    testImplementation("org.assertj:assertj-core:3.26.3")
 
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
+
+    // JWT (jjwt)
+    implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
+
+    testImplementation("org.slf4j:slf4j-api:2.0.13")
+    testRuntimeOnly("ch.qos.logback:logback-classic:1.4.14")
 }
 
 tasks.test {
     useJUnitPlatform()
-}
-
-// Docker Compose 태스크
-tasks.register<Exec>("composeUp") {
-    group = "docker"
-    description = "Start all services"
-    workingDir = file("infra")
-    commandLine("docker", "compose", "up", "-d")
-}
-
-tasks.register<Exec>("composeDown") {
-    group = "docker"
-    description = "Stop all services"
-    workingDir = file("infra")
-    commandLine("docker", "compose", "down")
-}
-
-tasks.register("smokeTest") {
-    group = "verification"
-    description = "Run smoke tests"
-    dependsOn("composeUp", "test")
-    finalizedBy("composeDown")
 }
