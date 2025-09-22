@@ -1,0 +1,3 @@
+### 상품 목록 조회
+GET http://localhost:18081/api/products
+Content-Type: application/json

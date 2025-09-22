@@ -1,0 +1,3 @@
+### 예약 목록 조회
+GET http://localhost:18083/api/reservations
+Content-Type: application/json
