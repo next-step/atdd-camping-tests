@@ -1,22 +1,17 @@
-###########
-# Builder #
-###########
-FROM eclipse-temurin:17-jdk AS builder
-WORKDIR /workspace
+# Build stage
+FROM eclipse-temurin:17-jdk AS build
+ARG SERVICE_NAME
+WORKDIR /home/gradle/project
+COPY ./repos/atdd-camping-${SERVICE_NAME} /home/gradle/project
 
-# 프로젝트 소스 전체를 빌드 컨텍스트로 받아와 부트 JAR 빌드
-COPY . .
-RUN chmod +x ./gradlew \
-    && ./gradlew --no-daemon clean bootJar -x test
+# CRLF를 LF로 변환 후 실행
+RUN sed -i 's/\r$//' ./gradlew && \
+    chmod +x ./gradlew && \
+    ./gradlew bootJar
 
-############
-# Runtime  #
-############
-FROM eclipse-temurin:17-jdk
+# Package stage
+FROM eclipse-temurin:17-jre
+ARG SERVICE_NAME
 WORKDIR /app
-
-# 빌드 결과 JAR 복사
-COPY --from=builder /workspace/build/libs/*.jar /app/app.jar
-
-# 실행
-ENTRYPOINT ["sh", "-c", "java -jar /app/app.jar"]
+COPY --from=build /home/gradle/project/build/libs/*.jar /app/app.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

@@ -10,7 +10,9 @@ services:
     container_name: admin
     build:
       context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-admin
+      dockerfile: infra/dockerfiles/Dockerfile
+      args:
+        SERVICE_NAME: admin
     ports:
       - "8082:8080"
     networks:
@@ -33,7 +35,9 @@ services:
     container_name: reservation
     build:
       context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-reservation
+      dockerfile: infra/dockerfiles/Dockerfile
+      args:
+        SERVICE_NAME: reservation
     ports:
       - "8083:8080"
     networks:
@@ -56,7 +60,9 @@ services:
     container_name: kiosk
     build:
       context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-kiosk
+      dockerfile: infra/dockerfiles/Dockerfile
+      args:
+        SERVICE_NAME: kiosk
     ports:
       - "8081:8080"
     networks:
