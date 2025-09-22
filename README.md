@@ -5,14 +5,50 @@
 - repos : MSA를 구성하는 서비스들의 실제 레포 코드
 
 ## 테스트 전 환경 구축 방법
-### Docker Compose 서비스 실행 및 종료
 
-- **서비스 실행**: 아래 명령어를 사용하여 `infra/docker-compose.yml`에 정의된 모든 서비스를 백그라운드에서 실행합니다.
+테스트를 실행하기 전에 다음 단계를 순서대로 진행하여 개발 환경을 구축합니다.
+
+### 1. MSA 저장소 클론
+
+각 MSA의 소스 코드를 `repos` 디렉토리 아래에 클론합니다.
+
+- **Kiosk 저장소 클론**:
+  ```bash
+  ./gradlew cloneKioskRepository
+  ```
+- **Admin 저장소 클론**:
+  ```bash
+  ./gradlew cloneAdminRepository
+  ```
+- **Reservation 저장소 클론**:
+  ```bash
+  ./gradlew cloneReservationRepository
+  ```
+
+### 2. 인프라 서비스 실행 및 종료
+
+테스트에 필요한 데이터베이스(MySQL) 컨테이너를 관리합니다.
+
+- **인프라 실행**: 아래 명령어를 사용하여 `infra/docker-compose-infra.yml`에 정의된 DB 서비스를 실행합니다.
+  ```bash
+  ./gradlew startInfraContainer
+  ```
+
+- **인프라 종료**: 실행 중인 DB 서비스를 중지하고 컨테이너를 삭제합니다.
+  ```bash
+  ./gradlew stopInfraContainers
+  ```
+
+### 3. 애플리케이션 서비스 실행 및 종료
+
+MSA를 구성하는 애플리케이션 컨테이너를 관리합니다.
+
+- **서비스 실행**: 아래 명령어를 사용하여 `infra/docker-compose.yml`에 정의된 모든 애플리케이션 서비스를 백그라운드에서 실행합니다. **반드시 인프라 서비스가 먼저 실행되어야 합니다.**
   ```bash
   ./gradlew dockerComposeUp
   ```
 
-- **서비스 종료**: 실행 중인 모든 서비스를 중지하고 컨테이너를 삭제합니다.
+- **서비스 종료**: 실행 중인 모든 애플리케이션 서비스를 중지하고 컨테이너를 삭제합니다.
   ```bash
   ./gradlew dockerComposeDown
   ```
@@ -20,5 +56,5 @@
 ## 테스트 실행 방법
 
 ```bash
- KIOSK_BASE_URL=http://localhost:18080 ./gradlew test
+ KIOSK_BASE_URL=http://localhost:18080 ADMIN_BASE_URL=http://localhost:18081 RESERVATION_BASE_URL=http://localhost:18082 ./gradlew test
 ```
