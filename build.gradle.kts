@@ -37,9 +37,9 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.register<Exec>("kioskComposeUp") {
+tasks.register<Exec>("servicesUp") {
     group = "infra"
-    description = "Run kiosk via docker compose (build + up)"
+    description = "Run all services (admin, reservation, kiosk) via docker compose (build + up)"
     commandLine(
         "/opt/homebrew/bin/docker", "compose",
         "-f", "infra/docker-compose.yml",
@@ -47,9 +47,9 @@ tasks.register<Exec>("kioskComposeUp") {
     )
 }
 
-tasks.register<Exec>("kioskComposeDown") {
+tasks.register<Exec>("servicesDown") {
     group = "infra"
-    description = "Stop kiosk compose and remove volumes"
+    description = "Stop all services compose and remove volumes"
     commandLine(
         "/opt/homebrew/bin/docker", "compose",
         "-f", "infra/docker-compose.yml",
