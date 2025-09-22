@@ -11,6 +11,7 @@ x-common-spring-env: &common-spring-env
   SPRING_DATASOURCE_PASSWORD: ""
   SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
   SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+  SPRING_DATASOURCE_URL: jdbc:h2:mem:admindb
 
 services:
   # Kiosk 서비스
@@ -27,7 +28,6 @@ services:
       - atdd-net
     environment:
       <<: *common-spring-env
-      SPRING_DATASOURCE_URL: jdbc:h2:mem:kioskdb
       KIOSK_ADMIN_BASE_URL: http://admin:8080
 
   # Admin 서비스
@@ -44,7 +44,6 @@ services:
       - atdd-net
     environment:
       <<: *common-spring-env
-      SPRING_DATASOURCE_URL: jdbc:h2:mem:admindb
 
   # Reservation 서비스
   reservation:
@@ -60,4 +59,3 @@ services:
       - atdd-net
     environment:
       <<: *common-spring-env
-      SPRING_DATASOURCE_URL: jdbc:h2:mem:reservationdb
