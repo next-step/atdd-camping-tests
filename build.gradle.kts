@@ -38,7 +38,5 @@ tasks.test {
     useJUnitPlatform()
 }
 
-apply(from = "gradle/task/kiosk-setup.gradle.kts")
-apply(from = "gradle/task/admin-setup.gradle.kts")
-apply(from = "gradle/task/reservation-setup.gradle.kts")
+apply(from = "gradle/task/repo-setup.gradle.kts")
 apply(from = "gradle/task/compose.gradle.kts")

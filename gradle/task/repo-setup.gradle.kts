@@ -1,25 +1,36 @@
 val reposDir = File("${project.rootDir}/repos")
-val serviceDir = File("${reposDir}/atdd-camping-kiosk")
+
+data class ServiceConfig(
+    val name: String,
+    val repoUrl: String,
+    val branchName: String = "parkSeryu"
+)
+
+val services = listOf(
+    ServiceConfig("kiosk", "https://github.com/ParkSeryu/atdd-camping-kiosk.git"),
+    ServiceConfig("admin", "https://github.com/ParkSeryu/atdd-camping-admin.git"),
+    ServiceConfig("reservation", "https://github.com/ParkSeryu/atdd-camping-reservation.git")
+)
 
 fun setupRepository(
     project: Project,
-    repoUrl: String,
-    targetDir: File,
-    branchName: String = "parkSeryu"
+    config: ServiceConfig
 ) {
+    val targetDir = File("${reposDir}/atdd-camping-${config.name}")
+
     if (!targetDir.parentFile.exists()) {
         println("Creating repos directory")
         targetDir.parentFile.mkdir()
     }
 
     if (!targetDir.exists()) {
-        cloneRepository(project, repoUrl, targetDir)
+        cloneRepository(project, config.repoUrl, targetDir)
     } else {
-        updateRepository(project, targetDir, branchName)
+        updateRepository(project, targetDir, config.branchName)
     }
 
-    checkoutBranch(project, targetDir, branchName)
-    println("Repository setup completed")
+    checkoutBranch(project, targetDir, config.branchName)
+    println("${config.name} repository setup completed")
 }
 
 fun cloneRepository(project: Project, repoUrl: String, targetDir: File) {
@@ -27,7 +38,6 @@ fun cloneRepository(project: Project, repoUrl: String, targetDir: File) {
     project.exec {
         commandLine("git", "clone", repoUrl, targetDir.absolutePath)
     }
-    // 클론 직후 원격 브랜치 정보 업데이트
     project.exec {
         commandLine("git", "-C", targetDir.absolutePath, "fetch", "origin")
     }
@@ -63,24 +73,14 @@ fun checkoutBranch(project: Project, targetDir: File, branchName: String) {
     }
 }
 
-tasks.register("SetupKioskRepo") {
-    group = "setup kiosk"
-    description = "Clones or pulls the atdd-camping-kiosk repository and checks out parkSeryu branch."
+tasks.register("SetupAllServices") {
+    group = "setup"
+    description = "Sets up all services (kiosk, admin, reservation)."
 
     doLast {
-        setupRepository(
-            project,
-            "https://github.com/ParkSeryu/atdd-camping-kiosk.git",
-            serviceDir
-        )
-    }
-}
-
-tasks.register("SetupKiosk") {
-    group = "setup kiosk"
-    description = "Sets up the atdd-camping-kiosk by cloning/pulling and checking out the parkSeryu branch."
-    dependsOn("SetupKioskRepo")
-    doLast {
-        println("Service code setup completed")
+        services.forEach { service ->
+            setupRepository(project, service)
+        }
+        println("All services setup completed")
     }
 }
