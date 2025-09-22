@@ -1,8 +1,46 @@
+name: atdd-infra
+
+networks:
+  atdd-net:
+    external: true
+
 services:
   atdd-camping-kiosk:
     container_name: atdd-camping-kiosk
     build:
       context: ../repos/atdd-camping-kiosk
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk # context 기준 상대경로
+    environment:
+      - kiosk.admin.base-url=http://atdd-camping-admin:8080
     ports:
       - "8080:8080"
+    networks:
+      - atdd-net
+
+  atdd-camping-admin:
+    container_name: atdd-camping-admin
+    build:
+      context: ../repos/atdd-camping-admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile-admin # context 기준 상대경로
+    environment:
+      - spring.datasource.url=jdbc:mysql://atdd-db:3306/atdd
+      - spring.datasource.username=root
+      - spring.datasource.password=secret
+    ports:
+      - "8081:8080"
+    networks:
+      - atdd-net
+
+  atdd-camping-reservation:
+    container_name: atdd-camping-reservation
+    build:
+      context: ../repos/atdd-camping-reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation # context 기준 상대경로
+    environment:
+      - spring.datasource.url=jdbc:mysql://atdd-db:3306/atdd
+      - spring.datasource.username=root
+      - spring.datasource.password=secret
+    ports:
+      - "8082:8080"
+    networks:
+      - atdd-net
