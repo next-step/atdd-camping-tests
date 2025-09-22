@@ -21,6 +21,10 @@ services:
       - "18082:8080"
     networks:
       - atdd-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
 
   reservation:
     build:
@@ -30,3 +34,7 @@ services:
       - "18083:8080"
     networks:
       - atdd-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
