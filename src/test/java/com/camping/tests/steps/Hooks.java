@@ -1,17 +1,18 @@
-package com.camping.tests.helper;
+package com.camping.tests.steps;
 
+import com.camping.tests.helper.KioskContext;
 import io.cucumber.java.Before;
 import io.restassured.RestAssured;
 
 /**
  * 키오스크 테스트 설정 헬퍼
  */
-public class KioskHook {
+public class Hooks {
 
     @Before
     public void setUp() {
         if (KioskContext.kioskBaseUrl == null) {
-            KioskHook.initializeRestAssured();
+            Hooks.initializeRestAssured();
         }
         KioskContext.reset();
     }
