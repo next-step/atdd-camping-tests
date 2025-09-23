@@ -1,9 +1,79 @@
+name: atdd-compose
+
+networks:
+  atdd-net:
+    name: atdd-net
+    external: true
+
 services:
-  kiosk:
+  admin:
+    container_name: admin
     build:
       context: ..
-      dockerfile: infra/dockerfiles/Dockerfile-kiosk
+      dockerfile: infra/dockerfiles/Dockerfile
+      args:
+        SERVICE_NAME: admin
+    ports:
+      - "8082:8080"
+    networks:
+      - atdd-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_SQL_INIT_MODE=never
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  reservation:
+    container_name: reservation
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile
+      args:
+        SERVICE_NAME: reservation
+    ports:
+      - "8083:8080"
+    networks:
+      - atdd-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_SQL_INIT_MODE=never
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  kiosk:
+    container_name: kiosk
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile
+      args:
+        SERVICE_NAME: kiosk
     ports:
       - "8081:8080"
+    networks:
+      - atdd-net
     environment:
       - PAYMENTS_SECRET_KEY=test_sk_dummy
+    depends_on:
+      admin:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 20

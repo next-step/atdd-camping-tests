@@ -12,16 +12,34 @@ public class SmokeTestSteps {
 
     private Response response;
     private final String kioskBaseUrl;
+    private final String adminBaseUrl;
+    private final String reservationBaseUrl;
 
     public SmokeTestSteps() {
-        this.kioskBaseUrl = System.getProperty("KIOSK_BASE_URL", "http://localhost:8081");
+        this.kioskBaseUrl = System.getProperty("KIOSK_BASE_URL", "http://localhost:8081/health");
+        this.adminBaseUrl = System.getProperty("ADMIN_BASE_URL", "http://localhost:8082/login");
+        this.reservationBaseUrl = System.getProperty("RESERVATION_BASE_URL", "http://localhost:8083");
     }
 
-    @When("키오스크의 상태 확인 엔드포인트로 요청을 보내면")
+    @When("키오스크 서비스의 상태 확인 엔드포인트로 요청을 보내면")
     public void requestKioskHealthCheck() {
         response = given()
                 .when()
                 .get(kioskBaseUrl);
+    }
+
+    @When("어드민 서비스의 상태 확인 엔드포인트로 요청을 보내면")
+    public void requestAdminHealthCheck() {
+        response = given()
+                .when()
+                .get(adminBaseUrl);
+    }
+
+    @When("예약 서비스의 상태 확인 엔드포인트로 요청을 보내면")
+    public void requestReservationHealthCheck() {
+        response = given()
+                .when()
+                .get(reservationBaseUrl);
     }
 
     @Then("정상 응답을 받는다")

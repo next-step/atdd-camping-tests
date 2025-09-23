@@ -1,0 +1,9 @@
+Feature: 키오스크 -> 어드민 -> DB 통합 기능 테스트
+  Scenario: 관리자 로그인 후 Kiosk 상품 목록 조회
+    Given 어드민 서비스에 로그인 요청을 한다
+      | username | password |
+      | admin   | admin123 |
+    When 키오스크 서비스의 상품 목록을 조회한다
+    Then 상품 목록이 정상적으로 조회된다
+    And 최소 1개 이상의 상품이 존재한다
+    And 각 상품은 필수 필드를 포함한다
