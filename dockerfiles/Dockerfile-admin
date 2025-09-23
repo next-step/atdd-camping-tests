@@ -1,0 +1,23 @@
+FROM eclipse-temurin:21-jdk-alpine AS builder
+ARG SOURCE_DIR=./repos/atdd-camping-admin
+WORKDIR /src
+
+COPY ${SOURCE_DIR}/gradle /src/gradle
+COPY ${SOURCE_DIR}/gradlew /src/gradlew
+COPY ${SOURCE_DIR}/settings.gradle* /src/
+COPY ${SOURCE_DIR}/build.gradle* /src/
+RUN chmod +x ./gradlew && ./gradlew --no-daemon build -x test || true
+
+COPY ${SOURCE_DIR}/ /src/
+RUN ./gradlew --no-daemon clean bootJar -x test && \
+    JAR=$(ls build/libs | grep -E '.*\.jar$' | grep -v 'plain' | head -n 1) && \
+    mkdir -p /out && cp "build/libs/${JAR}" /out/app.jar
+
+FROM eclipse-temurin:21-jre-alpine AS runtime
+ENV TZ=Asia/Seoul \
+    SPRING_PROFILES_ACTIVE=default \
+    JAVA_OPTS=""
+WORKDIR /app
+COPY --from=builder /out/app.jar /app/app.jar
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
