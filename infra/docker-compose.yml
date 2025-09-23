@@ -18,7 +18,7 @@ services:
   kiosk:
     build:
       context: ..
-      dockerfile: dockerfiles/Dockerfile-svc
+      dockerfile: infra/dockerfiles/Dockerfile-svc
       args:
         SERVICE_NAME: kiosk
     container_name: atdd-kiosk
@@ -35,7 +35,7 @@ services:
   admin:
     build:
       context: ..
-      dockerfile: dockerfiles/Dockerfile-svc
+      dockerfile: infra/dockerfiles/Dockerfile-svc
       args:
         SERVICE_NAME: admin
     container_name: atdd-admin
@@ -50,7 +50,7 @@ services:
   reservation:
     build:
       context: ..
-      dockerfile: dockerfiles/Dockerfile-svc
+      dockerfile: infra/dockerfiles/Dockerfile-svc
       args:
         SERVICE_NAME: reservation
     container_name: atdd-reservation

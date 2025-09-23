@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PaymentSteps {
 
-    private List<Map<String, Object>> selectedItems = new ArrayList<>();
+    private final List<Map<String, Object>> selectedItems = new ArrayList<>();
     private ExtractableResponse<Response> paymentResponse;
 
     @Given("상품 목록에서 결제할 상품을 선택한다")
@@ -38,7 +38,6 @@ public class PaymentSteps {
 
     @When("정상 금액으로 결제를 요청한다")
     public void 정상금액으로결제를요청한다() {
-        // CartItem 구조에 맞게 변환
         List<Map<String, Object>> cartItems = new ArrayList<>();
         for (Map<String, Object> item : selectedItems) {
             Map<String, Object> cartItem = new HashMap<>();
@@ -66,7 +65,6 @@ public class PaymentSteps {
 
     @When("유효하지 않은 금액으로 결제를 요청한다")
     public void 유효하지않은금액으로결제를요청한다() {
-        // amount = 0이 되도록 0원 상품 설정
         List<Map<String, Object>> cartItems = new ArrayList<>();
         Map<String, Object> cartItem = new HashMap<>();
         cartItem.put("productId", 998L);
