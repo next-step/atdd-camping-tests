@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     java
 }
@@ -37,43 +39,66 @@ tasks.test {
     useJUnitPlatform()
 }
 
+data class GitRepo(val url: String, val dir: String, val branch: String = "main")
+
 tasks.register("setupRepos") {
+    group = "repo"
+    description = "Create repos dir, clone missing repos, and pull updates if already cloned."
+
     doLast {
-        val reposDir = file("${rootProject.projectDir}/repos")
-        if (!reposDir.exists()) {
-            reposDir.mkdirs()
-            println("Created repos directory: $reposDir")
-        }
-
-        val gitignore = file("${rootProject.projectDir}/.gitignore")
-        val ignoreEntry = "repos/"
-
-        if (!gitignore.exists()) {
-            gitignore.createNewFile()
-            println(".gitignore created")
-        }
-
-        val lines = gitignore.readLines()
-        if (!lines.contains(ignoreEntry)) {
-            gitignore.appendText(ignoreEntry + "\n")
-            println("Added '$ignoreEntry' to .gitignore")
-        } else {
-            println("'$ignoreEntry' already exists in .gitignore")
+        val reposDir = file("${rootProject.projectDir}/repos").also {
+            if (!it.exists()) {
+                it.mkdirs()
+                println("Created repos directory: $it")
+            }
         }
 
         val reposToClone = listOf(
-                "https://github.com/next-step/atdd-camping-kiosk.git" to "atdd-camping-kiosk",
+            GitRepo("https://github.com/next-step/atdd-camping-kiosk.git", "atdd-camping-kiosk", "main")
         )
 
-        reposToClone.forEach { (repoUrl, dirName) ->
-            val repoDir = reposDir.resolve(dirName)
+        fun execCapture(vararg cmd: String, wd: File? = null): String {
+            val out = ByteArrayOutputStream()
+            project.exec {
+                if (wd != null) workingDir = wd
+                commandLine(*cmd)
+                standardOutput = out
+                isIgnoreExitValue = true
+            }
+            return out.toString().trim()
+        }
+        fun execOrFail(vararg cmd: String, wd: File? = null) {
+            project.exec {
+                if (wd != null) workingDir = wd
+                commandLine(*cmd)
+            }
+        }
+
+        reposToClone.forEach { repo ->
+            val repoDir = reposDir.resolve(repo.dir)
+
             if (!repoDir.exists()) {
-                println("Cloning $repoUrl into $repoDir")
-                exec {
-                    commandLine("git", "clone", repoUrl, repoDir.absolutePath)
-                }
+                println("Cloning ${repo.url} into $repoDir (branch: ${repo.branch})")
+                execOrFail("git", "clone", "--branch", repo.branch, repo.url, repoDir.absolutePath)
             } else {
-                println("Repo already exists: $repoDir")
+                val isGit = repoDir.resolve(".git").exists()
+                if (!isGit) {
+                    println("⚠️  $repoDir exists but is not a git repository. Skipping.")
+                    return@forEach
+                }
+
+                val origin = execCapture("git", "-C", repoDir.absolutePath, "remote", "get-url", "origin")
+                if (origin.isNotBlank() && origin != repo.url) {
+                    println("⚠️  origin url ($origin) != expected (${repo.url}) for $repoDir")
+                }
+
+                println("Updating repo: $repoDir (branch: ${repo.branch})")
+                execOrFail("git", "-C", repoDir.absolutePath, "fetch", "--all", "--prune")
+                execOrFail("git", "-C", repoDir.absolutePath, "checkout", repo.branch)
+                project.exec {
+                    commandLine("git", "-C", repoDir.absolutePath, "pull", "--rebase", "--autostash", "origin", repo.branch)
+                    isIgnoreExitValue = true
+                }
             }
         }
     }
