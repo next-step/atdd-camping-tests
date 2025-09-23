@@ -36,3 +36,49 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register("cloneRepository") {
+    group = "setup"
+    description = "Clone atdd-camping-kiosk repository"
+
+    doLast {
+        val reposDir = file("repos")
+        val targetDir = file("repos/atdd-camping-kiosk")
+
+        // repos 디렉토리 생성
+        if (!reposDir.exists()) {
+            reposDir.mkdirs()
+            println("Created repos directory")
+        }
+
+        // 이미 클론된 경우 스킵
+        if (targetDir.exists()) {
+            println("Repository already exists at ${targetDir.absolutePath}")
+            return@doLast
+        }
+
+        // Git 클론 실행
+        val gitCloneCommand = listOf(
+            "git", "clone",
+            "https://github.com/next-step/atdd-camping-kiosk.git",
+            "repos/atdd-camping-kiosk"
+        )
+
+        val process = ProcessBuilder(gitCloneCommand)
+            .directory(projectDir)
+            .inheritIO()
+            .start()
+
+        val exitCode = process.waitFor()
+        if (exitCode == 0) {
+            println("Successfully cloned repository to repos/atdd-camping-kiosk")
+        } else {
+            throw GradleException("Failed to clone repository (exit code: $exitCode)")
+        }
+    }
+}
+
+// 테스트 컴파일 전에 자동으로 클론
+tasks.named("compileTestJava") {
+    dependsOn("cloneRepository")
+}
