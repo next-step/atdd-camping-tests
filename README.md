@@ -70,6 +70,57 @@ docker compose -f infra/docker-compose.yml down -v
 애플리케이션이 성공적으로 시작되면 다음 URL에서 접속할 수 있습니다:
 - **키오스크 웹 애플리케이션**: http://localhost:8080
 
+## 🧪 테스트 실행
+
+### 전체 테스트 실행
+```bash
+./gradlew test
+```
+
+### 키오스크 Smoke 테스트만 실행
+```bash
+./gradlew test --tests "*kiosk*"
+```
+
+### 테스트 보고서 확인
+테스트 실행 후 다음 경로에서 상세한 보고서를 확인할 수 있습니다:
+- **HTML 보고서**: `build/reports/tests/test/index.html`
+- **XML 결과**: `build/test-results/test/`
+
+## 🚀 빠른 시작 가이드
+
+전체 환경을 처음부터 설정하고 테스트를 실행하는 방법:
+
+```bash
+# 1. 키오스크 애플리케이션 시작
+./start-kiosk.sh
+
+# 2. 애플리케이션 상태 확인
+./status-kiosk.sh
+
+# 3. 테스트 실행
+./gradlew test
+
+# 4. 정리 (선택사항)
+./stop-kiosk.sh
+```
+
+### ✅ 성공 기준
+
+프로젝트가 올바르게 설정되었다면 다음 조건들이 모두 만족되어야 합니다:
+
+1. **로컬에서 kiosk 컨테이너가 기동되어 접근 가능하다**
+   - `./status-kiosk.sh` 실행 시 애플리케이션이 정상 응답
+   - http://localhost:8080 접속 가능
+
+2. **atdd-tests의 kiosk smoke 테스트가 200 응답으로 통과한다**
+   - `./gradlew test` 실행 시 모든 테스트 통과
+   - 키오스크 애플리케이션 응답성 확인 시나리오 성공
+
+3. **구성과 실행 방법이 자동화되어 있고, 재현이 가능하다**
+   - 자동화 스크립트 (`start-kiosk.sh`, `stop-kiosk.sh`, `status-kiosk.sh`) 제공
+   - 이 README.md 문서를 통한 완전한 재현 가능
+
 ### 🛠️ 문제 해결
 
 #### 포트 충돌 문제
@@ -95,4 +146,14 @@ docker logs camping-kiosk
 ```bash
 # 컨테이너 내부 접속
 docker exec -it camping-kiosk /bin/bash
+```
+
+#### 테스트 실패 시
+```bash
+# 애플리케이션이 준비되지 않은 경우
+./status-kiosk.sh  # 상태 확인
+./start-kiosk.sh   # 재시작
+
+# 테스트 재실행
+./gradlew clean test
 ```
