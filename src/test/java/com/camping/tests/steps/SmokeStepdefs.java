@@ -24,4 +24,9 @@ public class SmokeStepdefs {
     public void 성공응답을받는다() {
         response.then().statusCode(HttpStatus.SC_OK);
     }
+
+    @Then("인증 필요 응답을 받는다")
+    public void 인증필요응답을받는다() {
+        response.then().statusCode(HttpStatus.SC_UNAUTHORIZED);
+    }
 }
