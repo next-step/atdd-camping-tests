@@ -1,24 +1,23 @@
-name: atdd-infra
+name: atdd
 
 networks:
   atdd-net:
     name: atdd-net
-    external: false
+    external: false # 여기서 네트워크 '생성'
 
 services:
   db:
     image: mysql:8.0
     container_name: atdd-db
     environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=atdd
-      - MYSQL_ROOT_HOST=%
+      - MYSQL_ROOT_PASSWORD=root1234
+      - MYSQL_DATABASE=camping
     ports:
-      - "3306:3306"
+      - "3307:3306"
     networks:
       - atdd-net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot1234"]
       interval: 5s
       timeout: 3s
       retries: 20

@@ -1,0 +1,8 @@
+### 어드민 로그인
+POST http://localhost:18082/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
