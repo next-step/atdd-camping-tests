@@ -54,7 +54,9 @@ tasks.register("setupRepos") {
         }
 
         val reposToClone = listOf(
-            GitRepo("https://github.com/next-step/atdd-camping-kiosk.git", "atdd-camping-kiosk", "main")
+            GitRepo("https://github.com/next-step/atdd-camping-kiosk.git",       "atdd-camping-kiosk",       "main"),
+            GitRepo("https://github.com/next-step/atdd-camping-admin.git",       "atdd-camping-admin",       "main"),
+            GitRepo("https://github.com/next-step/atdd-camping-reservation.git", "atdd-camping-reservation", "main"),
         )
 
         fun execCapture(vararg cmd: String, wd: File? = null): String {
