@@ -106,14 +106,23 @@ tasks.register("setupRepos") {
     }
 }
 
+tasks.register<Exec>("infraUp") {
+    group = "docker"
+    description = "Bring up infra (DB) containers"
+    commandLine("docker", "compose", "-f", "infra/docker-compose-infra.yml", "up", "-d")
+}
+
+tasks.register<Exec>("infraDown") {
+    group = "docker"
+    description = "Stop infra (DB) containers"
+    commandLine("docker", "compose", "-f", "infra/docker-compose-infra.yml", "down", "-v")
+}
+
 tasks.register<Exec>("composeUp") {
     group = "docker"
-    description = "docker compose up -d --build (atdd-tests)"
-    commandLine(
-            "docker", "compose",
-            "-f", "infra/docker-compose.yml",
-            "up", "-d", "--build"
-    )
+    description = "docker compose up -d --build (apps)"
+    dependsOn("infraUp")
+    commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "up", "-d", "--build")
 }
 
 
@@ -132,6 +141,7 @@ tasks.register<Exec>("composeLogs") {
 tasks.register<Exec>("composeDown") {
     group = "docker"
     description = "docker compose down -v (atdd-tests)"
+    finalizedBy("infraDown")
     commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "down", "-v")
 }
 
