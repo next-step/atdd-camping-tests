@@ -1,6 +1,9 @@
 package com.camping.tests.helper;
 
+import groovy.util.logging.Slf4j;
 import io.restassured.response.Response;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.time.Duration;
 
@@ -9,11 +12,13 @@ import static io.restassured.RestAssured.given;
 /**
  * 키오스크 애플리케이션 준비 상태 대기 유틸리티
  */
+@Slf4j
 public class KioskApplicationWaiter {
     
     private static final int MAX_RETRY_ATTEMPTS = 30;
     private static final Duration RETRY_INTERVAL = Duration.ofSeconds(2);
-    
+    private static final Log log = LogFactory.getLog(KioskApplicationWaiter.class);
+
     /**
      * 애플리케이션이 준비될 때까지 폴링하며 대기합니다.
      */
@@ -30,16 +35,12 @@ public class KioskApplicationWaiter {
                     .response();
                 
                 if (testResponse.getStatusCode() == 200) {
-                    System.out.println("✅ 키오스크 애플리케이션이 준비되었습니다! (시도: " + attempt + "/" + MAX_RETRY_ATTEMPTS + ")");
                     return;
                 }
                 
-                System.out.println("⏳ 키오스크 애플리케이션 준비 대기 중... (시도: " + attempt + "/" + MAX_RETRY_ATTEMPTS + 
-                                 ", 상태코드: " + testResponse.getStatusCode() + ")");
-                
             } catch (Exception e) {
-                System.out.println("⏳ 키오스크 애플리케이션 연결 대기 중... (시도: " + attempt + "/" + MAX_RETRY_ATTEMPTS + 
-                                 ", 오류: " + e.getMessage() + ")");
+                log.error("⏳ 키오스크 애플리케이션 연결 대기 중... (시도: " + attempt + "/" + MAX_RETRY_ATTEMPTS +
+                        ", 오류: " + e.getMessage() + ")");
             }
             
             if (attempt < MAX_RETRY_ATTEMPTS) {
