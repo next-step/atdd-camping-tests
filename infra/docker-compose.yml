@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  camping-kiosk:
+    build:
+      context: ../repos/atdd-camping-kiosk
+      dockerfile: ../../infra/dockerfiles/Dockerfile
+    container_name: camping-kiosk
+    ports:
+      - "8080:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SERVER_PORT=8081
+    networks:
+      - camping-network
+
+networks:
+  camping-network:
+    driver: bridge

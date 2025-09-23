@@ -36,3 +36,36 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Exec>("cloneRepo") {
+    group = "setup"
+    description = "Clone the camping kiosk repository"
+
+    doFirst {
+        val reposDir = file("repos")
+        if (!reposDir.exists()) {
+            reposDir.mkdirs()
+        }
+
+        val targetDir = file("repos/atdd-camping-kiosk")
+        if (targetDir.exists()) {
+            delete(targetDir)
+        }
+    }
+
+    commandLine("git", "clone", "--depth", "1", "--branch", "main", "--single-branch", "https://github.com/next-step/atdd-camping-kiosk", "repos/atdd-camping-kiosk")
+}
+
+tasks.register<Exec>("dockerUp") {
+    group = "docker"
+    description = "Start camping kiosk application with docker-compose"
+
+    commandLine("docker-compose", "-f", "infra/docker-compose.yml", "up", "--build", "-d")
+}
+
+tasks.register<Exec>("dockerDown") {
+    group = "docker"
+    description = "Stop camping kiosk application with docker-compose"
+
+    commandLine("docker-compose", "-f", "infra/docker-compose.yml", "down")
+}
