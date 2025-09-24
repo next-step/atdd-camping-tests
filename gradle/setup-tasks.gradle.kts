@@ -1,16 +1,18 @@
 tasks.register("setupTestInfra") {
     group = "setup"
 
-    createReposDirectory()
-    listOf(
-        Repository(name = "atdd-camping-kiosk", url = "https://github.com/next-step/atdd-camping-kiosk", branch = "main"),
-        Repository(name = "atdd-camping-admin", url = "https://github.com/ivvve/atdd-camping-admin", branch = "mysql"),
-        Repository(name = "atdd-camping-reservation", url = "https://github.com/ivvve/atdd-camping-reservation", branch = "mysql"),
-    ).forEach { setupRepository(it) }
+    doLast {
+        createReposDirectory()
+        listOf(
+            Repository(name = "atdd-camping-kiosk", url = "https://github.com/next-step/atdd-camping-kiosk", branch = "main"),
+            Repository(name = "atdd-camping-admin", url = "https://github.com/ivvve/atdd-camping-admin", branch = "mysql"),
+            Repository(name = "atdd-camping-reservation", url = "https://github.com/ivvve/atdd-camping-reservation", branch = "mysql"),
+        ).forEach { setupRepository(it) }
 
-    runInfraContainers()
-    Thread.sleep(5000) // Wait for infra containers to be fully up
-    runServiceContainers()
+        runInfraContainers()
+        Thread.sleep(5000) // Wait for infra containers to be fully up
+        runServiceContainers()
+    }
 }
 
 fun createReposDirectory() {
