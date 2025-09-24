@@ -22,7 +22,7 @@ public class ServicesHealthSteps {
 
     private Response response;
 
-    @When("^(.+) 서비스 루트 경로에 요청을 보낸다$")
+    @When("^(.+) 서비스에 요청을 보낸다$")
     public void 서비스_루트_경로에_요청을_보낸다(String serviceName) {
         Integer port = SERVICE_PORTS.get(serviceName);
         if (port == null) {
