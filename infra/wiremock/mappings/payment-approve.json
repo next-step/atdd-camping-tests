@@ -11,9 +11,10 @@
     "jsonBody": {
       "success": true,
       "message": "결제 생성 성공",
-      "paymentKey": "pay_mock",
+      "paymentKey": "pay_123456789",
       "orderId": "ord_mock",
-      "amount": 100000
+      "amount": 10000,
+      "status": "APPROVED"
     }
   }
 }
