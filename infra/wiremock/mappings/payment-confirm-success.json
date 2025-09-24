@@ -4,7 +4,7 @@
     "urlPath": "/v1/payments/confirm",
     "bodyPatterns": [
       {
-        "equalToJson": "{\"amount\": \"10000\"}",
+        "equalToJson": "{\"amount\": 10000}",
         "ignoreExtraElements": true
       }
     ]
@@ -15,10 +15,11 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "success": true,
-      "message": "결제 확정 성공",
-      "transactionId": "pay_123456789",
-      "status": "CONFIRMED"
+      "paymentKey": "pay_123456789",
+      "orderId": "ord_mock",
+      "method": "CARD",
+      "approvedAt": "2024-01-01T10:00:00",
+      "totalAmount": 10000
     }
   }
 }
