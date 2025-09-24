@@ -1,21 +1,19 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/v1/payments"
+    "urlPath": "/v1/payments/server-error"
   },
   "response": {
-    "status": 200,
+    "status": 500,
     "headers": {
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "success": true,
-      "message": "결제 생성 성공",
+      "success": false,
+      "message": "결제 생성 실패",
       "paymentKey": "pay_mock",
       "orderId": "ord_mock",
-      "amount": 100000
+      "amount": 1000
     }
   }
 }
-
-
