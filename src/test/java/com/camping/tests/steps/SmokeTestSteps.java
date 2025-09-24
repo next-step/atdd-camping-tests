@@ -16,9 +16,9 @@ public class SmokeTestSteps {
     private final String reservationBaseUrl;
 
     public SmokeTestSteps() {
-        this.kioskBaseUrl = System.getProperty("KIOSK_BASE_URL", "http://localhost:8081/health");
-        this.adminBaseUrl = System.getProperty("ADMIN_BASE_URL", "http://localhost:8082/login");
-        this.reservationBaseUrl = System.getProperty("RESERVATION_BASE_URL", "http://localhost:8083");
+        this.kioskBaseUrl = System.getProperty("KIOSK_BASE_URL");
+        this.adminBaseUrl = System.getProperty("ADMIN_BASE_URL");
+        this.reservationBaseUrl = System.getProperty("RESERVATION_BASE_URL");
     }
 
     @When("키오스크 서비스의 상태 확인 엔드포인트로 요청을 보내면")
@@ -32,7 +32,7 @@ public class SmokeTestSteps {
     public void requestAdminHealthCheck() {
         response = given()
                 .when()
-                .get(adminBaseUrl);
+                .get(adminBaseUrl + "/login");
     }
 
     @When("예약 서비스의 상태 확인 엔드포인트로 요청을 보내면")

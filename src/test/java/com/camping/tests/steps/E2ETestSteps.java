@@ -17,7 +17,7 @@ public class E2ETestSteps {
     private final CommonContext context;
 
     public E2ETestSteps() {
-        this.kioskBaseUrl = System.getProperty("KIOSK_BASE_URL", "http://localhost:8081");
+        this.kioskBaseUrl = System.getProperty("KIOSK_BASE_URL");
         this.context = new CommonContext();
     }
 

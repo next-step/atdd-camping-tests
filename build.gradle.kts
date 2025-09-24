@@ -36,6 +36,11 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+
+    systemProperty("KIOSK_BASE_URL", "http://localhost:8081")
+    systemProperty("ADMIN_BASE_URL", "http://localhost:8082")
+    systemProperty("RESERVATION_BASE_URL", "http://localhost:8083")
+    systemProperty("PAYMENTS_BASE_URL", "http://localhost:8084")
 }
 
 apply(from = "gradle/task/repo-setup.gradle.kts")

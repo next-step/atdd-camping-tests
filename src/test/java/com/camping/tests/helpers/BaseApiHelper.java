@@ -7,7 +7,7 @@ import java.util.Map;
 import static io.restassured.RestAssured.given;
 
 public class BaseApiHelper {
-    private static final String ADMIN_BASE_URL = System.getProperty("ADMIN_BASE_URL", "http://localhost:8082");
+    private static final String ADMIN_BASE_URL = System.getProperty("ADMIN_BASE_URL");
 
     public static String authenticateAndGetToken() {
         Response response = given()
