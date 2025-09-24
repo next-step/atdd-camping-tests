@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.camping.tests.steps.kiosk.dto.KioskConfirmPaymentRequest;
 import com.camping.tests.steps.kiosk.dto.KioskCreatePaymentRequest;
 import com.camping.tests.steps.kiosk.dto.KioskCreatePaymentResult;
+import com.camping.tests.steps.kiosk.dto.KioskPaymentConfirmResult;
 import com.camping.tests.steps.kiosk.dto.KioskProductDetail;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
@@ -77,5 +78,17 @@ public class KioskProductTestSteps {
 
     public static void 결제_승인이_성공한다(Response response) {
         response.then().statusCode(HttpStatus.SC_OK);
+        var result = 결제_승인_결과를_가져온다(response);
+        assertThat(result.success()).isTrue();
+    }
+
+    public static void 결제_승인이_실패한다(Response response) {
+        response.then().statusCode(HttpStatus.SC_OK);
+        var result = 결제_승인_결과를_가져온다(response);
+        assertThat(result.success()).isFalse();
+    }
+
+    private static KioskPaymentConfirmResult 결제_승인_결과를_가져온다(Response response) {
+        return response.as(KioskPaymentConfirmResult.class);
     }
 }

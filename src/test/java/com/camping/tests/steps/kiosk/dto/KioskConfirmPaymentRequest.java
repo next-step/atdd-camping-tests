@@ -24,6 +24,11 @@ public record KioskConfirmPaymentRequest(
         int amount = 400_000;
         List<Item> items = List.of(Item.fixture().create());
 
+        public Fixture wrongPaymentKey() {
+            this.paymentKey = "wrong_key";
+            return this;
+        }
+
         public KioskConfirmPaymentRequest create() {
             return KioskConfirmPaymentRequest.builder()
                 .paymentKey(paymentKey)
