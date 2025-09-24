@@ -31,6 +31,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
 
+    // assertJ
+    testImplementation("org.assertj:assertj-core:3.24.2")
+
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
@@ -112,6 +115,12 @@ tasks.register<Exec>("infraUp") {
     commandLine("docker", "compose", "-f", "infra/docker-compose-infra.yml", "up", "-d")
 }
 
+tasks.register<Exec>("infraInitDb") {
+    group = "docker"
+    dependsOn("infraUp")
+    commandLine("docker", "compose", "-f", "infra/docker-compose-infra.yml", "run", "--rm", "db-init")
+}
+
 tasks.register<Exec>("infraDown") {
     group = "docker"
     description = "Stop infra (DB) containers"
@@ -121,7 +130,7 @@ tasks.register<Exec>("infraDown") {
 tasks.register<Exec>("composeUp") {
     group = "docker"
     description = "docker compose up -d --build (apps)"
-    dependsOn("infraUp")
+    dependsOn("infraInitDb")
     commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "up", "-d", "--build")
 }
 

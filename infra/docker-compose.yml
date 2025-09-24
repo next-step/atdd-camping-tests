@@ -14,7 +14,11 @@ services:
       - atdd-net
     environment:
       JAVA_OPTS: "-Xms256m -Xmx512m"
-      ADMIN_BASE_URL: "http://admin:8080"
+      KIOSK_ADMIN_BASE_URL: "http://admin:8080"
+      KIOSK_ADMIN_AUTH_LOGIN_PATH: "/auth/login"
+      KIOSK_ADMIN_AUTH_USERNAME: "admin"
+      KIOSK_ADMIN_AUTH_PASSWORD: "admin123"
+      KIOSK_ADMIN_AUTH_COOKIE_NAME: "AUTH_TOKEN"
       RESERVATION_BASE_URL: "http://reservation:8080"
       SPRING_DATASOURCE_URL: "jdbc:mysql://atdd-db:3306/atdd?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul"
       SPRING_DATASOURCE_USERNAME: "root"

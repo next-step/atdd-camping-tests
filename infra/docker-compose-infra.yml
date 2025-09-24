@@ -23,3 +23,16 @@ services:
       timeout: 3s
       retries: 20
     command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+
+  db-init:
+    image: mysql:8.0
+    container_name: atdd-db-init
+    networks:
+      - atdd-net
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./db/init.sql:/init/init.sql:ro
+    command: [ "sh", "-c", "mysql -hatdd-db -uroot -psecret atdd < /init/init.sql" ]
+    restart: "no"
