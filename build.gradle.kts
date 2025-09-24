@@ -40,3 +40,4 @@ tasks.test {
 
 apply(from = "gradle/task/repo-setup.gradle.kts")
 apply(from = "gradle/task/compose.gradle.kts")
+apply(from = "gradle/task/wiremock.gradle.kts")
