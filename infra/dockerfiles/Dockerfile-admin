@@ -1,0 +1,28 @@
+###########
+# Builder #
+###########
+FROM eclipse-temurin:17-jdk AS builder
+WORKDIR /workspace
+
+# 캠핑 관리자 서비스 소스 복사
+COPY repos/atdd-camping-admin/ .
+
+# gradlew 실행 권한 설정 및 JAR 빌드
+RUN chmod +x ./gradlew \
+    && sed -i 's/\r$//' ./gradlew \
+    && ./gradlew --no-daemon clean bootJar -x test
+
+###########
+# Runtime #
+###########
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+# 빌드된 JAR 파일 복사
+COPY --from=builder /workspace/build/libs/*.jar /app/app.jar
+
+# 외부 노출 포트
+EXPOSE 8080
+
+# 애플리케이션 실행
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
