@@ -2,7 +2,18 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.sql.DriverManager
 import kotlin.system.exitProcess
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.mysql:mysql-connector-j:9.4.0")
+    }
+}
 
 tasks.register("setupTestInfra") {
     group = "setup"
@@ -99,18 +110,46 @@ fun runServiceContainers() {
 }
 
 fun waitForInfra() {
-    waitForMySql()
-    waitForWireMock()
+    waitForMySql(maxAttempts = 30)
+    waitForWireMock(maxAttempts = 30)
 }
 
-fun waitForMySql() {
-    Thread.sleep(5_000L)
+fun waitForMySql(maxAttempts: Int) {
+    Class.forName("com.mysql.cj.jdbc.Driver")
+    var attempts = 1
+
+    while (attempts < maxAttempts) {
+        try {
+            val mysqlUrl = "jdbc:mysql://localhost:3306/atdd"
+            val username = "root"
+            val password = "secret"
+
+            DriverManager.getConnection(mysqlUrl, username, password).use { connection ->
+                connection.createStatement().use { statement ->
+                    statement.executeQuery("SELECT 1").use { resultSet ->
+                        if (resultSet.next()) {
+                            println("MySQL is ready!")
+                            return
+                        } else {
+                            throw RuntimeException("No result returned from SELECT 1 query")
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            attempts++
+            println("MySQL is not ready yet (attempt $attempts/$maxAttempts): ${e.message}")
+            Thread.sleep(1_000)
+        }
+    }
+
+    println("MySQL did not become ready in time. Exiting.")
+    exitProcess(1)
 }
 
-fun waitForWireMock() {
-    val maxAttempts = 30
-    var attempts = 0
+fun waitForWireMock(maxAttempts: Int) {
     val client = HttpClient.newHttpClient()
+    var attempts = 1
 
     while (attempts < maxAttempts) {
         try {
@@ -129,9 +168,7 @@ fun waitForWireMock() {
         } catch (e: Exception) {
             attempts++
             println("Wiremock is not ready yet (attempt $attempts/$maxAttempts): ${e.message}")
-            if (attempts < maxAttempts) {
-                Thread.sleep(1000)
-            }
+            Thread.sleep(1_000)
         }
     }
 
