@@ -1,23 +1,17 @@
 package com.camping.tests.scenario.product;
 
-import static com.camping.tests.steps.admin.AdminProductTestSteps.상품_등록이_성공한다;
-import static com.camping.tests.steps.admin.AdminProductTestSteps.상품_이름을_수정한다;
-import static com.camping.tests.steps.admin.AdminProductTestSteps.상품_정보_수정이_성공한다;
-import static com.camping.tests.steps.admin.AdminProductTestSteps.상품_정보를_가져온다;
-import static com.camping.tests.steps.admin.AdminProductTestSteps.상품을_등록한다;
-import static com.camping.tests.steps.kiosk.KioskProductTestSteps.상품_목록에서_상품이_조회되지_않는다;
-import static com.camping.tests.steps.kiosk.KioskProductTestSteps.상품_목록에서_상품이_조회된다;
-
+import com.camping.tests.scenario.TestContext;
 import com.camping.tests.steps.admin.dto.CreateAdminProductRequest;
 import com.camping.tests.steps.admin.dto.UpdateAdminProductRequest;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.restassured.response.Response;
+
+import static com.camping.tests.steps.admin.AdminProductTestSteps.*;
+import static com.camping.tests.steps.kiosk.KioskProductTestSteps.상품_목록에서_상품이_조회되지_않는다;
+import static com.camping.tests.steps.kiosk.KioskProductTestSteps.상품_목록에서_상품이_조회된다;
 
 public class ProductScenarioSteps {
-    private Response 상품_등록_응답;
-    private Response 상품_수정_응답;
 
     // 상품 등록
     @Given("어드민에서 {string} 상품이 등록되어 있다")
@@ -28,31 +22,36 @@ public class ProductScenarioSteps {
 
     @When("어드민에서 {string} 상품을 등록한다")
     public void 어드민에서_상품을_등록한다(String 상품명) {
-        상품_등록_응답 = 상품을_등록한다(CreateAdminProductRequest.fixture()
+        var 상품_등록_응답 = 상품을_등록한다(CreateAdminProductRequest.fixture()
             .name(상품명)
             .create());
+        TestContext.Product.상품_등록_응답(상품_등록_응답);
     }
 
     @Then("어드민에서 상품 등록이 성공한다")
     public void 어드민에서_상품_등록이_성공한다() {
+        var 상품_등록_응답 = TestContext.Product.상품_등록_응답();
         상품_등록이_성공한다(상품_등록_응답);
     }
 
     // 상품 수정
     @When("어드민에서 상품 이름을 {string}으로 수정한다")
     public void 어드민에서_상품_이름을_수정한다(String 상품명) {
+        var 상품_등록_응답 = TestContext.Product.상품_등록_응답();
         var 상품_정보 = 상품_정보를_가져온다(상품_등록_응답);
 
-        상품_수정_응답 = 상품_이름을_수정한다(
+        var 상품_수정_응답 = 상품_이름을_수정한다(
             상품_정보.id(),
             UpdateAdminProductRequest.fixture()
                 .name(상품명)
                 .create()
         );
+        TestContext.Product.상품_수정_응답(상품_수정_응답);
     }
 
     @Then("어드민에서 상품 정보 수정이 성공한다")
     public void 어드민에서_상품_정보_수정이_성공한다() {
+        var 상품_수정_응답 = TestContext.Product.상품_수정_응답();
         상품_정보_수정이_성공한다(상품_수정_응답);
     }
 
