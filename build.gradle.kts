@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     java
 }
@@ -29,6 +31,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
 
+    // assertJ
+    testImplementation("org.assertj:assertj-core:3.24.2")
+
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
@@ -37,56 +42,96 @@ tasks.test {
     useJUnitPlatform()
 }
 
+data class GitRepo(val url: String, val dir: String, val branch: String = "main")
+
 tasks.register("setupRepos") {
+    group = "repo"
+    description = "Create repos dir, clone missing repos, and pull updates if already cloned."
+
     doLast {
-        val reposDir = file("${rootProject.projectDir}/repos")
-        if (!reposDir.exists()) {
-            reposDir.mkdirs()
-            println("Created repos directory: $reposDir")
-        }
-
-        val gitignore = file("${rootProject.projectDir}/.gitignore")
-        val ignoreEntry = "repos/"
-
-        if (!gitignore.exists()) {
-            gitignore.createNewFile()
-            println(".gitignore created")
-        }
-
-        val lines = gitignore.readLines()
-        if (!lines.contains(ignoreEntry)) {
-            gitignore.appendText(ignoreEntry + "\n")
-            println("Added '$ignoreEntry' to .gitignore")
-        } else {
-            println("'$ignoreEntry' already exists in .gitignore")
+        val reposDir = file("${rootProject.projectDir}/repos").also {
+            if (!it.exists()) {
+                it.mkdirs()
+                println("Created repos directory: $it")
+            }
         }
 
         val reposToClone = listOf(
-                "https://github.com/next-step/atdd-camping-kiosk.git" to "atdd-camping-kiosk",
+            GitRepo("https://github.com/next-step/atdd-camping-kiosk.git",       "atdd-camping-kiosk",       "main"),
+            GitRepo("https://github.com/stoneHee99/atdd-camping-admin.git",       "atdd-camping-admin",       "test"),
+            GitRepo("https://github.com/stoneHee99/atdd-camping-reservation.git", "atdd-camping-reservation", "test"),
         )
 
-        reposToClone.forEach { (repoUrl, dirName) ->
-            val repoDir = reposDir.resolve(dirName)
+        fun execCapture(vararg cmd: String, wd: File? = null): String {
+            val out = ByteArrayOutputStream()
+            project.exec {
+                if (wd != null) workingDir = wd
+                commandLine(*cmd)
+                standardOutput = out
+                isIgnoreExitValue = true
+            }
+            return out.toString().trim()
+        }
+        fun execOrFail(vararg cmd: String, wd: File? = null) {
+            project.exec {
+                if (wd != null) workingDir = wd
+                commandLine(*cmd)
+            }
+        }
+
+        reposToClone.forEach { repo ->
+            val repoDir = reposDir.resolve(repo.dir)
+
             if (!repoDir.exists()) {
-                println("Cloning $repoUrl into $repoDir")
-                exec {
-                    commandLine("git", "clone", repoUrl, repoDir.absolutePath)
-                }
+                println("Cloning ${repo.url} into $repoDir (branch: ${repo.branch})")
+                execOrFail("git", "clone", "--branch", repo.branch, repo.url, repoDir.absolutePath)
             } else {
-                println("Repo already exists: $repoDir")
+                val isGit = repoDir.resolve(".git").exists()
+                if (!isGit) {
+                    println("⚠️  $repoDir exists but is not a git repository. Skipping.")
+                    return@forEach
+                }
+
+                val origin = execCapture("git", "-C", repoDir.absolutePath, "remote", "get-url", "origin")
+                if (origin.isNotBlank() && origin != repo.url) {
+                    println("⚠️  origin url ($origin) != expected (${repo.url}) for $repoDir")
+                }
+
+                println("Updating repo: $repoDir (branch: ${repo.branch})")
+                execOrFail("git", "-C", repoDir.absolutePath, "fetch", "--all", "--prune")
+                execOrFail("git", "-C", repoDir.absolutePath, "checkout", repo.branch)
+                project.exec {
+                    commandLine("git", "-C", repoDir.absolutePath, "pull", "--rebase", "--autostash", "origin", repo.branch)
+                    isIgnoreExitValue = true
+                }
             }
         }
     }
 }
 
+tasks.register<Exec>("infraUp") {
+    group = "docker"
+    description = "Bring up infra (DB) containers"
+    commandLine("docker", "compose", "-f", "infra/docker-compose-infra.yml", "up", "-d")
+}
+
+tasks.register<Exec>("infraInitDb") {
+    group = "docker"
+    dependsOn("infraUp")
+    commandLine("docker", "compose", "-f", "infra/docker-compose-infra.yml", "run", "--rm", "db-init")
+}
+
+tasks.register<Exec>("infraDown") {
+    group = "docker"
+    description = "Stop infra (DB) containers"
+    commandLine("docker", "compose", "-f", "infra/docker-compose-infra.yml", "down", "-v")
+}
+
 tasks.register<Exec>("composeUp") {
     group = "docker"
-    description = "docker compose up -d --build (atdd-tests)"
-    commandLine(
-            "docker", "compose",
-            "-f", "infra/docker-compose.yml",
-            "up", "-d", "--build"
-    )
+    description = "docker compose up -d --build (apps)"
+    dependsOn("infraInitDb")
+    commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "up", "-d", "--build")
 }
 
 
@@ -105,6 +150,7 @@ tasks.register<Exec>("composeLogs") {
 tasks.register<Exec>("composeDown") {
     group = "docker"
     description = "docker compose down -v (atdd-tests)"
+    finalizedBy("infraDown")
     commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "down", "-v")
 }
 
