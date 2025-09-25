@@ -1,18 +1,18 @@
-package com.camping.tests.helper;
+package com.camping.tests.support.helper;
 
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public class DeleteStrategy implements HttpMethodStrategy {
+public class GetStrategy implements HttpMethodStrategy {
 
     @Override
     public <T> ExtractableResponse<Response> execute(RequestSpecification requestSpec, String url, T body) {
         return RestAssured.given()
                 .spec(requestSpec)
                 .when()
-                .delete(url)
+                .get(url)
                 .then()
                 .log().all()
                 .extract();
@@ -20,6 +20,6 @@ public class DeleteStrategy implements HttpMethodStrategy {
 
     @Override
     public boolean supports(HttpMethod method) {
-        return method == HttpMethod.DELETE;
+        return method == HttpMethod.GET;
     }
 }

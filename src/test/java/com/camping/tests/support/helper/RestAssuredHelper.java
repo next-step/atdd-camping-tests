@@ -1,4 +1,4 @@
-package com.camping.tests.helper;
+package com.camping.tests.support.helper;
 
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;

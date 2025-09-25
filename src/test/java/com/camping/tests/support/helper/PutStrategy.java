@@ -1,18 +1,21 @@
-package com.camping.tests.helper;
+package com.camping.tests.support.helper;
 
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public class GetStrategy implements HttpMethodStrategy {
+public class PutStrategy implements HttpMethodStrategy {
 
     @Override
     public <T> ExtractableResponse<Response> execute(RequestSpecification requestSpec, String url, T body) {
-        return RestAssured.given()
-                .spec(requestSpec)
-                .when()
-                .get(url)
+        RequestSpecification given = RestAssured.given().spec(requestSpec);
+        if (body != null) {
+            given = given.body(body);
+        }
+
+        return given.when()
+                .put(url)
                 .then()
                 .log().all()
                 .extract();
@@ -20,6 +23,6 @@ public class GetStrategy implements HttpMethodStrategy {
 
     @Override
     public boolean supports(HttpMethod method) {
-        return method == HttpMethod.GET;
+        return method == HttpMethod.PUT;
     }
 }

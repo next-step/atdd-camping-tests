@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.camping.tests.fixture.PaymentTestFixture.*;
+import static com.camping.tests.support.fixture.PaymentTestFixture.*;
 
 public class PaymentSteps {
 

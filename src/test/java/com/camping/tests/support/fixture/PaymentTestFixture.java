@@ -1,4 +1,4 @@
-package com.camping.tests.fixture;
+package com.camping.tests.support.fixture;
 
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.camping.tests.helper.ApiHelper.createExtractableResponse;
+import static com.camping.tests.support.helper.ApiHelper.createExtractableResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PaymentTestFixture {

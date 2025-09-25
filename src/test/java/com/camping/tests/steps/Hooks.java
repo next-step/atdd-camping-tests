@@ -1,7 +1,7 @@
 package com.camping.tests.steps;
 
-import com.camping.tests.helper.ServiceContext;
-import com.camping.tests.helper.ServiceType;
+import com.camping.tests.support.helper.ServiceContext;
+import com.camping.tests.support.helper.ServiceType;
 import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
 import io.restassured.RestAssured;

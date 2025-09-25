@@ -1,4 +1,4 @@
-package com.camping.tests.helper;
+package com.camping.tests.support.helper;
 
 public enum ServiceType {
     KIOSK("kiosk", 18081),

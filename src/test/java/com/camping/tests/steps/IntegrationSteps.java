@@ -6,7 +6,7 @@ import io.cucumber.java.en.When;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 
-import static com.camping.tests.fixture.KioskTestFixture.*;
+import static com.camping.tests.support.fixture.KioskTestFixture.*;
 
 public class IntegrationSteps {
 

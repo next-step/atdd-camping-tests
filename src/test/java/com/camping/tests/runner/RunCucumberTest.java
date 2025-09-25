@@ -1,4 +1,4 @@
-package com.camping.tests;
+package com.camping.tests.runner;
 
 import org.junit.platform.suite.api.IncludeEngines;
 import org.junit.platform.suite.api.SelectClasspathResource;

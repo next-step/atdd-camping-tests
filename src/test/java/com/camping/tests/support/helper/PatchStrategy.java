@@ -1,11 +1,11 @@
-package com.camping.tests.helper;
+package com.camping.tests.support.helper;
 
 import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public class PutStrategy implements HttpMethodStrategy {
+public class PatchStrategy implements HttpMethodStrategy {
 
     @Override
     public <T> ExtractableResponse<Response> execute(RequestSpecification requestSpec, String url, T body) {
@@ -15,7 +15,7 @@ public class PutStrategy implements HttpMethodStrategy {
         }
 
         return given.when()
-                .put(url)
+                .patch(url)
                 .then()
                 .log().all()
                 .extract();
@@ -23,6 +23,6 @@ public class PutStrategy implements HttpMethodStrategy {
 
     @Override
     public boolean supports(HttpMethod method) {
-        return method == HttpMethod.PUT;
+        return method == HttpMethod.PATCH;
     }
 }
