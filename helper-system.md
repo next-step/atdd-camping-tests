@@ -1,108 +1,154 @@
-# 🛠️ 헬퍼 시스템 가이드
+# 🛠️ API 클라이언트 시스템 가이드
 
-## 🎯 헬퍼 시스템 개요
+## 🎯 API 클라이언트 시스템 개요
 
-우리 프로젝트는 **전략 패턴**을 활용한 강력한 헬퍼 시스템을 제공합니다. 이를 통해 HTTP 요청 코드를 대폭 단순화하고 유지보수성을 향상시킵니다.
+우리 프로젝트는 **Factory 패턴과 전략 패턴**을 결합한 강력한 API 클라이언트 시스템을 제공합니다. 이를 통해 멀티 서비스 환경에서 HTTP 요청 코드를 대폭 단순화하고 유지보수성을 향상시킵니다.
 
 ## 📐 시스템 구조
 
 ```
-src/test/java/com/camping/admin/helper/
-├── 🎯 ApiHelper.java              # 최상위 API 호출 인터페이스
-├── 🔧 RestAssuredHelper.java      # RestAssured 래퍼
-├── 📋 HttpMethod.java             # HTTP 메서드 enum
-├── ⚡ HttpMethodStrategy.java     # 전략 패턴 인터페이스
-├── 🔄 GetStrategy.java           # GET 요청 전략
-├── 📝 PostStrategy.java          # POST 요청 전략  
-├── ✏️ PutStrategy.java           # PUT 요청 전략
-├── 🔧 PatchStrategy.java         # PATCH 요청 전략
-└── 🗑️ DeleteStrategy.java        # DELETE 요청 전략
+src/test/java/com/camping/tests/support/
+├── client/                              # 🎯 API 클라이언트 시스템
+│   ├── ApiClient.java                   # 📋 공통 인터페이스
+│   ├── BaseApiClient.java               # 🔧 공통 구현체
+│   ├── ApiClientFactory.java            # 🏭 팩토리 클래스
+│   └── impl/                            # 📁 서비스별 구현체
+│       ├── KioskApiClient.java          # 🛒 키오스크 서비스
+│       ├── AdminApiClient.java          # 👨‍💼 관리자 서비스
+│       └── ReservationApiClient.java    # 📅 예약 서비스
+├── helper/                              # 🔧 지원 클래스들
+│   ├── ServiceType.java                 # 🏷️ 서비스 타입 정의
+│   ├── ServiceContext.java              # 🌐 서비스 컨텍스트 관리
+│   ├── HttpMethod.java                  # 📋 HTTP 메서드 enum
+│   ├── HttpMethodStrategy.java          # ⚡ 전략 패턴 인터페이스
+│   ├── GetStrategy.java                 # 🔄 GET 요청 전략
+│   ├── PostStrategy.java                # 📝 POST 요청 전략
+│   ├── PutStrategy.java                 # ✏️ PUT 요청 전략
+│   ├── PatchStrategy.java               # 🔧 PATCH 요청 전략
+│   └── DeleteStrategy.java              # 🗑️ DELETE 요청 전략
+└── fixture/                             # 🧪 테스트 픽스처
+    ├── KioskTestFixture.java            # 키오스크 테스트 데이터
+    └── PaymentTestFixture.java          # 결제 테스트 데이터
 ```
 
 ---
 
-## 🎯 ApiHelper - 최상위 인터페이스
+## 🏭 ApiClientFactory - 서비스별 클라이언트 생성
+
+### 멀티 서비스 아키텍처 지원
+
+우리 시스템은 3개의 독립적인 마이크로서비스를 지원합니다:
+
+| 서비스 | 포트 | 역할 | 클라이언트 |
+|--------|------|------|-----------|
+| **KIOSK** | 18081 | 키오스크 서비스 | `KioskApiClient` |
+| **ADMIN** | 18082 | 관리자 서비스 | `AdminApiClient` |
+| **RESERVATION** | 18083 | 예약 서비스 | `ReservationApiClient` |
 
 ### 기본 사용법
 
 ```java
-import static com.camping.admin.helper.ApiHelper.*;
+// 1. Factory를 통한 명시적 생성
+ApiClient kioskClient = ApiClientFactory.create(ServiceType.KIOSK);
+ApiClient adminClient = ApiClientFactory.create(ServiceType.ADMIN);
+ApiClient reservationClient = ApiClientFactory.create(ServiceType.RESERVATION);
 
-// 인증 없는 요청
-ExtractableResponse response = createExtractableResponse("GET", "/admin/products");
-
-// 인증 필요한 요청  
-ExtractableResponse response = createExtractableResponseWithAuthorization("POST", "/admin/rentals", body);
-
-// body 없는 요청
-ExtractableResponse response = createExtractableResponseWithAuthorization("GET", "/admin/rentals");
+// 2. 편의 메서드로 간편 생성
+ApiClient kiosk = ApiClientFactory.kiosk();
+ApiClient admin = ApiClientFactory.admin();
+ApiClient reservation = ApiClientFactory.reservation();
 ```
+
+### 실제 멀티 서비스 시나리오 예시
+
+```java
+// 📱 사용자가 키오스크에서 상품 조회
+ExtractableResponse<Response> products = ApiClientFactory.kiosk()
+    .get("/api/products");
+
+// 📅 예약 서비스로 예약 생성
+Map<String, Object> reservationData = Map.of(
+    "productId", 1,
+    "quantity", 2
+);
+ExtractableResponse<Response> reservation = ApiClientFactory.reservation()
+    .post("/api/reservations", reservationData);
+
+// 👨‍💼 관리자가 예약 승인
+Map<String, String> statusUpdate = Map.of("status", "APPROVED");
+long reservationId = reservation.jsonPath().getLong("id");
+ExtractableResponse<Response> approval = ApiClientFactory.admin()
+    .patch("/api/reservations/" + reservationId, statusUpdate, true); // 인증 필요
+```
+
+---
+
+## 🎯 ApiClient - 공통 인터페이스
 
 ### 제공되는 메서드
 
+모든 HTTP 메서드는 4가지 오버로드를 제공합니다:
+
 ```java
-public class ApiHelper {
-    // 기본 요청 (인증 없음)
-    public static <T> ExtractableResponse createExtractableResponse(String httpMethod, String url, T body)
-    public static ExtractableResponse createExtractableResponse(String httpMethod, String url)
-    
-    // 인증 필요 요청
-    public static <T> ExtractableResponse createExtractableResponseWithAuthorization(String httpMethod, String url, T body)  
-    public static ExtractableResponse createExtractableResponseWithAuthorization(String httpMethod, String url)
-    
-    // 세밀한 제어 (직접 사용 권장하지 않음)
-    public static <T> ExtractableResponse createExtractableResponse(String httpMethod, String url, T body, boolean needAuthorization)
+public interface ApiClient {
+    // GET 메서드
+    <T> ExtractableResponse<Response> get(String url);                        // 기본
+    <T> ExtractableResponse<Response> get(String url, boolean needAuth);      // 인증 여부 설정
+    <T> ExtractableResponse<Response> get(String url, T body);               // Body 포함
+    <T> ExtractableResponse<Response> get(String url, T body, boolean auth); // 전체 옵션
+
+    // POST, PUT, PATCH, DELETE 메서드도 동일한 패턴
 }
 ```
 
 ### 💡 사용 팁
 
-- **정적 import 활용**: `import static com.camping.admin.helper.ApiHelper.*;`
-- **메서드명으로 의도 표현**: `WithAuthorization`이 붙은 메서드는 JWT 토큰 자동 포함
-- **타입 안전성**: 제네릭을 통해 다양한 body 타입 지원
+- **서비스 명확성**: 메서드 호출 시점에 어떤 서비스인지 명확함
+- **타입 안전성**: 컴파일 타임에 잘못된 사용 방지
+- **자동완성 지원**: IDE에서 완벽한 자동완성 제공
+- **인증 처리**: `true` 파라미터로 JWT 토큰 자동 포함
 
 ---
 
-## 🔧 RestAssuredHelper - 핵심 엔진
+## 🔧 ServiceContext - 서비스 컨텍스트 관리
 
-### 내부 구조
+### 핵심 역할
 
 ```java
-public class RestAssuredHelper {
-    // 전략 패턴으로 HTTP 메서드별 처리
-    private static final List<HttpMethodStrategy> strategies = List.of(
-        new GetStrategy(), new PostStrategy(), new PutStrategy(), 
-        new PatchStrategy(), new DeleteStrategy()
-    );
-    
-    // 통합 실행 메서드
-    public <T> ExtractableResponse execute(HttpMethod method, String url, T body, boolean needAuthorization) {
-        RequestSpecification requestSpec = needAuthorization 
-            ? StepContext.getRequestSpecificationWithAccessToken()
-            : StepContext.getRequestSpecification();
-            
-        // 적절한 전략 찾아서 실행
-        for (HttpMethodStrategy strategy : strategies) {
-            if (strategy.supports(method)) {
-                return strategy.execute(requestSpec, url, body);
-            }
-        }
-        
-        throw new IllegalArgumentException("Unsupported HTTP method: " + method);
-    }
+public class ServiceContext {
+    // 서비스별 RequestSpecification 관리
+    public static void initializeRequestSpec(ServiceType serviceType);
+    public static RequestSpecification getRequestSpecification(ServiceType serviceType);
+
+    // 서비스별 인증 토큰 관리
+    public static void setAccessToken(ServiceType serviceType, String token);
+    public static RequestSpecification getRequestSpecificationWithAccessToken(ServiceType serviceType);
+
+    // ThreadLocal로 테스트 격리 보장
+    public static void clearContext();
 }
 ```
 
-### HTTP 메서드별 편의 메서드
+### 초기화 과정 (Hooks.java)
 
 ```java
-// 모든 메서드는 4가지 오버로드 제공
-public <T> ExtractableResponse get(String url, T body, boolean needAuthorization)
-public <T> ExtractableResponse get(String url, T body)  // needAuthorization = false
-public ExtractableResponse get(String url)              // body = null, needAuthorization = false  
-public ExtractableResponse get(String url, boolean needAuthorization) // body = null
+@Before
+public void beforeScenario() {
+    // 각 서비스별 RequestSpec 초기화
+    ServiceContext.initializeRequestSpec(ServiceType.ADMIN);    // localhost:18082
+    ServiceContext.initializeRequestSpec(ServiceType.KIOSK);    // localhost:18081
+    ServiceContext.initializeRequestSpec(ServiceType.RESERVATION); // localhost:18083
+}
 
-// POST, PUT, PATCH, DELETE 메서드도 동일한 패턴
+@BeforeAll
+public static void initAccessToken() {
+    // Admin 로그인 후 토큰 획득
+    String adminAccessToken = requestAdminLogin(loginParams);
+
+    // 각 서비스에 토큰 설정 (필요한 경우)
+    ServiceContext.setAccessToken(ServiceType.ADMIN, adminAccessToken);
+    ServiceContext.setAccessToken(ServiceType.KIOSK, adminAccessToken);
+}
 ```
 
 ---
@@ -113,7 +159,7 @@ public ExtractableResponse get(String url, boolean needAuthorization) // body = 
 
 ```java
 public interface HttpMethodStrategy {
-    <T> ExtractableResponse execute(RequestSpecification requestSpec, String url, T body);
+    <T> ExtractableResponse<Response> execute(RequestSpecification requestSpec, String url, T body);
     boolean supports(HttpMethod method);
 }
 ```
@@ -122,20 +168,20 @@ public interface HttpMethodStrategy {
 
 ```java
 public class PostStrategy implements HttpMethodStrategy {
-    
+
     @Override
-    public <T> ExtractableResponse execute(RequestSpecification requestSpec, String url, T body) {
+    public <T> ExtractableResponse<Response> execute(RequestSpecification requestSpec, String url, T body) {
         RequestSpecification given = RestAssured.given().spec(requestSpec);
         if (body != null) {
             given = given.body(body);
         }
-        
+
         return given.when()
                 .post(url)
                 .then()
                 .extract();
     }
-    
+
     @Override
     public boolean supports(HttpMethod method) {
         return method == HttpMethod.POST;
@@ -143,254 +189,227 @@ public class PostStrategy implements HttpMethodStrategy {
 }
 ```
 
-### 전략 패턴의 장점
+### BaseApiClient에서의 전략 활용
 
-- ✅ **확장성**: 새로운 HTTP 메서드 추가 용이
-- ✅ **단일 책임**: 각 전략이 하나의 HTTP 메서드만 담당
-- ✅ **테스트 용이성**: 각 전략을 독립적으로 테스트 가능
-- ✅ **유지보수성**: 특정 메서드 로직 변경 시 해당 전략만 수정
+```java
+public abstract class BaseApiClient implements ApiClient {
+    private final ServiceType serviceType;
+    private final List<HttpMethodStrategy> strategies = List.of(
+        new GetStrategy(), new PostStrategy(), new PutStrategy(),
+        new PatchStrategy(), new DeleteStrategy()
+    );
+
+    protected <T> ExtractableResponse<Response> execute(HttpMethod method, String url, T body, boolean needAuth) {
+        RequestSpecification requestSpec = needAuth
+            ? ServiceContext.getRequestSpecificationWithAccessToken(serviceType)
+            : ServiceContext.getRequestSpecification(serviceType);
+
+        // 적절한 전략 찾아서 실행
+        for (HttpMethodStrategy strategy : strategies) {
+            if (strategy.supports(method)) {
+                return strategy.execute(requestSpec, url, body);
+            }
+        }
+
+        throw new IllegalArgumentException("Unsupported HTTP method: " + method);
+    }
+}
+```
 
 ---
 
-## 🔧 실제 사용 예제
+## 🧪 TestFixture에서의 활용
 
-### TestFixture에서의 활용
+### KioskTestFixture 예시
 
 ```java
-public class RentalTestFixture {
-    
-    public static ExtractableResponse<Response> 대여_기록_작성_요청(Map<String, Integer> body) {
-        return createExtractableResponseWithAuthorization("POST", "/admin/rentals", body);
-    }
+public class KioskTestFixture {
 
-    public static ExtractableResponse<Response> 대여_기록_목록_조회() {
-        ExtractableResponse<Response> response = createExtractableResponseWithAuthorization("GET", "/admin/rentals");
+    public static ExtractableResponse<Response> 키오스크_상품_목록_조회() {
+        ExtractableResponse<Response> response = ApiClientFactory.kiosk()
+            .get("/api/products", true); // 인증 필요
         assertThat(response.statusCode()).isEqualTo(200);
         return response;
     }
 
-    public static Map<String, Object> 특정_대여_기록_조회(long rentalId) {
-        return 대여_기록_목록_조회().jsonPath()
-                .<Map<String, Object>>getList("$").stream()
-                .filter(r -> ((Integer) r.get("id")) == rentalId)
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("대여 기록을 찾을 수 없습니다."));
+    public static void 상품_목록_개수_검증(ExtractableResponse<Response> response, int expectedMinCount) {
+        List<Map<String, Object>> products = response.jsonPath().getList("$");
+        assertThat(products.size()).isGreaterThanOrEqualTo(expectedMinCount);
     }
 }
 ```
 
-### Before/After 비교
-
-#### ❌ Helper 사용 전 (복잡하고 중복 많음)
+### PaymentTestFixture 예시
 
 ```java
-public static ExtractableResponse<Response> 예약_상태_변경(long reservationId, Map<String, String> body) {
-    return RestAssured.given()
-            .spec(StepContext.getRequestSpecification())
-            .header("Authorization", "Bearer " + StepContext.getAccessToken())
-            .body(body)
-            .when()
-            .patch("/admin/reservations/" + reservationId + "/status")
-            .then()
-            .extract();
-}
-```
+public class PaymentTestFixture {
 
-#### ✅ Helper 사용 후 (간결하고 명확함)
+    public static ExtractableResponse<Response> 정상_금액으로_결제_요청(List<Map<String, Object>> selectedItems) {
+        Map<String, Object> paymentRequest = createPaymentRequest(selectedItems);
 
-```java
-public static ExtractableResponse<Response> 예약_상태_변경(long reservationId, Map<String, String> body) {
-    return createExtractableResponseWithAuthorization("PATCH", "/admin/reservations/" + reservationId + "/status", body);
-}
-```
+        // 키오스크 서비스의 결제 API 호출
+        return ApiClientFactory.kiosk()
+            .post("/api/payments", paymentRequest);
+    }
 
----
-
-## 🧹 DatabaseCleaner - 데이터베이스 초기화
-
-### 목적
-
-각 Cucumber 시나리오 완료 후 **자동으로 데이터베이스를 초기화**하여 테스트 간 격리를 보장합니다.
-
-### 위치 및 구조
-
-```
-src/test/java/com/camping/admin/helper/DatabaseCleaner.java  # 실제 DB 정리 로직
-src/main/java/com/camping/admin/controller/DatabaseAdminController.java  # HTTP API 엔드포인트
-src/test/java/com/camping/admin/steps/Hooks.java  # @After Hook에서 API 호출
-```
-
-### 동작 메커니즘
-
-1. **@After Hook 실행**: 각 Cucumber 시나리오 완료 후 자동 실행
-2. **HTTP API 호출**: `/admin/database/reset` 엔드포인트로 POST 요청
-3. **JWT 인증**: 관리자 토큰을 사용하여 안전한 초기화
-4. **완전한 초기화**: 모든 테이블 TRUNCATE + data.sql 재실행
-
-### Hooks.java 구현
-
-```java
-@After
-public void afterScenario() {
-    try {
-        log.info("🧹 시나리오 완료 - HTTP API를 통해 데이터베이스 초기화 시작");
-
-        ExtractableResponse<Response> response = RestAssured.given()
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + StepContext.getAccessToken())
-                .body("{}")
-                .when()
-                .post("http://localhost:8081/admin/database/reset")
-                .then()
-                .extract();
-
-        if (response.statusCode() == 200) {
-            log.info("✅ 데이터베이스 초기화 완료 - 다음 시나리오 준비됨");
-        } else {
-            log.warn("⚠️ 데이터베이스 초기화 실패 - 상태코드: {}", response.statusCode());
-        }
-    } catch (Exception e) {
-        log.error("❌ 데이터베이스 초기화 중 오류 발생: {}", e.getMessage());
+    public static void 결제_성공_검증(ExtractableResponse<Response> response) {
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.jsonPath().getBoolean("success")).isTrue();
     }
 }
 ```
-
-### DatabaseCleaner Bean
-
-```java
-@Component
-public class DatabaseCleaner {
-    @Autowired private JdbcTemplate jdbcTemplate;
-    @Autowired private DataSource dataSource;
-
-    public void clean() {
-        // 1. 외래키 제약 조건 비활성화
-        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
-
-        // 2. 모든 테이블 TRUNCATE + ID 시퀀스 리셋
-        List<String> tableNames = jdbcTemplate.queryForList(
-            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC'",
-            String.class
-        );
-
-        for (String tableName : tableNames) {
-            jdbcTemplate.execute("TRUNCATE TABLE " + tableName);
-            jdbcTemplate.execute("ALTER TABLE " + tableName + " ALTER COLUMN ID RESTART WITH 1");
-        }
-
-        // 3. 외래키 제약 조건 재활성화
-        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
-
-        // 4. data.sql 재실행으로 초기 데이터 복원
-        try (Connection connection = dataSource.getConnection()) {
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("data.sql"));
-        }
-    }
-}
-```
-
-### 장점
-
-- **자동화**: 개발자가 수동으로 DB를 초기화할 필요 없음
-- **안전성**: JWT 인증을 통한 보안 확보
-- **효율성**: 애플리케이션 재시작 없이 빠른 초기화
-- **격리성**: 각 시나리오가 완전히 독립적으로 실행
 
 ---
 
 ## 🔍 고급 활용법
 
-### 1. 커스텀 검증이 필요한 경우
+### 1. 크로스 서비스 워크플로우
 
 ```java
-public static ExtractableResponse<Response> 대여_기록_목록_조회_성공() {
-    ExtractableResponse<Response> response = createExtractableResponseWithAuthorization("GET", "/admin/rentals");
-    
-    // 추가 검증 로직
-    assertThat(response.statusCode()).isEqualTo(200);
-    assertThat(response.jsonPath().getList("$")).isNotEmpty();
-    
-    return response;
+public class CrossServiceWorkflow {
+
+    public static void 예약_승인_워크플로우() {
+        // 1단계: Reservation 서비스에서 예약 생성
+        Map<String, Object> reservationData = createReservationData();
+        ExtractableResponse<Response> reservation = ApiClientFactory.reservation()
+            .post("/api/reservations", reservationData);
+
+        long reservationId = reservation.jsonPath().getLong("id");
+
+        // 2단계: Admin 서비스에서 예약 승인
+        Map<String, String> approval = Map.of("status", "APPROVED");
+        ApiClientFactory.admin()
+            .patch("/api/admin/reservations/" + reservationId, approval, true);
+
+        // 3단계: Kiosk에서 승인된 예약 확인
+        ExtractableResponse<Response> confirmed = ApiClientFactory.kiosk()
+            .get("/api/reservations/" + reservationId);
+
+        assertThat(confirmed.jsonPath().getString("status")).isEqualTo("APPROVED");
+    }
 }
 ```
 
-### 2. 동적 URL 구성
+### 2. 커스텀 인증 헤더
 
 ```java
-public static ExtractableResponse<Response> 특정_예약_상태_변경(long reservationId, String status) {
-    Map<String, String> body = Map.of("status", status);
-    String url = "/admin/reservations/" + reservationId + "/status";
-    
-    return createExtractableResponseWithAuthorization("PATCH", url, body);
+public static ExtractableResponse<Response> 특정_토큰으로_관리자_요청(String customToken) {
+    // ServiceContext에 임시 토큰 설정
+    String originalToken = ServiceContext.getAccessToken(ServiceType.ADMIN);
+    ServiceContext.setAccessToken(ServiceType.ADMIN, customToken);
+
+    try {
+        return ApiClientFactory.admin()
+            .get("/api/admin/sensitive-data", true);
+    } finally {
+        // 원래 토큰으로 복원
+        if (originalToken != null) {
+            ServiceContext.setAccessToken(ServiceType.ADMIN, originalToken);
+        }
+    }
 }
 ```
 
-### 3. 에러 케이스 테스트
+### 3. 동적 서비스 선택
 
 ```java
-public static ExtractableResponse<Response> 존재하지_않는_상품_대여_시도(int productId) {
-    Map<String, Integer> body = Map.of(
-        "reservationId", 1,
-        "productId", productId,  // 존재하지 않는 ID
-        "quantity", 1
-    );
-    
-    ExtractableResponse<Response> response = createExtractableResponseWithAuthorization("POST", "/admin/rentals", body);
-    
-    // 에러 상황이므로 성공 검증은 하지 않음
-    return response;
+public static ExtractableResponse<Response> 서비스별_상태_확인(ServiceType serviceType) {
+    ApiClient client = ApiClientFactory.create(serviceType);
+    return client.get("/actuator/health");
+}
+
+// 사용 예시
+public void 모든_서비스_상태_확인() {
+    for (ServiceType serviceType : ServiceType.values()) {
+        ExtractableResponse<Response> health = 서비스별_상태_확인(serviceType);
+        assertThat(health.statusCode()).isEqualTo(200);
+    }
 }
 ```
 
 ---
 
-## 🚨 주의사항
+## 🚨 주의사항 및 권장사항
 
 ### ⚠️ 하지 말아야 할 것들
 
 ```java
-// ❌ 직접 RestAssured 사용 (Helper를 우회)
+// ❌ 하드코딩된 포트 사용
+RestAssured.get("http://localhost:18081/api/products");
+
+// ❌ ServiceType 혼동
+ApiClientFactory.admin().get("/api/kiosk-products"); // 잘못된 서비스 사용
+
+// ❌ 직접 RestAssured 사용 (시스템 우회)
 RestAssured.given()
-    .spec(StepContext.getRequestSpecification())
-    .body(body)
+    .baseUri("http://localhost:18082")
     .when()
-    .post("/admin/rentals");
-
-// ❌ 복잡한 로직을 Helper에 넣기
-ApiHelper.createComplexBusinessLogicRequest(...); // 이런 메서드는 만들지 말 것
-
-// ❌ 하드코딩된 URL 중복 사용
-createExtractableResponse("GET", "http://localhost:8081/admin/rentals"); // baseUri는 StepContext에서 처리
+    .get("/api/admin/users");
 ```
 
-### ✅ 권장 사항
+### ✅ 권장사항
 
 ```java
-// ✅ static import로 깔끔하게
-import static com.camping.admin.helper.ApiHelper.createExtractableResponseWithAuthorization;
+// ✅ 명확한 서비스 분리
+ApiClient kioskClient = ApiClientFactory.kiosk();
+ApiClient adminClient = ApiClientFactory.admin();
 
 // ✅ 의미 있는 메서드명으로 래핑
-public static ExtractableResponse<Response> 관리자_권한으로_대여_목록_조회() {
-    return createExtractableResponseWithAuthorization("GET", "/admin/rentals");
+public static ExtractableResponse<Response> 관리자_권한으로_사용자_목록_조회() {
+    return ApiClientFactory.admin().get("/api/users", true);
 }
 
-// ✅ 적절한 추상화 수준 유지
-public static Map<String, Object> 특정_조건의_예약_찾기(Predicate<Map<String, Object>> condition) {
-    return 예약_목록_조회().jsonPath()
-            .<Map<String, Object>>getList("$").stream()
-            .filter(condition)
-            .findFirst()
-            .orElse(null);
+// ✅ 서비스 역할에 맞는 API 호출
+public static void 키오스크_상품_관리_시나리오() {
+    // 키오스크에서 상품 조회
+    ApiClientFactory.kiosk().get("/api/products");
+
+    // 관리자에서 상품 관리
+    ApiClientFactory.admin().post("/api/admin/products", productData, true);
+
+    // 예약에서 상품 예약
+    ApiClientFactory.reservation().post("/api/reservations", reservationData);
 }
 ```
+
+---
+
+## 🎯 마이그레이션 가이드
+
+### 기존 ApiHelper에서 새 시스템으로
+
+#### Before (ApiHelper 사용)
+```java
+// 복잡하고 서비스가 불분명
+createExtractableResponse("GET", "/api/products");
+createExtractableResponse(ServiceType.ADMIN, "POST", "/api/users", userData, true);
+```
+
+#### After (ApiClientFactory 사용)
+```java
+// 명확하고 직관적
+ApiClientFactory.kiosk().get("/api/products");
+ApiClientFactory.admin().post("/api/users", userData, true);
+```
+
+### 장점 요약
+
+1. **서비스 명확성** - 호출 시점에 어떤 서비스인지 바로 알 수 있음
+2. **타입 안전성** - 문자열 기반 메서드명 대신 타입 안전한 메서드 호출
+3. **확장성** - 새로운 서비스 추가 시 구현체만 추가하면 됨
+4. **테스트 용이성** - 각 서비스별로 독립적인 테스트 가능
+5. **멀티 서비스 지원** - 복잡한 크로스 서비스 시나리오 완벽 지원
+
+---
 
 ## 🎯 정리
 
-이 헬퍼 시스템을 활용하면:
+이 API 클라이언트 시스템을 활용하면:
 
-1. **코드 중복 최소화** - 같은 HTTP 요청 로직을 반복 작성할 필요 없음
-2. **일관된 코드 스타일** - 모든 테스트에서 동일한 패턴 사용
-3. **유지보수성 향상** - 공통 로직 변경 시 한 곳만 수정
-4. **테스트 가독성 향상** - 비즈니스 로직에 집중 가능
+1. **멀티 서비스 아키텍처 완벽 지원** - 3개 독립 서비스 간 원활한 통신
+2. **코드 명확성 극대화** - 어떤 서비스를 호출하는지 한눈에 파악
+3. **확장성과 유지보수성** - 새로운 서비스나 기능 추가 용이
+4. **타입 안전성** - 컴파일 타임 오류 방지
+5. **테스트 격리** - 각 서비스별 독립적인 테스트 환경
 
-헬퍼 시스템을 적극 활용하여 효율적인 테스트 코드를 작성하세요! 🚀
+**Factory 패턴 + 전략 패턴**의 조합으로 현대적이고 확장 가능한 테스트 인프라를 구축했습니다! 🚀
