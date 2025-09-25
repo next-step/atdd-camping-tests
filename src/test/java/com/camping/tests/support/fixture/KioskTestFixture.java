@@ -6,12 +6,12 @@ import io.restassured.response.Response;
 import java.util.List;
 import java.util.Map;
 
-import static com.camping.tests.support.helper.ApiHelper.createExtractableResponse;
+import com.camping.tests.support.client.ApiClientFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class KioskTestFixture {
     public static ExtractableResponse<Response> 키오스크_상품_목록_조회() {
-        ExtractableResponse<Response> response = createExtractableResponse("GET", "/api/products");
+        ExtractableResponse<Response> response = ApiClientFactory.kiosk().get("/api/products");
         assertThat(response.statusCode()).isEqualTo(200);
         return response;
     }

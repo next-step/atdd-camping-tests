@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.camping.tests.support.helper.ApiHelper.createExtractableResponse;
+import com.camping.tests.support.client.ApiClientFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PaymentTestFixture {
@@ -28,7 +28,7 @@ public class PaymentTestFixture {
         paymentRequest.put("items", cartItems);
         paymentRequest.put("paymentMethod", "CARD");
 
-        return createExtractableResponse("POST", "/api/payments", paymentRequest);
+        return ApiClientFactory.kiosk().post("/api/payments", paymentRequest);
     }
 
     public static ExtractableResponse<Response> 유효하지_않은_금액으로_결제_요청() {
@@ -44,7 +44,7 @@ public class PaymentTestFixture {
         paymentRequest.put("items", cartItems);
         paymentRequest.put("paymentMethod", "CARD");
 
-        return createExtractableResponse("POST", "/api/payments", paymentRequest);
+        return ApiClientFactory.kiosk().post("/api/payments", paymentRequest);
     }
 
     public static void 결제_성공_검증(ExtractableResponse<Response> response) {

@@ -14,7 +14,7 @@ public class ServiceContext {
     private static final String BASE_CONTENT_TYPE = "application/json";
 
     private static final ThreadLocal<Map<ServiceType, Map<String, Object>>> contexts =
-            ThreadLocal.withInitial(() -> new ConcurrentHashMap<>());
+            ThreadLocal.withInitial(ConcurrentHashMap::new);
 
     private static Map<String, Object> getServiceContext(ServiceType serviceType) {
         return contexts.get().computeIfAbsent(serviceType, k -> new HashMap<>());
