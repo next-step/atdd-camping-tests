@@ -26,7 +26,13 @@ public class Hooks {
     public static void initAccessToken() {
         log.info("로그인 시도중...");
         Map<String, String> params = Map.of("username", "admin", "password", "admin123");
+        String adminAccessToken = requestAdminLogin(params);
+        ServiceContext.setAccessToken(ServiceType.ADMIN, adminAccessToken);
+        ServiceContext.setAccessToken(ServiceType.KIOSK, adminAccessToken);
+        log.info("로그인 완료");
+    }
 
+    private static String requestAdminLogin(Map<String, String> params) {
         ExtractableResponse<Response> response = RestAssured.given()
                 .header("Content-Type", "application/json")
                 .body(params)
@@ -36,8 +42,6 @@ public class Hooks {
                 .statusCode(200)
                 .extract();
 
-        String accessToken = response.jsonPath().get("accessToken");
-        ServiceContext.setAccessToken(ServiceType.ADMIN, accessToken);
-        log.info("로그인 완료");
+        return response.jsonPath().get("accessToken");
     }
 }
