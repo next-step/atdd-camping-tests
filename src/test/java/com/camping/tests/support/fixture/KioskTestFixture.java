@@ -11,7 +11,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class KioskTestFixture {
     public static ExtractableResponse<Response> 키오스크_상품_목록_조회() {
-        ExtractableResponse<Response> response = ApiClientFactory.kiosk().get("/api/products", true);
+        ExtractableResponse<Response> response = ApiClientFactory.kiosk()
+                .get("/api/products")
+                .needAuth()
+                .execute();
         assertThat(response.statusCode()).isEqualTo(200);
         return response;
     }

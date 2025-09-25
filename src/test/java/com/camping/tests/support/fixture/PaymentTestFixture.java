@@ -28,7 +28,11 @@ public class PaymentTestFixture {
         paymentRequest.put("items", cartItems);
         paymentRequest.put("paymentMethod", "CARD");
 
-        return ApiClientFactory.kiosk().post("/api/payments", paymentRequest);
+        return ApiClientFactory.kiosk()
+                .post("/api/payments")
+                .body(paymentRequest)
+                .accessToken("test_sk_dummy")
+                .execute();
     }
 
     public static ExtractableResponse<Response> 유효하지_않은_금액으로_결제_요청() {
@@ -44,7 +48,11 @@ public class PaymentTestFixture {
         paymentRequest.put("items", cartItems);
         paymentRequest.put("paymentMethod", "CARD");
 
-        return ApiClientFactory.kiosk().post("/api/payments", paymentRequest);
+        return ApiClientFactory.kiosk()
+                .post("/api/payments")
+                .body(paymentRequest)
+                .accessToken("test_sk_dummy")
+                .execute();
     }
 
     public static void 결제_성공_검증(ExtractableResponse<Response> response) {
