@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.Delete
+import java.io.File
 
 // Default compose file path used by docker-related tasks
 val appComposeFile = project.rootProject.layout.projectDirectory
@@ -134,28 +135,33 @@ tasks.register<Exec>("reservation-logs") {
 
 tasks.register("repo-clone") {
     group = "docker"
-    description = "저장소 완전 초기화 (기존 삭제 후 새로 클론)"
+    description = "repo/<name>가 존재하면 git pull, 없으면 clone만 수행"
 
     doLast {
-        println("🔄 저장소 완전 초기화를 시작합니다...")
+        val baseDir = file("repo").apply { mkdirs() }
 
+        println("🔄 저장소 동기화를 시작합니다 (단순 모드: pull or clone).")
         DockerConfig.repos.forEach { repo ->
-            println("📦 ${repo.name} 완전 초기화 중...")
+            val repoDir = File(baseDir, repo.name)
+            println("📦 ${repo.name} 처리 중... (branch=${repo.branch})")
 
-            val sourceDir = file("repo/${repo.name}")
-            if (sourceDir.exists()) {
-                sourceDir.deleteRecursively()
+            if (repoDir.exists()) {
+                println("💡기존 디렉토리 발견: git pull 실행")
+                exec {
+                    workingDir = repoDir
+                    commandLine("git", "pull")
+                }
+                println("✅ ${repo.name} pull 완료")
+            } else {
+                println("⬇️ 디렉토리 없음: git clone 실행")
+                exec {
+                    workingDir = baseDir
+                    commandLine("git", "clone", "-b", repo.branch, repo.url, repo.name)
+                }
+                println("✅ ${repo.name} clone 완료")
             }
-            sourceDir.mkdirs()
-
-            exec {
-                workingDir = sourceDir
-                commandLine = listOf("git", "clone", "-b", repo.branch, repo.url, sourceDir.absolutePath)
-            }
-            println("✅ ${repo.name} 클론 완료")
         }
-
-        println("🎉 모든 저장소 완전 초기화가 완료되었습니다!")
+        println("🎉 모든 저장소 처리 완료")
     }
 }
 
