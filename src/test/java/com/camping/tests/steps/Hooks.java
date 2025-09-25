@@ -1,6 +1,6 @@
 package com.camping.tests.steps;
 
-import com.camping.tests.helper.KioskContext;
+import com.camping.tests.helper.Context;
 import io.cucumber.java.Before;
 import io.restassured.RestAssured;
 
@@ -9,21 +9,21 @@ import io.restassured.RestAssured;
  */
 public class Hooks {
 
-    @Before
-    public void setUp() {
-        if (KioskContext.kioskBaseUrl == null) {
-            Hooks.initializeRestAssured();
-        }
-        KioskContext.reset();
-    }
-
     /**
      * RestAssured 기본 설정을 초기화합니다.
      */
     public static void initializeRestAssured() {
-        KioskContext.kioskBaseUrl = getKioskBaseUrl();
-        RestAssured.baseURI = KioskContext.kioskBaseUrl;
+        Context.kioskBaseUrl = getKioskBaseUrl();
+        RestAssured.baseURI = Context.kioskBaseUrl;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    }
+
+    @Before
+    public void setUp() {
+        if (Context.kioskBaseUrl == null) {
+            Hooks.initializeRestAssured();
+        }
+        Context.reset();
     }
 
     /**

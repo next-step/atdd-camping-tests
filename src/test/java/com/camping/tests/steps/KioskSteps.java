@@ -3,9 +3,9 @@ package com.camping.tests.steps;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-import static com.camping.tests.helper.KioskAssertions.assertSuccessResponse;
-import static com.camping.tests.helper.KioskContext.lastResponse;
-import static com.camping.tests.helper.KioskRequestSender.get;
+import static com.camping.tests.helper.Assertions.assertSuccessResponse;
+import static com.camping.tests.helper.Context.lastResponse;
+import static com.camping.tests.helper.RequestSender.get;
 
 /**
  * 키오스크 애플리케이션 인수테스트를 위한 Step Definitions

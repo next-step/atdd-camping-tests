@@ -5,7 +5,7 @@ import io.restassured.response.Response;
 /**
  * 키오스크 테스트 전역 공용 컨텍스트
  */
-public class KioskContext {
+public class Context {
     
     public static String kioskBaseUrl;
     public static Response lastResponse;

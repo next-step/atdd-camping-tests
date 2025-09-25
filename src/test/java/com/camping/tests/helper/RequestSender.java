@@ -7,7 +7,7 @@ import static io.restassured.RestAssured.given;
 /**
  * 키오스크 API 요청 전송 유틸리티
  */
-public class KioskRequestSender {
+public class RequestSender {
     
     public static Response get(String endpoint) {
         return given()
