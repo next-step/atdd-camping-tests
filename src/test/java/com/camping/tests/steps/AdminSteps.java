@@ -3,17 +3,17 @@ package com.camping.tests.steps;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+import static com.camping.tests.helper.AdminRequestSender.get;
 import static com.camping.tests.helper.Assertions.assertSuccessResponse;
 import static com.camping.tests.helper.Context.lastResponse;
-import static com.camping.tests.helper.KioskRequestSender.get;
 
 /**
- * 키오스크 애플리케이션 인수테스트를 위한 Step Definitions
+ * 관리자 시스템 애플리케이션 인수테스트를 위한 Step Definitions
  */
-public class KioskSteps {
+public class AdminSteps {
 
-    @When("키오스크 홈페이지 {string}에 요청을 보낸다")
-    public void 키오스크_홈페이지에_요청을_보낸다(String endpoint) {
+    @When("관리자 시스템 홈페이지 {string}에 요청을 보낸다")
+    public void 관리자_시스템_홈페이지에_요청을_보낸다(String endpoint) {
         lastResponse = get(endpoint);
     }
 
@@ -22,4 +22,3 @@ public class KioskSteps {
         assertSuccessResponse(lastResponse);
     }
 }
-

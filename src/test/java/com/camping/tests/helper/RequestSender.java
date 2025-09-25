@@ -5,12 +5,16 @@ import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
 /**
- * 키오스크 API 요청 전송 유틸리티
+ * 기본 API 요청 전송 유틸리티
  */
 public class RequestSender {
-    
-    public static Response get(String endpoint) {
+
+    /**
+     * 지정된 baseUrl로 GET 요청을 보냅니다.
+     */
+    public static Response get(String baseUrl, String endpoint) {
         return given()
+                .baseUri(baseUrl)
                 .when()
                 .get(endpoint)
                 .then()
