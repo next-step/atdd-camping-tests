@@ -16,10 +16,10 @@ public class RestAssuredHelper {
             new DeleteStrategy()
     );
 
-    public <T> ExtractableResponse<Response> execute(HttpMethod method, String url, T body, boolean needAuthorization) {
+    public <T> ExtractableResponse<Response> execute(ServiceType serviceType, HttpMethod method, String url, T body, boolean needAuthorization) {
         RequestSpecification requestSpec = needAuthorization
-                ? StepContext.getRequestSpecificationWithAccessToken()
-                : StepContext.getRequestSpecification();
+                ? ServiceContext.getRequestSpecificationWithAccessToken(serviceType)
+                : ServiceContext.getRequestSpecification(serviceType);
 
         for (HttpMethodStrategy strategy : strategies) {
             if (strategy.supports(method)) {
@@ -30,9 +30,30 @@ public class RestAssuredHelper {
         throw new IllegalArgumentException("Unsupported HTTP method: " + method);
     }
 
-    // GET 메서드 편의 메서드들
+    public <T> ExtractableResponse<Response> execute(HttpMethod method, String url, T body, boolean needAuthorization) {
+        return execute(ServiceType.KIOSK, method, url, body, needAuthorization);
+    }
+
+    // GET 메서드 편의 메서드들 (ServiceType 포함)
+    public <T> ExtractableResponse<Response> get(ServiceType serviceType, String url, T body, boolean needAuthorization) {
+        return execute(serviceType, HttpMethod.GET, url, body, needAuthorization);
+    }
+
+    public <T> ExtractableResponse<Response> get(ServiceType serviceType, String url, T body) {
+        return get(serviceType, url, body, false);
+    }
+
+    public ExtractableResponse<Response> get(ServiceType serviceType, String url) {
+        return get(serviceType, url, null, false);
+    }
+
+    public ExtractableResponse<Response> get(ServiceType serviceType, String url, boolean needAuthorization) {
+        return get(serviceType, url, null, needAuthorization);
+    }
+
+    // GET 메서드 편의 메서드들 (기본값: KIOSK)
     public <T> ExtractableResponse<Response> get(String url, T body, boolean needAuthorization) {
-        return execute(HttpMethod.GET, url, body, needAuthorization);
+        return get(ServiceType.KIOSK, url, body, needAuthorization);
     }
 
     public <T> ExtractableResponse<Response> get(String url, T body) {
@@ -47,9 +68,26 @@ public class RestAssuredHelper {
         return get(url, null, needAuthorization);
     }
 
-    // POST 메서드 편의 메서드들
+    // POST 메서드 편의 메서드들 (ServiceType 포함)
+    public <T> ExtractableResponse<Response> post(ServiceType serviceType, String url, T body, boolean needAuthorization) {
+        return execute(serviceType, HttpMethod.POST, url, body, needAuthorization);
+    }
+
+    public <T> ExtractableResponse<Response> post(ServiceType serviceType, String url, T body) {
+        return post(serviceType, url, body, false);
+    }
+
+    public ExtractableResponse<Response> post(ServiceType serviceType, String url) {
+        return post(serviceType, url, null, false);
+    }
+
+    public ExtractableResponse<Response> post(ServiceType serviceType, String url, boolean needAuthorization) {
+        return post(serviceType, url, null, needAuthorization);
+    }
+
+    // POST 메서드 편의 메서드들 (기본값: KIOSK)
     public <T> ExtractableResponse<Response> post(String url, T body, boolean needAuthorization) {
-        return execute(HttpMethod.POST, url, body, needAuthorization);
+        return post(ServiceType.KIOSK, url, body, needAuthorization);
     }
 
     public <T> ExtractableResponse<Response> post(String url, T body) {
@@ -64,9 +102,26 @@ public class RestAssuredHelper {
         return post(url, null, needAuthorization);
     }
 
-    // PUT 메서드 편의 메서드들
+    // PUT 메서드 편의 메서드들 (ServiceType 포함)
+    public <T> ExtractableResponse<Response> put(ServiceType serviceType, String url, T body, boolean needAuthorization) {
+        return execute(serviceType, HttpMethod.PUT, url, body, needAuthorization);
+    }
+
+    public <T> ExtractableResponse<Response> put(ServiceType serviceType, String url, T body) {
+        return put(serviceType, url, body, false);
+    }
+
+    public ExtractableResponse<Response> put(ServiceType serviceType, String url) {
+        return put(serviceType, url, null, false);
+    }
+
+    public ExtractableResponse<Response> put(ServiceType serviceType, String url, boolean needAuthorization) {
+        return put(serviceType, url, null, needAuthorization);
+    }
+
+    // PUT 메서드 편의 메서드들 (기본값: KIOSK)
     public <T> ExtractableResponse<Response> put(String url, T body, boolean needAuthorization) {
-        return execute(HttpMethod.PUT, url, body, needAuthorization);
+        return put(ServiceType.KIOSK, url, body, needAuthorization);
     }
 
     public <T> ExtractableResponse<Response> put(String url, T body) {
@@ -81,9 +136,26 @@ public class RestAssuredHelper {
         return put(url, null, needAuthorization);
     }
 
-    // PATCH 메서드 편의 메서드들
+    // PATCH 메서드 편의 메서드들 (ServiceType 포함)
+    public <T> ExtractableResponse<Response> patch(ServiceType serviceType, String url, T body, boolean needAuthorization) {
+        return execute(serviceType, HttpMethod.PATCH, url, body, needAuthorization);
+    }
+
+    public <T> ExtractableResponse<Response> patch(ServiceType serviceType, String url, T body) {
+        return patch(serviceType, url, body, false);
+    }
+
+    public ExtractableResponse<Response> patch(ServiceType serviceType, String url) {
+        return patch(serviceType, url, null, false);
+    }
+
+    public ExtractableResponse<Response> patch(ServiceType serviceType, String url, boolean needAuthorization) {
+        return patch(serviceType, url, null, needAuthorization);
+    }
+
+    // PATCH 메서드 편의 메서드들 (기본값: KIOSK)
     public <T> ExtractableResponse<Response> patch(String url, T body, boolean needAuthorization) {
-        return execute(HttpMethod.PATCH, url, body, needAuthorization);
+        return patch(ServiceType.KIOSK, url, body, needAuthorization);
     }
 
     public <T> ExtractableResponse<Response> patch(String url, T body) {
@@ -98,9 +170,26 @@ public class RestAssuredHelper {
         return patch(url, null, needAuthorization);
     }
 
-    // DELETE 메서드 편의 메서드들
+    // DELETE 메서드 편의 메서드들 (ServiceType 포함)
+    public <T> ExtractableResponse<Response> delete(ServiceType serviceType, String url, T body, boolean needAuthorization) {
+        return execute(serviceType, HttpMethod.DELETE, url, body, needAuthorization);
+    }
+
+    public <T> ExtractableResponse<Response> delete(ServiceType serviceType, String url, T body) {
+        return delete(serviceType, url, body, false);
+    }
+
+    public ExtractableResponse<Response> delete(ServiceType serviceType, String url) {
+        return delete(serviceType, url, null, false);
+    }
+
+    public ExtractableResponse<Response> delete(ServiceType serviceType, String url, boolean needAuthorization) {
+        return delete(serviceType, url, null, needAuthorization);
+    }
+
+    // DELETE 메서드 편의 메서드들 (기본값: KIOSK)
     public <T> ExtractableResponse<Response> delete(String url, T body, boolean needAuthorization) {
-        return execute(HttpMethod.DELETE, url, body, needAuthorization);
+        return delete(ServiceType.KIOSK, url, body, needAuthorization);
     }
 
     public <T> ExtractableResponse<Response> delete(String url, T body) {

@@ -1,5 +1,7 @@
 package com.camping.tests.steps;
 
+import com.camping.tests.helper.ServiceContext;
+import com.camping.tests.helper.ServiceType;
 import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
 import io.restassured.RestAssured;
@@ -15,7 +17,9 @@ public class Hooks {
 
     @Before
     public void beforeScenario() {
-        AdminStepContext.setSpec();
+        ServiceContext.initializeRequestSpec(ServiceType.ADMIN);
+        ServiceContext.initializeRequestSpec(ServiceType.KIOSK);
+        ServiceContext.initializeRequestSpec(ServiceType.RESERVATION);
     }
 
     @BeforeAll
@@ -27,13 +31,13 @@ public class Hooks {
                 .header("Content-Type", "application/json")
                 .body(params)
                 .when()
-                .post("http://localhost:18082/auth/login")
+                .post(ServiceType.ADMIN.getBaseUrl() + "/auth/login")
                 .then()
                 .statusCode(200)
                 .extract();
 
         String accessToken = response.jsonPath().get("accessToken");
-        AdminStepContext.setAccessToken(accessToken);
+        ServiceContext.setAccessToken(ServiceType.ADMIN, accessToken);
         log.info("로그인 완료");
     }
 }
