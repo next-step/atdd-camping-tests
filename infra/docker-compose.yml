@@ -12,9 +12,39 @@ services:
       - PAYMENTS_SECRET_KEY=test_sk_dummy
     restart: unless-stopped
     networks:
-      - kiosk-network
+      - camping-network
+
+  admin:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-admin
+    image: camping-admin:latest
+    container_name: camping-admin
+    ports:
+      - "8081:8081"
+    environment:
+      # Admin service configuration
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    networks:
+      - camping-network
+
+  reservation:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-reservation
+    image: camping-reservation:latest
+    container_name: camping-reservation
+    ports:
+      - "8082:8082"
+    environment:
+      # Reservation service configuration
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+    networks:
+      - camping-network
 
 networks:
-  kiosk-network:
+  camping-network:
     driver: bridge
-    name: camping-kiosk-network
+    name: camping-network
