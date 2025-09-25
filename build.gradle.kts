@@ -39,11 +39,10 @@ tasks.test {
 
 tasks.register("cloneRepository") {
     group = "setup"
-    description = "Clone atdd-camping-kiosk repository"
+    description = "Clone required repositories"
 
     doLast {
         val reposDir = file("repos")
-        val targetDir = file("repos/atdd-camping-kiosk")
 
         // repos 디렉토리 생성
         if (!reposDir.exists()) {
@@ -51,29 +50,40 @@ tasks.register("cloneRepository") {
             println("Created repos directory")
         }
 
-        // 이미 클론된 경우 스킵
-        if (targetDir.exists()) {
-            println("Repository already exists at ${targetDir.absolutePath}")
-            return@doLast
-        }
-
-        // Git 클론 실행
-        val gitCloneCommand = listOf(
-            "git", "clone",
-            "https://github.com/next-step/atdd-camping-kiosk.git",
-            "repos/atdd-camping-kiosk"
+        // 클론할 저장소 목록
+        val repositories = listOf(
+            "https://github.com/next-step/atdd-camping-kiosk.git" to "repos/atdd-camping-kiosk",
+            "https://github.com/next-step/atdd-camping-admin.git" to "repos/atdd-camping-admin",
+            "https://github.com/next-step/atdd-camping-reservation.git" to "repos/atdd-camping-reservation"
         )
 
-        val process = ProcessBuilder(gitCloneCommand)
-            .directory(projectDir)
-            .inheritIO()
-            .start()
+        repositories.forEach { (repoUrl, targetPath) ->
+            val targetDir = file(targetPath)
 
-        val exitCode = process.waitFor()
-        if (exitCode == 0) {
-            println("Successfully cloned repository to repos/atdd-camping-kiosk")
-        } else {
-            throw GradleException("Failed to clone repository (exit code: $exitCode)")
+            // 이미 클론된 경우 스킵
+            if (targetDir.exists()) {
+                println("Repository already exists at ${targetDir.absolutePath}")
+                return@forEach
+            }
+
+            // Git 클론 실행
+            val gitCloneCommand = listOf(
+                "git", "clone",
+                repoUrl,
+                targetPath
+            )
+
+            val process = ProcessBuilder(gitCloneCommand)
+                .directory(projectDir)
+                .inheritIO()
+                .start()
+
+            val exitCode = process.waitFor()
+            if (exitCode == 0) {
+                println("Successfully cloned repository to $targetPath")
+            } else {
+                throw GradleException("Failed to clone repository $repoUrl (exit code: $exitCode)")
+            }
         }
     }
 }
