@@ -120,12 +120,8 @@ public abstract class BaseApiClient implements ApiClient {
         throw new IllegalArgumentException("Unsupported HTTP method: " + method);
     }
 
-    // 기존 메서드들 (하위 호환성을 위해 유지)
-    // get, post, put, patch, delete 메서드들 - 기존 사용법 지원
-    public <T> ExtractableResponse<Response> get(String url) {
-        return getDirectly(url);
-    }
-
+    // 기존 메서드들 - 하위 호환성을 위해 유지 (기존 코드에서 사용할 수 있도록)
+    // get, post, put, patch, delete with parameters - 기본 오버로드
     public <T> ExtractableResponse<Response> get(String url, boolean needAuthorization) {
         return getDirectly(url, needAuthorization);
     }
@@ -136,10 +132,6 @@ public abstract class BaseApiClient implements ApiClient {
 
     public <T> ExtractableResponse<Response> get(String url, T body, boolean needAuthorization) {
         return getDirectly(url, body, needAuthorization);
-    }
-
-    public <T> ExtractableResponse<Response> post(String url) {
-        return postDirectly(url);
     }
 
     public <T> ExtractableResponse<Response> post(String url, boolean needAuthorization) {
@@ -154,10 +146,6 @@ public abstract class BaseApiClient implements ApiClient {
         return postDirectly(url, body, needAuthorization);
     }
 
-    public <T> ExtractableResponse<Response> put(String url) {
-        return putDirectly(url);
-    }
-
     public <T> ExtractableResponse<Response> put(String url, boolean needAuthorization) {
         return putDirectly(url, needAuthorization);
     }
@@ -170,10 +158,6 @@ public abstract class BaseApiClient implements ApiClient {
         return putDirectly(url, body, needAuthorization);
     }
 
-    public <T> ExtractableResponse<Response> patch(String url) {
-        return patchDirectly(url);
-    }
-
     public <T> ExtractableResponse<Response> patch(String url, boolean needAuthorization) {
         return patchDirectly(url, needAuthorization);
     }
@@ -184,10 +168,6 @@ public abstract class BaseApiClient implements ApiClient {
 
     public <T> ExtractableResponse<Response> patch(String url, T body, boolean needAuthorization) {
         return patchDirectly(url, body, needAuthorization);
-    }
-
-    public <T> ExtractableResponse<Response> delete(String url) {
-        return deleteDirectly(url);
     }
 
     public <T> ExtractableResponse<Response> delete(String url, boolean needAuthorization) {

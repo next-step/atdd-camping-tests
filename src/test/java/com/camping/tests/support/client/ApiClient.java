@@ -21,8 +21,28 @@ public interface ApiClient {
         ExtractableResponse<Response> execute();
     }
 
-    // 기존 메서드들 (하위 호환성)
+    // 기존 메서드들 (하위 호환성) - 매개변수 있는 오버로드
+    <T> ExtractableResponse<Response> get(String url, boolean needAuthorization);
+    <T> ExtractableResponse<Response> get(String url, T body);
+    <T> ExtractableResponse<Response> get(String url, T body, boolean needAuthorization);
 
+    <T> ExtractableResponse<Response> post(String url, boolean needAuthorization);
+    <T> ExtractableResponse<Response> post(String url, T body);
+    <T> ExtractableResponse<Response> post(String url, T body, boolean needAuthorization);
+
+    <T> ExtractableResponse<Response> put(String url, boolean needAuthorization);
+    <T> ExtractableResponse<Response> put(String url, T body);
+    <T> ExtractableResponse<Response> put(String url, T body, boolean needAuthorization);
+
+    <T> ExtractableResponse<Response> patch(String url, boolean needAuthorization);
+    <T> ExtractableResponse<Response> patch(String url, T body);
+    <T> ExtractableResponse<Response> patch(String url, T body, boolean needAuthorization);
+
+    <T> ExtractableResponse<Response> delete(String url, boolean needAuthorization);
+    <T> ExtractableResponse<Response> delete(String url, T body);
+    <T> ExtractableResponse<Response> delete(String url, T body, boolean needAuthorization);
+
+    // Directly 메서드들 - 내부 구현용
     <T> ExtractableResponse<Response> getDirectly(String url);
     <T> ExtractableResponse<Response> getDirectly(String url, boolean needAuthorization);
     <T> ExtractableResponse<Response> getDirectly(String url, T body);
