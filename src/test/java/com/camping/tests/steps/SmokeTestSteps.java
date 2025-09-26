@@ -1,10 +1,7 @@
 package com.camping.tests.steps;
 
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-import static com.camping.tests.helper.Assertions.assertSuccessResponse;
-import static com.camping.tests.helper.Assertions.assertUnauthorziedResponse;
 import static com.camping.tests.helper.Context.*;
 import static com.camping.tests.helper.RequestSender.get;
 
@@ -26,16 +23,6 @@ public class SmokeTestSteps {
     @When("예약 홈페이지 {string}에 요청을 보낸다")
     public void 예약홈페이지에요청을보낸다(String endpoint) {
         lastResponse = get(reservationBaseUrl, endpoint);
-    }
-
-    @Then("200 응답을 받는다")
-    public void 응답을받는다_200() {
-        assertSuccessResponse(lastResponse);
-    }
-
-    @Then("401 응답을 받는다")
-    public void 응답을받는다_401() {
-        assertUnauthorziedResponse(lastResponse);
     }
 }
 
