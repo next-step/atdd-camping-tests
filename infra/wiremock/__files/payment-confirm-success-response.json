@@ -1,0 +1,11 @@
+{
+  "paymentKey": "{{jsonPath request.body '$.paymentKey'}}",
+  "orderId": "{{jsonPath request.body '$.orderId'}}",
+  "method": "CARD",
+  "approvedAt": "2024-01-15T10:30:00+09:00",
+  "totalAmount": 100,
+  "status": "DONE",
+  "receipt": {
+    "url": "https://dashboard.tosspayments.com/receipt/{{jsonPath request.body '$.orderId'}}"
+  }
+}

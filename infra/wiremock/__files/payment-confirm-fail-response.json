@@ -1,0 +1,9 @@
+{
+  "paymentKey": null,
+  "orderId": "{{jsonPath request.body '$.orderId'}}",
+  "method": "CARD",
+  "approvedAt": null,
+  "totalAmount": 100,
+  "status": "FAILED",
+  "receipt": null
+}

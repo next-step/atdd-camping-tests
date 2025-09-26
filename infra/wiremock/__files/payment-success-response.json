@@ -1,5 +1,5 @@
 {
   "paymentKey": "tgen_20240101120000_ABCD1234",
-  "orderId": "order_{{randomValue length=8 type='ALPHANUMERIC'}}",
+  "orderId": "ord_87654321-4321-4321-4321-210987654321",
   "status": "READY"
 }

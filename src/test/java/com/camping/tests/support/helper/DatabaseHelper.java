@@ -17,21 +17,8 @@ public class DatabaseHelper {
     private static final String H2_USER = "sa";
     private static final String H2_PASSWORD = "";
 
-    private static final List<String> COMMON_TABLES = Arrays.asList(
-        "RESERVATION",
-        "PAYMENT",
-        "PRODUCT",
-        "USER",
-        "AUTH_TOKEN",
-        "CAMP_SITE"
-    );
-
     public static void cleanupAllDatabases() {
         log.info("Cleaning up shared H2 database (admindb)");
-        cleanupDatabase();
-    }
-
-    public static void cleanupDatabase(ServiceType serviceType) {
         cleanupDatabase();
     }
 
@@ -47,6 +34,9 @@ public class DatabaseHelper {
             // Drop all tables
             dropAllTables(statement);
 
+            // Reset sequences for auto-increment columns
+            resetSequences(statement);
+
             // Re-enable foreign key constraints
             statement.execute("SET REFERENTIAL_INTEGRITY TRUE");
 
@@ -60,7 +50,7 @@ public class DatabaseHelper {
     private static void dropAllTables(Statement statement) throws SQLException {
         // Get all table names from information_schema
         var resultSet = statement.executeQuery(
-            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC'"
+                "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC'"
         );
 
         while (resultSet.next()) {
@@ -74,6 +64,35 @@ public class DatabaseHelper {
         }
 
         resultSet.close();
+    }
+
+    private static void resetSequences(Statement statement) throws SQLException {
+        log.info("Resetting sequences...");
+
+        // Get all sequences from information_schema
+        var sequenceResultSet = statement.executeQuery(
+                "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = 'PUBLIC'"
+        );
+
+        int sequenceCount = 0;
+        while (sequenceResultSet.next()) {
+            String sequenceName = sequenceResultSet.getString("SEQUENCE_NAME");
+            sequenceCount++;
+            try {
+                statement.execute("ALTER SEQUENCE " + sequenceName + " RESTART WITH 1");
+                log.info("Reset sequence: {}", sequenceName);
+            } catch (SQLException e) {
+                log.warn("Failed to reset sequence: {} - {}", sequenceName, e.getMessage());
+            }
+        }
+
+        if (sequenceCount == 0) {
+            log.info("No sequences found to reset");
+        } else {
+            log.info("Reset {} sequences", sequenceCount);
+        }
+
+        sequenceResultSet.close();
     }
 
     public static void initializeDatabase(ServiceType serviceType) {
@@ -90,10 +109,6 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             log.error("Failed to initialize database admindb - {}", e.getMessage());
         }
-    }
-
-    public static boolean isDatabaseAccessible(ServiceType serviceType) {
-        return isDatabaseAccessible();
     }
 
     public static boolean isDatabaseAccessible() {
