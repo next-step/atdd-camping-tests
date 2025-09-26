@@ -188,6 +188,10 @@ object DockerConfig {
             url = "https://github.com/mdy0501/atdd-camping-reservation.git",
             branch = "mdy0501-test"
         ),
-
+        Repo(
+            name = "atdd-camping-payments",
+            url = "https://github.com/mdy0501/atdd-camping-payments.git",
+            branch = "mdy0501-test"
+        ),
     )
 }
