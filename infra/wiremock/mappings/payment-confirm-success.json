@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"amount\": 10000}",
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "paymentKey": "pay_123456789",
+      "orderId": "ord_mock",
+      "method": "CARD",
+      "approvedAt": "2024-01-01T10:00:00",
+      "totalAmount": 10000
+    }
+  }
+}

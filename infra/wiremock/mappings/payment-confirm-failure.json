@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"amount\": 12345}",
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 500,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "error": "Internal Server Error"
+    }
+  }
+}
