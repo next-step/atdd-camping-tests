@@ -2,6 +2,8 @@ package com.camping.tests.helper;
 
 import io.restassured.response.Response;
 
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -10,6 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class Assertions {
     
     public static void assertSuccessResponse(Response response) {
-        assertEquals(200, response.getStatusCode());
+        assertEquals(SC_OK, response.getStatusCode());
+    }
+
+    public static void assertUnauthorziedResponse(Response response) {
+        assertEquals(SC_UNAUTHORIZED, response.getStatusCode());
     }
 }

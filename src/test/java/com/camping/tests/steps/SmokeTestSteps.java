@@ -4,6 +4,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import static com.camping.tests.helper.Assertions.assertSuccessResponse;
+import static com.camping.tests.helper.Assertions.assertUnauthorziedResponse;
 import static com.camping.tests.helper.Context.*;
 import static com.camping.tests.helper.RequestSender.get;
 
@@ -28,8 +29,13 @@ public class SmokeTestSteps {
     }
 
     @Then("200 응답을 받는다")
-    public void 응답을받는다() {
+    public void 응답을받는다_200() {
         assertSuccessResponse(lastResponse);
+    }
+
+    @Then("401 응답을 받는다")
+    public void 응답을받는다_401() {
+        assertUnauthorziedResponse(lastResponse);
     }
 }
 
