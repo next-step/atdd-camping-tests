@@ -5,25 +5,42 @@ import io.restassured.response.Response;
 import io.restassured.http.ContentType;
 
 public class CommonContext {
-    private static final ThreadLocal<RequestSpecification> requestSpec = new ThreadLocal<>();
-    private static String adminToken;
+    private static final ThreadLocal<CommonContext> context = new ThreadLocal<>();
+
+    private RequestSpecification requestSpec;
+    private String adminToken;
     private Response response;
 
-    public static RequestSpecification getRequestSpec() {
-        RequestSpecification spec = requestSpec.get();
-        return spec.contentType(ContentType.JSON);
+    public static CommonContext getInstance() {
+        CommonContext ctx = context.get();
+        if (ctx == null) {
+            ctx = new CommonContext();
+            context.set(ctx);
+        }
+        return ctx;
     }
 
-    public static void setRequestSpec(RequestSpecification spec) {
-        requestSpec.set(spec);
+    public static void clear() {
+        context.remove();
     }
 
-    public static String getAdminToken() {
+    public RequestSpecification getRequestSpec() {
+        if (requestSpec == null) {
+            throw new IllegalStateException("RequestSpecification is not initialized");
+        }
+        return requestSpec.contentType(ContentType.JSON);
+    }
+
+    public void setRequestSpec(RequestSpecification spec) {
+        this.requestSpec = spec;
+    }
+
+    public String getAdminToken() {
         return adminToken;
     }
 
-    public static void setAdminToken(String adminToken) {
-        CommonContext.adminToken = adminToken;
+    public void setAdminToken(String adminToken) {
+        this.adminToken = adminToken;
     }
 
     public Response getResponse() {
