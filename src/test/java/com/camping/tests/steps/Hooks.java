@@ -4,7 +4,7 @@ import com.camping.tests.helper.Context;
 import io.cucumber.java.Before;
 import io.restassured.RestAssured;
 
-import static com.camping.tests.helper.BASE_URL.*;
+import static com.camping.tests.helper.BaseUrl.*;
 import static com.camping.tests.helper.Context.*;
 
 /**
