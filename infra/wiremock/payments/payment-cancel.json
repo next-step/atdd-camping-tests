@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/v1/payments/.*/cancel"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "canceledAt": "2024-01-01T00:00:00Z",
+      "status": "CANCELED"
+    }
+  }
+}
