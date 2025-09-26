@@ -8,6 +8,9 @@ import io.restassured.response.Response;
 public class Context {
     
     public static String kioskBaseUrl;
+    public static String adminBaseUrl;
+    public static String reservationBaseUrl;
+
     public static Response lastResponse;
     public static long requestStartTime;
     
