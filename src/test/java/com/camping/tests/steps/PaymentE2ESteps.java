@@ -29,9 +29,7 @@ public class PaymentE2ESteps {
 
     @그리고("키오스크에 금액 {int}원으로 결제 확정을 요청한다")
     public void 키오스크에_금액_원으로_결제_확정을_요청한다(int amount) {
-        Response response = kioskClient.confirmPaymentWithAmount(amount);
-        assertEquals(200, response.statusCode());
-        assertEquals("true", CommonContext.isSuccess);
+        kioskClient.confirmPaymentWithAmount(amount);
     }
 
     @그러면("결제가 성공이어야 한다")
@@ -43,5 +41,6 @@ public class PaymentE2ESteps {
     @그러면("결제가 실패이어야 한다")
     public void 결제가_실패이어야_한다() {
         assertEquals("false", CommonContext.isSuccess);
+        assertEquals("결제 또는 확정 실패", CommonContext.responseMessage);
     }
 }

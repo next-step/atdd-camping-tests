@@ -12,12 +12,14 @@ import java.util.Map;
 public class KioskClient {
     private static final String KIOSK_BASE_URL = "http://localhost:18081";
 
-    public void getProducts() {
-        CommonContext.lastResponse = RestAssured.given()
+    public Response getProducts() {
+        Response response = RestAssured.given()
             .contentType(ContentType.JSON)
             .when().get(KIOSK_BASE_URL + "/api/products")
             .then().log().all()
             .extract().response();
+
+        return response;
     }
 
     public Response createPayment() {
@@ -31,7 +33,7 @@ public class KioskClient {
         body.put("items", List.of(item));
         body.put("paymentMethod", "CARD"); // or "CASH"
 
-        Response response = RestAssured.given()
+        Response response = RestAssured.given().log().all()
             .contentType(ContentType.JSON)
             .body(body)
             .when().post(KIOSK_BASE_URL + "/api/payments")
@@ -41,9 +43,6 @@ public class KioskClient {
         CommonContext.paymentKey = response.jsonPath().getString("paymentKey");
         CommonContext.isSuccess = response.jsonPath().getString("success");
         CommonContext.responseMessage = response.jsonPath().getString("message");
-//        System.out.println("# orderId: " + CommonContext.orderId);
-//        System.out.println("# paymentKey: " + CommonContext.paymentKey);
-//        System.out.println("# isSuccess: " + CommonContext.isSuccess);
         return response;
     }
 
@@ -69,7 +68,6 @@ public class KioskClient {
             .when().post(KIOSK_BASE_URL + "/api/payments/confirm")
             .then().log().all()
             .extract().response();
-        System.out.println("# confirm : " + response.asString()); // TODO: 주석 제거
         CommonContext.isSuccess = response.jsonPath().getString("success");
         CommonContext.responseMessage = response.jsonPath().getString("message");
         return response;
@@ -82,7 +80,7 @@ public class KioskClient {
         Map<String, Object> item = new HashMap<>();
         item.put("productId", 1L);
         item.put("productName", "ProductA");
-        item.put("unitPrice", amount);
+        item.put("unitPrice", 1000);
         item.put("quantity", 1);
 
         Map<String, Object> body = new HashMap<>();
@@ -97,10 +95,8 @@ public class KioskClient {
             .when().post(KIOSK_BASE_URL + "/api/payments/confirm")
             .then().log().all()
             .extract().response();
-//        System.out.println("# confirm(response with amount) : " + CommonContext.lastResponse.asString());
         CommonContext.isSuccess = response.jsonPath().getString("success");
         CommonContext.responseMessage = response.jsonPath().getString("message");
-//        System.out.println("# confirm11 : " + CommonContext.lastResponse.asString());
         return response;
     }
 }

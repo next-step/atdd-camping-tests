@@ -33,7 +33,7 @@ public class SmokeSteps {
     @Then("성공 응답을 받는다")
     public void 성공응답을받는다() {
         CommonContext.lastResponse.then().statusCode(200);
-        System.out.println("성공 응답을 받았다");
+        System.out.println("# 성공 응답을 받는다");
     }
 }
 

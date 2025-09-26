@@ -9,7 +9,7 @@ public class ProductE2ESteps {
 
     @만약("상품 목록을 조회하기 위해 상품목록조회 API를 호출한다")
     public void 상품목록을_조회하기_위해_상품목록조회_API를_호출한다() {
-        kioskClient.getProducts();
+        CommonContext.lastResponse = kioskClient.getProducts();
         System.out.println("# response: " + CommonContext.lastResponse.asString());
     }
 }

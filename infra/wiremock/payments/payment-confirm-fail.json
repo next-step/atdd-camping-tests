@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm",
+    "bodyPatterns": [
+      { "matchesJsonPath": "$[?(@.amount == 12345)]" }
+    ]
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "AMOUNT_MISMATCH",
+      "message": "Amount does not match"
+    }
+  }
+}
