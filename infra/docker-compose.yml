@@ -10,6 +10,8 @@ services:
     environment:
       # Payment service configuration
       - PAYMENTS_SECRET_KEY=test_sk_dummy
+      # Override admin service URL for Docker environment
+      - KIOSK_ADMIN_BASE-URL=http://camping-admin:8081
     restart: unless-stopped
     networks:
       - camping-network

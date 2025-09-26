@@ -20,7 +20,7 @@ public class IntegrationTestSteps {
     public void 관리자시스템에서토큰을받았다() {
         var request = getLoginRequest();
         lastResponse = post(adminBaseUrl, "/auth/login", request);
-        authToken = lastResponse.jsonPath().getString("token");
+        authToken = lastResponse.jsonPath().getString("accessToken");
     }
 
     @When("키오스크 상품 목록을 조회한다")
