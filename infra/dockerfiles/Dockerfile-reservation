@@ -17,6 +17,9 @@ RUN chmod +x gradlew
 # Copy source code
 COPY repos/atdd-camping-reservation/src/ src/
 
+# Remove data.sql to prevent conflicts with shared DB initialization
+RUN rm -f src/main/resources/data.sql
+
 # Build the application
 RUN ./gradlew clean build -x test --no-daemon
 
