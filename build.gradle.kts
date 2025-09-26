@@ -36,6 +36,7 @@ dependencies {
 
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
+    testImplementation("com.h2database:h2:2.2.224")
 
     // JWT (jjwt)
     implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")

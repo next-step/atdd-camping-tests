@@ -13,6 +13,7 @@ fun cloneRepoIfNotExists(repoName: String, repoUrl: String) {
 tasks.register<Exec>("appUp") {
     group = "docker"
     description = "Start application services"
+    dependsOn("infraUp")
     workingDir = file("infra")
 
     doFirst {
@@ -29,4 +30,5 @@ tasks.register<Exec>("appDown") {
     description = "Stop application services"
     workingDir = file("infra")
     commandLine("docker", "compose", "down")
+    finalizedBy("infraDown")
 }

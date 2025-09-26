@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.paymentKey"
+      },
+      {
+        "matchesJsonPath": "$.orderId"
+      },
+      {
+        "matchesJsonPath": "$.amount"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "payment-success-response.json"
+  },
+  "priority": 2
+}
