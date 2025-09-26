@@ -1,4 +1,4 @@
-package com.camping.tests.steps;
+package com.camping.tests.support.hook;
 
 import com.camping.tests.support.helper.ServiceContext;
 import com.camping.tests.support.helper.ServiceType;
@@ -15,7 +15,7 @@ import java.util.Map;
 public class Hooks {
     private static final Logger log = LoggerFactory.getLogger(Hooks.class);
 
-    @Before
+    @Before(order = 2)
     public void beforeScenario() {
         ServiceContext.initializeRequestSpec(ServiceType.ADMIN);
         ServiceContext.initializeRequestSpec(ServiceType.KIOSK);
@@ -24,12 +24,16 @@ public class Hooks {
 
     @BeforeAll
     public static void initAccessToken() {
+        DatabaseHook.setupDatabasesBeforeAllTests();
+
         log.info("로그인 시도중...");
         Map<String, String> params = Map.of("username", "admin", "password", "admin123");
         String adminAccessToken = requestAdminLogin(params);
         ServiceContext.setAccessToken(ServiceType.ADMIN, adminAccessToken);
         ServiceContext.setAccessToken(ServiceType.KIOSK, adminAccessToken);
         log.info("로그인 완료");
+
+        DatabaseHook.verifyDatabaseConnectivity();
     }
 
     private static String requestAdminLogin(Map<String, String> params) {
