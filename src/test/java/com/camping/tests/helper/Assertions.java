@@ -16,11 +16,40 @@ import static org.junit.jupiter.api.Assertions.*;
 public class Assertions {
     
     public static void assertSuccessResponse(Response response) {
-        assertEquals(SC_OK, response.getStatusCode());
+        // RestAssured의 기본 검증 기능을 사용하여 더 상세한 오류 메시지 제공
+        try {
+            assertEquals(SC_OK, response.getStatusCode(),
+                    String.format("예상: 200 OK, 실제: %d %s\n응답 본문: %s",
+                            response.getStatusCode(),
+                            response.getStatusLine(),
+                            response.getBody().asString()));
+        } catch (AssertionError e) {
+            // 검증 실패 시 응답 정보를 추가로 출력
+            System.err.println("=== 응답 상태 검증 실패 ===");
+            System.err.println("예상 상태: 200 OK");
+            System.err.println("실제 상태: " + response.getStatusCode() + " " + response.getStatusLine());
+            System.err.println("응답 본문: " + response.getBody().asString());
+            System.err.println("========================");
+            throw e;
+        }
     }
 
     public static void assertUnauthorziedResponse(Response response) {
-        assertEquals(SC_UNAUTHORIZED, response.getStatusCode());
+        try {
+            assertEquals(SC_UNAUTHORIZED, response.getStatusCode(),
+                    String.format("예상: 401 Unauthorized, 실제: %d %s\n응답 본문: %s",
+                            response.getStatusCode(),
+                            response.getStatusLine(),
+                            response.getBody().asString()));
+        } catch (AssertionError e) {
+            // 검증 실패 시 응답 정보를 추가로 출력
+            System.err.println("=== 응답 상태 검증 실패 ===");
+            System.err.println("예상 상태: 401 Unauthorized");
+            System.err.println("실제 상태: " + response.getStatusCode() + " " + response.getStatusLine());
+            System.err.println("응답 본문: " + response.getBody().asString());
+            System.err.println("========================");
+            throw e;
+        }
     }
 
     public static void hasGivenFieldsAsNotNullInArray(Response response, String... fields) {
