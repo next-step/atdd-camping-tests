@@ -1,4 +1,4 @@
-tasks.register("setupWiremockStubs") {
+tasks.register("verifyWiremockStubs") {
     group = "wiremock"
     description = "Setup and verify WireMock stubs"
 
