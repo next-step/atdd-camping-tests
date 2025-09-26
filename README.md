@@ -35,6 +35,17 @@
 ### Reservation 애플리케이션 (in docker-compose.yml)
 - port: 8082
 
+## 문서 가이드
+
+인수 테스트를 작성하기 전에 상황에 맞는 문서를 참조하세요
+
+**[문서 참조 가이드](docs/documentation-reference-guide.md)** - 어떤 문서를 언제 참조해야 하는지 안내
+
+### 주요 문서들
+- **[테스트 인프라 설정](docs/test-infra-setup.md)** - 환경 구성 및 인프라 관리
+- **[인수 테스트 코딩 가이드](docs/acceptance-test-coding-guide.md)** - 테스트 코드 작성 방법론
+- **[API 분석 가이드](docs/api-analysis-guide.md)** - 서비스 API 분석 및 통합
+
 ## 테스트 실행
 
 ```bash
