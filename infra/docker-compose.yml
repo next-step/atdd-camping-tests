@@ -9,9 +9,7 @@ services:
   kiosk:
     build:
       context: ../repo/atdd-camping-kiosk
-      dockerfile: ../../dockerfiles/Dockerfile-kiosk
-      args:
-        - JAR_FILE=build/libs/*.jar
+      dockerfile: Dockerfile
     image: atdd/kiosk:latest
     container_name: atdd-kiosk
     ports:
@@ -26,9 +24,7 @@ services:
   admin:
     build:
       context: ../repo/atdd-camping-admin
-      dockerfile: ../../dockerfiles/Dockerfile-admin
-      args:
-        - JAR_FILE=build/libs/*.jar
+      dockerfile: Dockerfile
     image: atdd/admin:latest
     container_name: atdd-admin
     ports:
@@ -45,9 +41,7 @@ services:
   reservation:
     build:
       context: ../repo/atdd-camping-reservation
-      dockerfile: ../../dockerfiles/Dockerfile-reservation
-      args:
-        - JAR_FILE=build/libs/*.jar
+      dockerfile: Dockerfile
     image: atdd/reservation:latest
     container_name: atdd-reservation
     ports:
