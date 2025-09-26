@@ -10,17 +10,59 @@ services:
     environment:
       # Payment service configuration
       - PAYMENTS_SECRET_KEY=test_sk_dummy
+      # Override admin service URL for Docker environment
+      - KIOSK_ADMIN_BASE-URL=http://camping-admin:8081
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     networks:
-      - kiosk-network
+      - atdd-net
+    depends_on:
+      - admin
+
+  admin:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-admin
+    image: camping-admin:latest
+    container_name: camping-admin
+    ports:
+      - "8081:8081"
+    environment:
+      # Admin service configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      # Database configuration for shared DB
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    restart: unless-stopped
+    networks:
+      - atdd-net
+
+  reservation:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/Dockerfile-reservation
+    image: camping-reservation:latest
+    container_name: camping-reservation
+    ports:
+      - "8082:8082"
+    environment:
+      # Reservation service configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      # Database configuration for shared DB
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    restart: unless-stopped
+    networks:
+      - atdd-net
 
 networks:
-  kiosk-network:
-    driver: bridge
-    name: camping-kiosk-network
+  atdd-net:
+    name: atdd-net
+    external: true

@@ -1,0 +1,53 @@
+# Multi-stage build for Spring Boot application
+FROM gradle:8.5-jdk17 AS builder
+
+# Set working directory
+WORKDIR /app
+
+# Copy gradle files first for better caching
+COPY repos/atdd-camping-admin/gradle/ gradle/
+COPY repos/atdd-camping-admin/gradlew .
+COPY repos/atdd-camping-admin/gradlew.bat .
+COPY repos/atdd-camping-admin/build.gradle .
+COPY repos/atdd-camping-admin/settings.gradle .
+
+# Make gradlew executable
+RUN chmod +x gradlew
+
+# Copy source code
+COPY repos/atdd-camping-admin/src/ src/
+
+# Remove data.sql to prevent conflicts with shared DB initialization
+RUN rm -f src/main/resources/data.sql
+
+# Build the application
+RUN ./gradlew clean build -x test --no-daemon
+
+# Runtime stage
+FROM eclipse-temurin:17-jre
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN groupadd -r admin && useradd -r -g admin admin
+
+# Set working directory
+WORKDIR /app
+
+# Copy the built jar from builder stage
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Change ownership to non-root user
+RUN chown -R admin:admin /app
+USER admin
+
+# Expose port (admin typically runs on 8081)
+EXPOSE 8081
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8081/actuator/health || exit 1
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

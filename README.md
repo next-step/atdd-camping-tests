@@ -6,41 +6,62 @@
 ## 구동방식
 1. `./gradlew build` 실행시 `/repos` 하위에 `atdd-camping-kiosk` 프로젝트가 클론됩니다.
 
-## 🐳 Kiosk 애플리케이션 실행
+## 🐳 캠핑 서비스 애플리케이션 실행
 
-### 🚀 자동화 스크립트 사용 (권장)
+### 🚀 통합 서비스 관리 스크립트 사용 (권장)
 
-프로젝트 루트에서 제공되는 자동화 스크립트를 사용하여 간편하게 애플리케이션을 관리할 수 있습니다.
+프로젝트 루트에서 제공되는 `manage-services.sh` 스크립트를 사용하여 모든 서비스를 통합 관리할 수 있습니다.
 
-#### 애플리케이션 시작
+#### 도움말 확인
+
 ```bash
-./start-kiosk.sh
+./manage-services.sh help
 ```
+
+#### 모든 서비스 관리
+```bash
+# 모든 서비스 시작 (kiosk, admin, reservation)
+./manage-services.sh start
+
+# 모든 서비스 상태 확인
+./manage-services.sh status
+
+# 모든 서비스 중지
+./manage-services.sh stop
+
+# 모든 서비스 재시작
+./manage-services.sh restart
+
+# 모든 서비스 로그 확인
+./manage-services.sh logs
+```
+
+#### 개별 서비스 관리
+
+```bash
+# 키오스크 서비스만 시작
+./manage-services.sh start kiosk
+
+# 관리자 서비스 상태 확인
+./manage-services.sh status admin
+
+# 예약 서비스 중지
+./manage-services.sh stop reservation
+
+# 키오스크 로그 확인
+./manage-services.sh logs kiosk
+
+# 관리자 서비스 재시작
+./manage-services.sh restart admin
+```
+
+#### 주요 기능
 - 이미지 자동 빌드 (`--build` 포함)
 - Docker Compose로 서비스 시작
 - 헬스체크 자동 확인
 - 애플리케이션 접속 가능 여부 테스트
 - 상세한 상태 정보 출력
-
-#### 상태 확인
-```bash
-./status-kiosk.sh
-```
-- Docker Compose 서비스 상태 확인
-- 컨테이너 리소스 사용량 모니터링
-- 애플리케이션 접속 테스트 (http://localhost:8080)
-- 최근 로그 (50줄) 출력
-- 네트워크 상태 확인
-- 유용한 명령어 가이드
-
-#### 애플리케이션 종료
-```bash
-./stop-kiosk.sh
-```
-- Docker Compose 서비스 중지
-- 컨테이너 및 볼륨 제거
-- 네트워크 정리
-- 완전한 정리 상태 검증
+- 컬러 출력으로 가독성 향상
 
 ### 🔧 수동 Docker Compose 사용
 
@@ -69,6 +90,8 @@ docker compose -f infra/docker-compose.yml down -v
 
 애플리케이션이 성공적으로 시작되면 다음 URL에서 접속할 수 있습니다:
 - **키오스크 웹 애플리케이션**: http://localhost:8080
+- **관리자 웹 애플리케이션**: http://localhost:8081
+- **예약 웹 애플리케이션**: http://localhost:8082
 
 ## 🧪 테스트 실행
 
@@ -77,9 +100,16 @@ docker compose -f infra/docker-compose.yml down -v
 ./gradlew test
 ```
 
-### 키오스크 Smoke 테스트만 실행
+### 개별 서비스 테스트 실행
 ```bash
+# 키오스크 테스트만 실행
 ./gradlew test --tests "*kiosk*"
+
+# 관리자 테스트만 실행
+./gradlew test --tests "*admin*"
+
+# 예약 테스트만 실행
+./gradlew test --tests "*reservation*"
 ```
 
 ### 테스트 보고서 확인
@@ -92,67 +122,92 @@ docker compose -f infra/docker-compose.yml down -v
 전체 환경을 처음부터 설정하고 테스트를 실행하는 방법:
 
 ```bash
-# 1. 키오스크 애플리케이션 시작
-./start-kiosk.sh
+# 1. 모든 서비스 시작
+./manage-services.sh start
 
-# 2. 애플리케이션 상태 확인
-./status-kiosk.sh
+# 2. 서비스 상태 확인
+./manage-services.sh status
 
 # 3. 테스트 실행
 ./gradlew test
 
 # 4. 정리 (선택사항)
-./stop-kiosk.sh
+./manage-services.sh stop
+```
+
+### 개별 서비스만 사용하는 경우:
+
+```bash
+# 키오스크만 시작하여 테스트
+./manage-services.sh start kiosk
+./gradlew test --tests "*kiosk*"
+./manage-services.sh stop kiosk
 ```
 
 ### ✅ 성공 기준
 
 프로젝트가 올바르게 설정되었다면 다음 조건들이 모두 만족되어야 합니다:
 
-1. **로컬에서 kiosk 컨테이너가 기동되어 접근 가능하다**
-   - `./status-kiosk.sh` 실행 시 애플리케이션이 정상 응답
-   - http://localhost:8080 접속 가능
+1. **로컬에서 모든 서비스 컨테이너가 기동되어 접근 가능하다**
+    - `./manage-services.sh status` 실행 시 모든 애플리케이션이 정상 응답
+    - http://localhost:8080 (키오스크) 접속 가능
+    - http://localhost:8081 (관리자) 접속 가능
+    - http://localhost:8082 (예약) 접속 가능
 
-2. **atdd-tests의 kiosk smoke 테스트가 200 응답으로 통과한다**
+2. **atdd-tests의 모든 smoke 테스트가 200 응답으로 통과한다**
    - `./gradlew test` 실행 시 모든 테스트 통과
-   - 키오스크 애플리케이션 응답성 확인 시나리오 성공
+   - 각 서비스별 애플리케이션 응답성 확인 시나리오 성공
 
 3. **구성과 실행 방법이 자동화되어 있고, 재현이 가능하다**
-   - 자동화 스크립트 (`start-kiosk.sh`, `stop-kiosk.sh`, `status-kiosk.sh`) 제공
+    - 통합 자동화 스크립트 (`manage-services.sh`) 제공
    - 이 README.md 문서를 통한 완전한 재현 가능
 
 ### 🛠️ 문제 해결
 
 #### 포트 충돌 문제
 ```bash
-# 8080 포트를 사용하는 프로세스 확인
-lsof -i :8080
+# 사용 중인 포트 확인
+lsof -i :8080  # 키오스크
+lsof -i :8081  # 관리자
+lsof -i :8082  # 예약
 
-# 해당 프로세스 종료 후 재시작
-./stop-kiosk.sh
-./start-kiosk.sh
+# 모든 서비스 중지 후 재시작
+./manage-services.sh stop
+./manage-services.sh start
 ```
 
 #### 로그 확인
 ```bash
-# 실시간 로그 확인
-docker logs camping-kiosk -f
+# 모든 서비스 로그 확인
+./manage-services.sh logs
 
-# 전체 로그 확인
-docker logs camping-kiosk
+# 개별 서비스 로그 확인
+./manage-services.sh logs kiosk
+./manage-services.sh logs admin
+./manage-services.sh logs reservation
+
+# 실시간 로그 확인 (Docker 명령어 직접 사용)
+docker logs camping-kiosk -f
+docker logs camping-admin -f
+docker logs camping-reservation -f
 ```
 
 #### 컨테이너 접속
 ```bash
-# 컨테이너 내부 접속
+# 각 컨테이너 내부 접속
 docker exec -it camping-kiosk /bin/bash
+docker exec -it camping-admin /bin/bash
+docker exec -it camping-reservation /bin/bash
 ```
 
 #### 테스트 실패 시
 ```bash
 # 애플리케이션이 준비되지 않은 경우
-./status-kiosk.sh  # 상태 확인
-./start-kiosk.sh   # 재시작
+./manage-services.sh status  # 상태 확인
+./manage-services.sh restart # 재시작
+
+# 개별 서비스 재시작
+./manage-services.sh restart kiosk
 
 # 테스트 재실행
 ./gradlew clean test
