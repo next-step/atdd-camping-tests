@@ -6,6 +6,7 @@
 set -e  # 에러 발생 시 스크립트 중단
 
 COMPOSE_FILE="infra/docker-compose.yml"
+INFRA_COMPOSE_FILE="infra/docker-compose-infra.yml"
 
 # 서비스 설정 함수
 get_service_info() {
@@ -43,8 +44,8 @@ show_help() {
     echo "사용법: $0 <명령> [서비스명]"
     echo ""
     echo "명령:"
-    echo "  start     서비스 시작 (이미지 빌드 포함)"
-    echo "  stop      서비스 중지 및 정리"
+    echo "  start     서비스 시작 (공용 DB 자동 시작 포함)"
+    echo "  stop      서비스 중지 및 정리 (all 시 공용 DB도 중지)"
     echo "  status    서비스 상태 확인"
     echo "  restart   서비스 재시작"
     echo "  logs      서비스 로그 확인"
@@ -55,10 +56,16 @@ show_help() {
     echo "  reservation   예약 서비스 (포트: 8082)"
     echo "  all           모든 서비스 (기본값)"
     echo ""
+    echo "📋 주요 특징:"
+    echo "  • 공용 MySQL DB(atdd-db) 자동 관리"
+    echo "  • 서비스 시작 시 DB 초기화 자동 수행"
+    echo "  • 모든 서비스가 공용 네트워크(atdd-net)에서 통신"
+    echo ""
     echo "예시:"
-    echo "  $0 start              # 모든 서비스 시작"
-    echo "  $0 start kiosk        # 키오스크만 시작"
-    echo "  $0 stop admin         # 관리자 서비스만 중지"
+    echo "  $0 start              # 공용 DB + 모든 서비스 시작"
+    echo "  $0 start kiosk        # 공용 DB + 키오스크만 시작"
+    echo "  $0 stop admin         # 관리자 서비스만 중지 (DB는 유지)"
+    echo "  $0 stop all           # 모든 서비스 + 공용 DB 중지"
     echo "  $0 status             # 모든 서비스 상태 확인"
     echo "  $0 logs reservation   # 예약 서비스 로그 확인"
 }
@@ -69,10 +76,72 @@ check_docker() {
         echo -e "${RED}❌ Docker Compose 파일을 찾을 수 없습니다: $COMPOSE_FILE${NC}"
         exit 1
     fi
+    
+    if [ ! -f "$INFRA_COMPOSE_FILE" ]; then
+        echo -e "${RED}❌ 인프라 Compose 파일을 찾을 수 없습니다: $INFRA_COMPOSE_FILE${NC}"
+        exit 1
+    fi
 
     if ! docker info >/dev/null 2>&1; then
         echo -e "${RED}❌ Docker가 실행되지 않았습니다. Docker Desktop을 시작해주세요.${NC}"
         exit 1
+    fi
+}
+
+# 인프라 DB 시작
+start_infra_db() {
+    echo -e "${BLUE}🗄️  공용 인프라 DB를 시작합니다...${NC}"
+    
+    # 인프라 DB가 이미 실행 중인지 확인
+    if docker ps | grep -q "atdd-db"; then
+        echo -e "${GREEN}✅ 인프라 DB가 이미 실행 중입니다.${NC}"
+        return 0
+    fi
+    
+    # 인프라 DB 시작
+    docker compose -f "$INFRA_COMPOSE_FILE" up -d
+    
+    echo -e "${YELLOW}⏳ DB 초기화를 기다리는 중...${NC}"
+    
+    # DB가 준비될 때까지 대기 (최대 60초)
+    local max_attempts=60
+    local attempt=1
+    
+    while [ $attempt -le $max_attempts ]; do
+        if docker exec atdd-db mysqladmin ping -h127.0.0.1 -uroot -psecret --silent 2>/dev/null; then
+            echo -e "${GREEN}✅ DB가 준비되었습니다!${NC}"
+            break
+        fi
+        
+        if [ $attempt -eq $max_attempts ]; then
+            echo -e "${RED}❌ DB 시작 시간이 초과되었습니다.${NC}"
+            exit 1
+        fi
+        
+        echo "   시도 $attempt/$max_attempts - DB 시작 대기 중..."
+        sleep 2
+        ((attempt++))
+    done
+    
+    # DB 초기화
+    echo -e "${YELLOW}🔧 DB 초기화 중...${NC}"
+    if [ -f "infra/db/init.sql" ]; then
+        docker exec -i atdd-db mysql -uroot -psecret atdd < infra/db/init.sql 2>/dev/null || true
+        echo -e "${GREEN}✅ DB 초기화가 완료되었습니다.${NC}"
+    else
+        echo -e "${YELLOW}⚠️  초기화 스크립트를 찾을 수 없습니다: infra/db/init.sql${NC}"
+    fi
+}
+
+# 인프라 DB 중지
+stop_infra_db() {
+    echo -e "${BLUE}🗄️  공용 인프라 DB를 중지합니다...${NC}"
+    
+    if docker ps | grep -q "atdd-db"; then
+        docker compose -f "$INFRA_COMPOSE_FILE" down -v
+        echo -e "${GREEN}✅ 인프라 DB가 중지되었습니다.${NC}"
+    else
+        echo -e "${YELLOW}⚠️  인프라 DB가 실행되지 않았습니다.${NC}"
     fi
 }
 
@@ -103,6 +172,10 @@ start_services() {
     echo -e "${BLUE}🚀 ATDD 캠핑 서비스를 시작합니다...${NC}"
     echo "📁 작업 디렉토리: $(pwd)"
     echo "📄 Compose 파일: $COMPOSE_FILE"
+    echo ""
+
+    # 인프라 DB 먼저 시작
+    start_infra_db
     echo ""
 
     if [ "$target_service" = "all" ]; then
@@ -150,6 +223,8 @@ stop_services() {
     if [ "$target_service" = "all" ]; then
         echo -e "${YELLOW}🔄 모든 서비스 중지 및 컨테이너 제거 중...${NC}"
         docker compose -f "$COMPOSE_FILE" down -v
+        echo ""
+        stop_infra_db
         echo -e "${GREEN}✅ 모든 서비스가 성공적으로 종료되었습니다!${NC}"
     else
         echo -e "${YELLOW}🔄 $target_service 서비스 중지 중...${NC}"
