@@ -2,6 +2,15 @@ networks:
   atdd-net:
     external: true
 
+x-db-env: &db_env
+  SPRING_DATASOURCE_URL: "jdbc:mysql://atdd-db:3306/atdd?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul"
+  SPRING_DATASOURCE_USERNAME: "root"
+  SPRING_DATASOURCE_PASSWORD: "secret"
+
+x-wait-db: &wait_db_cmd >
+  sh -c "until nc -z atdd-db 3306; do echo 'waiting db...'; sleep 2; done;
+         java $JAVA_OPTS -jar /app/app.jar"
+
 services:
   kiosk:
     build:
@@ -20,13 +29,8 @@ services:
       KIOSK_ADMIN_AUTH_PASSWORD: "admin123"
       KIOSK_ADMIN_AUTH_COOKIE_NAME: "AUTH_TOKEN"
       RESERVATION_BASE_URL: "http://reservation:8080"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://atdd-db:3306/atdd?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul"
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: "secret"
-
-    command: >
-      sh -c "until nc -z atdd-db 3306; do echo 'waiting db...'; sleep 2; done;
-             java $JAVA_OPTS -jar /app/app.jar"
+      <<: *db_env
+    command: *wait_db_cmd
 
   admin:
     build:
@@ -41,12 +45,8 @@ services:
       JAVA_OPTS: "-Xms256m -Xmx512m"
       RESERVATION_BASE_URL: "http://reservation:8080"
       KIOSK_BASE_URL: "http://kiosk:8080"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://atdd-db:3306/atdd?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul"
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: "secret"
-    command: >
-      sh -c "until nc -z atdd-db 3306; do echo 'waiting db...'; sleep 2; done;
-             java $JAVA_OPTS -jar /app/app.jar"
+      <<: *db_env
+    command: *wait_db_cmd
 
   reservation:
     build:
@@ -61,9 +61,5 @@ services:
       JAVA_OPTS: "-Xms256m -Xmx512m"
       ADMIN_BASE_URL: "http://admin:8080"
       KIOSK_BASE_URL: "http://kiosk:8080"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://atdd-db:3306/atdd?useSSL=false&characterEncoding=utf8&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul"
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: "secret"
-    command: >
-      sh -c "until nc -z atdd-db 3306; do echo 'waiting db...'; sleep 2; done;
-             java $JAVA_OPTS -jar /app/app.jar"
+      <<: *db_env
+    command: *wait_db_cmd
