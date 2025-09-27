@@ -1,0 +1,14 @@
+{
+  "priority": 19,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm",
+    "headers": { "Authorization": { "equalTo": "Basic dGVzdF9za19kdW1teTo=" } },
+    "bodyPatterns": [ { "matchesJsonPath": "$[?(@.amount == 99999)]" } ]
+  },
+  "response": {
+    "status": 409,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "code": "AMOUNT_MISMATCH", "message": "amount/orderId mismatch" }
+  }
+}

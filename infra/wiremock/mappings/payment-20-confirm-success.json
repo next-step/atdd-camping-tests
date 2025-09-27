@@ -1,0 +1,30 @@
+{
+  "priority": 20,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm",
+    "headers": {
+      "Authorization": { "equalTo": "Basic dGVzdF9za19kdW1teTo=" },
+      "Content-Type": { "contains": "application/json" }
+    },
+    "bodyPatterns": [
+      { "matchesJsonPath": "$.paymentKey" },
+      { "matchesJsonPath": "$.orderId" },
+      { "matchesJsonPath": "$.amount" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "paymentKey": "{{jsonPath request.body '$.paymentKey'}}",
+      "orderId": "{{jsonPath request.body '$.orderId'}}",
+      "method": "CARD",
+      "approvedAt": "2024-01-01T12:34:56Z",
+      "totalAmount": "{{jsonPath request.body '$.amount'}}",
+      "status": "APPROVED",
+      "receipt": { "url": "https://pay.local/receipts/{{jsonPath request.body '$.paymentKey'}}" }
+    },
+    "transformers": ["response-template"]
+  }
+}
