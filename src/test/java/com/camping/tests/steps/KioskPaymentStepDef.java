@@ -10,6 +10,7 @@ import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import java.util.List;
 import java.util.Map;
+import org.apache.http.HttpStatus;
 
 public class KioskPaymentStepDef {
 
@@ -44,7 +45,7 @@ public class KioskPaymentStepDef {
 
     @Then("결제가 성공하며 결제 금액은 {int}원이다")
     public void 결제가성공하며결제금액은원이다(int expectedAmount) {
-        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.SC_OK);
         boolean success = response.jsonPath().getBoolean("success");
         int paid = response.jsonPath().getInt("paidAmount");
         assertThat(success).isTrue();
@@ -53,12 +54,8 @@ public class KioskPaymentStepDef {
 
     @Then("결제가 실패한다.")
     public void 결제가실패한다() {
-        int sc = response.statusCode();
-        if (sc >= 200 && sc < 300) {
-            boolean success = response.jsonPath().getBoolean("success");
-            assertThat(success).isFalse();
-        } else {
-            assertThat(sc).isBetween(400, 599);
-        }
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.SC_OK);
+        boolean success = response.jsonPath().getBoolean("success");
+        assertThat(success).isFalse();
     }
 }
