@@ -1,0 +1,158 @@
+openapi: 3.0.1
+info:
+  title: 캠핑 예약 시스템 - Kiosk Service API
+  description: 키오스크용 상품 조회 및 결제 처리 API
+  contact:
+    name: 개발팀
+    email: dev@camping.com
+  version: 1.0.0
+servers:
+- url: http://localhost:18081
+  description: Kiosk Service
+paths:
+  /api/payments:
+    post:
+      tags:
+      - payment-controller
+      operationId: createPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaymentCreateResult'
+  /api/payments/confirm:
+    post:
+      tags:
+      - payment-controller
+      operationId: confirmPayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentConfirmRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PaymentConfirmResponse'
+  /health:
+    get:
+      tags:
+      - home-controller
+      operationId: health
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+  /api/products:
+    get:
+      tags:
+      - product-controller
+      operationId: list
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+components:
+  schemas:
+    CartItem:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        unitPrice:
+          type: integer
+          format: int32
+        quantity:
+          type: integer
+          format: int32
+        lineTotal:
+          type: integer
+          format: int32
+    PaymentCreateRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        paymentMethod:
+          type: string
+    PaymentCreateResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        paymentKey:
+          type: string
+        orderId:
+          type: string
+        amount:
+          type: integer
+          format: int32
+    PaymentConfirmRequest:
+      type: object
+      properties:
+        paymentKey:
+          type: string
+        orderId:
+          type: string
+        amount:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+    PaymentConfirmResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        transactionId:
+          type: string
+        message:
+          type: string
+        paidAmount:
+          type: integer
+          format: int32
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: integer
+          format: int32
+        stockQuantity:
+          type: integer
+          format: int32
+        productType:
+          type: string

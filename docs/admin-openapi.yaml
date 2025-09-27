@@ -1,0 +1,596 @@
+openapi: 3.0.1
+info:
+  title: 캠핑 예약 시스템 - Admin Service API
+  description: "관리자용 상품, 예약, 캠프사이트 관리 API"
+  contact:
+    name: 개발팀
+    email: dev@camping.com
+  version: 1.0.0
+servers:
+- url: http://localhost:18082
+  description: Admin Service
+tags:
+- name: Authentication
+  description: 인증 관리 API
+- name: Product Management
+  description: 상품 관리 API
+paths:
+  /admin/products/{productId}:
+    put:
+      tags:
+      - Product Management
+      summary: 상품 수정
+      description: 기존 상품 정보를 수정합니다.
+      operationId: updateProduct
+      parameters:
+      - name: productId
+        in: path
+        description: 상품 ID
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+        required: true
+      responses:
+        "404":
+          description: 상품을 찾을 수 없음
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Product'
+        "200":
+          description: 상품 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+      security:
+      - BearerAuth: []
+  /admin/campsites/{campsiteId}:
+    put:
+      tags:
+      - campsite-admin-controller
+      operationId: updateCampsite
+      parameters:
+      - name: campsiteId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Campsite'
+  /auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: 관리자 로그인
+      description: 관리자 또는 키오스크의 인증을 수행하고 JWT 토큰을 발급합니다.
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "401":
+          description: 인증 실패 - 잘못된 사용자명 또는 비밀번호
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Invalid credentials
+        "200":
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /api/sales:
+    get:
+      tags:
+      - sales-controller
+      operationId: listSales
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SalesRecordResponse'
+    post:
+      tags:
+      - sales-controller
+      operationId: processSale
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessSaleRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+  /admin/rentals:
+    get:
+      tags:
+      - rental-admin-controller
+      operationId: getAllRentals
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RentalResponse'
+    post:
+      tags:
+      - rental-admin-controller
+      operationId: createRental
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRentalRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RentalResponse'
+  /admin/products:
+    get:
+      tags:
+      - Product Management
+      summary: 상품 목록 조회
+      description: 모든 상품의 목록을 조회합니다.
+      operationId: getAllProducts
+      responses:
+        "200":
+          description: 상품 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+      security:
+      - BearerAuth: []
+    post:
+      tags:
+      - Product Management
+      summary: 상품 생성
+      description: 새로운 상품을 생성합니다.
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+        required: true
+      responses:
+        "500":
+          description: 서버 오류
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Product'
+        "201":
+          description: 상품 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+      security:
+      - BearerAuth: []
+  /admin/campsites:
+    get:
+      tags:
+      - campsite-admin-controller
+      operationId: getAllCampsites
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Campsite'
+    post:
+      tags:
+      - campsite-admin-controller
+      operationId: createCampsite
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Campsite'
+  /admin/reservations/{reservationId}/status:
+    patch:
+      tags:
+      - reservation-admin-controller
+      operationId: updateReservationStatus
+      parameters:
+      - name: reservationId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ReservationResponse'
+  /admin/rentals/{rentalRecordId}/return:
+    patch:
+      tags:
+      - rental-admin-controller
+      operationId: markAsReturned
+      parameters:
+      - name: rentalRecordId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RentalResponse'
+  /admin/reservations:
+    get:
+      tags:
+      - reservation-admin-controller
+      operationId: getAllReservations
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservationResponse'
+  /admin/reports/revenue/range:
+    get:
+      tags:
+      - revenue-admin-controller
+      operationId: getRangeRevenueReport
+      parameters:
+      - name: from
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/RangeRevenueReportResponse'
+  /admin/reports/revenue/range/entries:
+    get:
+      tags:
+      - revenue-admin-controller
+      operationId: getRangeRevenueEntries
+      parameters:
+      - name: from
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RevenueEntryResponse'
+  /admin/reports/revenue/daily:
+    get:
+      tags:
+      - revenue-admin-controller
+      operationId: getDailyRevenueReport
+      parameters:
+      - name: date
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/DailyRevenueReportResponse'
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        stockQuantity:
+          type: integer
+          format: int32
+        price:
+          type: number
+        productType:
+          type: string
+          enum:
+          - SALE
+          - RENTAL
+    Campsite:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        siteNumber:
+          type: string
+        description:
+          type: string
+        maxPeople:
+          type: integer
+          format: int32
+        reservations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reservation'
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        customerName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        reservationDate:
+          type: string
+          format: date
+        campsite:
+          $ref: '#/components/schemas/Campsite'
+        phoneNumber:
+          type: string
+        status:
+          type: string
+        confirmationCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    LoginRequest:
+      required:
+      - password
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+    ProcessSaleRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SaleItemResponse'
+    SaleItemResponse:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+    CreateRentalRequest:
+      type: object
+      properties:
+        reservationId:
+          type: integer
+          format: int64
+        productId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+    RentalResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        reservationId:
+          type: integer
+          format: int64
+        productId:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        isReturned:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    ReservationResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        customerName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        status:
+          type: string
+        campsiteSiteNumber:
+          type: string
+        reservationDate:
+          type: string
+          format: date
+    SalesRecordResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        productName:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        totalPrice:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    RangeRevenueReportResponse:
+      type: object
+      properties:
+        fromDate:
+          type: string
+          format: date
+        toDate:
+          type: string
+          format: date
+        totalReservationRevenue:
+          type: number
+        totalSalesRevenue:
+          type: number
+        totalRentalRevenue:
+          type: number
+        grandTotalRevenue:
+          type: number
+    RevenueEntryResponse:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - RESERVATION
+          - SALE
+          - RENTAL
+        title:
+          type: string
+        amount:
+          type: number
+        occurredAt:
+          type: string
+          format: date-time
+    DailyRevenueReportResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        totalReservationRevenue:
+          type: number
+        totalSalesRevenue:
+          type: number
+        totalRentalRevenue:
+          type: number
+        grandTotalRevenue:
+          type: number
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: JWT 토큰을 Bearer 형식으로 전송
+      scheme: bearer
+      bearerFormat: JWT

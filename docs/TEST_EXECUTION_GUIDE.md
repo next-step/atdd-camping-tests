@@ -130,16 +130,16 @@ public class CrossServiceScenario {
     public void 예약_승인_워크플로우() {
         // 1단계: RESERVATION 서비스에서 예약 생성 (포트 18083)
         ExtractableResponse<Response> reservation = ApiClientFactory.reservation()
-            .post("/api/reservations", reservationData);
+                .post("/api/reservations", reservationData);
 
         // 2단계: ADMIN 서비스에서 예약 승인 (포트 18082, 인증 필요)
         long reservationId = reservation.jsonPath().getLong("id");
         ApiClientFactory.admin()
-            .patch("/api/admin/reservations/" + reservationId, approvalData, true);
+                .patch("/api/admin/reservations/" + reservationId, approvalData, true);
 
         // 3단계: KIOSK에서 승인된 예약 확인 (포트 18081)
         ExtractableResponse<Response> confirmed = ApiClientFactory.kiosk()
-            .get("/api/reservations/" + reservationId);
+                .get("/api/reservations/" + reservationId);
     }
 }
 ```
@@ -247,9 +247,19 @@ curl http://localhost:18083/actuator/health
 
 ```java
 // 올바른 사용 예시
-ApiClientFactory.kiosk().get("/api/products");              // 키오스크 상품 조회
-ApiClientFactory.admin().get("/api/users", true);           // 관리자 사용자 목록 (인증)
-ApiClientFactory.reservation().post("/api/reservations", data); // 예약 생성
+ApiClientFactory.kiosk().
+
+get("/api/products");              // 키오스크 상품 조회
+ApiClientFactory.
+
+admin().
+
+get("/api/users",true);           // 관리자 사용자 목록 (인증)
+ApiClientFactory.
+
+reservation().
+
+post("/api/reservations",data); // 예약 생성
 
 // 피해야 할 사용법
 // ❌ 직접 RestAssured 사용
