@@ -29,6 +29,8 @@ services:
       KIOSK_ADMIN_AUTH_PASSWORD: "admin123"
       KIOSK_ADMIN_AUTH_COOKIE_NAME: "AUTH_TOKEN"
       RESERVATION_BASE_URL: "http://reservation:8080"
+      KIOSK_PAYMENT_BASE_URL: "http://payments-mock:8080"
+      KIOSK_PAYMENT_SECRET_KEY: "test_sk_dummy"
       <<: *db_env
     command: *wait_db_cmd
 
@@ -63,3 +65,16 @@ services:
       KIOSK_BASE_URL: "http://kiosk:8080"
       <<: *db_env
     command: *wait_db_cmd
+
+  payments-mock:
+    image: wiremock/wiremock:3.13.1
+    container_name: payments-mock
+    networks: [ atdd-net ]
+    ports:
+      - "9090:8080"
+    volumes:
+      - ./wiremock:/home/wiremock
+    command:
+      - "--global-response-templating"
+      - "--verbose"
+
