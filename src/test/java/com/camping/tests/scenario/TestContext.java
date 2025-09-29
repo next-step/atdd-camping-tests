@@ -10,6 +10,7 @@ public class TestContext {
     public static void clear() {
         Product.context.clear();
         Payment.context.clear();
+        Reservation.context.clear();
     }
 
     public static class Product {
@@ -68,6 +69,22 @@ public class TestContext {
 
         public static void 상품_결제_승인_응답(Response 상품_결제_승인_응답) {
             context.put(Key.상품_결제_승인_응답, 상품_결제_승인_응답);
+        }
+    }
+
+    public static class Reservation {
+        private static Map<Key, Object> context = new EnumMap<>(Key.class);
+
+        private enum Key {
+            예약_생성_응답,
+        }
+
+        public static Response 예약_생성_응답() {
+            return (Response) context.get(Key.예약_생성_응답);
+        }
+
+        public static void 예약_생성_응답(Response 예약_생성_응답) {
+            context.put(Key.예약_생성_응답, 예약_생성_응답);
         }
     }
 }

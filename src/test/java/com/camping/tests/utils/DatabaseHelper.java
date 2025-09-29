@@ -21,6 +21,10 @@ public class DatabaseHelper {
         connection.close();
     }
 
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+    }
+
     public static List<String> getAllTableNames() throws SQLException {
         List<String> tableNames = new ArrayList<>();
 
@@ -53,4 +57,5 @@ public class DatabaseHelper {
             statement.execute("SET FOREIGN_KEY_CHECKS = 1");
         }
     }
+
 }
