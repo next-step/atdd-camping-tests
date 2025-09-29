@@ -38,6 +38,45 @@ public enum Service {
 - 환경변수를 통한 동적 URL 설정 가능
 - 로컬 개발 환경의 기본 포트 정보 파악
 
+### 1.3 repos 디렉토리 접근 방법
+
+`repos/` 디렉토리는 기본적으로 gitignore 처리되어 있어 MCP 도구로는 직접 접근이 제한됩니다. 다음 방법들을 사용하여 서비스 소스코드에 접근할 수 있습니다:
+
+**방법 1: Bash 명령어 사용**
+```bash
+# 디렉토리 구조 확인
+ls -la repos/
+
+# 특정 패턴의 파일 찾기
+find repos/ -name "*Controller.java" -type f
+
+# 특정 서비스의 컨트롤러 찾기
+find repos/atdd-camping-admin -name "*Controller.java"
+
+# 소스코드 내용 확인
+cat repos/atdd-camping-admin/src/main/java/com/camping/admin/controller/RentalAdminController.java
+```
+
+**방법 2: Read 도구 사용**
+```bash
+# 절대 경로로 파일 읽기
+/Users/chris8282/dev/atdd/atdd-camping-tests/repos/atdd-camping-admin/src/main/java/com/camping/admin/controller/RentalAdminController.java
+```
+
+**방법 3: 패턴 검색**
+```bash
+# 특정 키워드를 포함한 파일 검색
+grep -r "RentalController" repos/
+grep -r "@PostMapping" repos/atdd-camping-admin/
+```
+
+**주요 서비스별 경로:**
+```
+repos/atdd-camping-admin/src/main/java/com/camping/admin/controller/
+repos/atdd-camping-kiosk/src/main/java/com/camping/kiosk/controller/
+repos/atdd-camping-reservation/src/main/java/com/camping/reservation/controller/
+```
+
 ## 2. SpringBoot Controller 분석 방법
 
 ### 2.1 Controller 파일 위치 찾기
