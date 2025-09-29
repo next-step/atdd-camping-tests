@@ -41,4 +41,8 @@ public class AdminAuthTestSteps {
     public static void 인증_토큰을_저장한다(String authToken) {
         AdminClient.setAuthToken(authToken);
     }
+
+    public static void 관리자로_로그인한다() {
+        어드민으로_로그인이_되어있다();
+    }
 }

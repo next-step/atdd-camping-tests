@@ -77,6 +77,8 @@ public class TestContext {
 
         private enum Key {
             예약_생성_응답,
+            예약_ID,
+            예약_상태_변경_응답,
         }
 
         public static Response 예약_생성_응답() {
@@ -85,6 +87,22 @@ public class TestContext {
 
         public static void 예약_생성_응답(Response 예약_생성_응답) {
             context.put(Key.예약_생성_응답, 예약_생성_응답);
+        }
+
+        public static Long 예약_ID() {
+            return (Long) context.get(Key.예약_ID);
+        }
+
+        public static void 예약_ID(Long 예약_ID) {
+            context.put(Key.예약_ID, 예약_ID);
+        }
+
+        public static Response 예약_상태_변경_응답() {
+            return (Response) context.get(Key.예약_상태_변경_응답);
+        }
+
+        public static void 예약_상태_변경_응답(Response 예약_상태_변경_응답) {
+            context.put(Key.예약_상태_변경_응답, 예약_상태_변경_응답);
         }
     }
 }
