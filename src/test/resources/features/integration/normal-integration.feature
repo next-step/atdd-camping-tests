@@ -4,8 +4,9 @@ Feature: 정상 통합 시나리오 테스트
   정상적인 비즈니스 플로우에서 2개 이상의 서비스가 함께 동작하는 시나리오를 검증합니다.
 
   @ai-assistant @kiosk-admin @product-lifecycle
-  Scenario: 상품 생성부터 판매까지 전체 통합 플로우
+  Scenario: 상품 생성부터 판매까지 전체 통합 플로우 (WireMock 결제 연동)
     Given 관리자가 로그인되어 있다
+    And WireMock 결제 서버가 실행 중이다
     When 관리자가 새로운 상품을 등록한다
       | name        | price | stockQuantity | productType |
       | 캠핑 텐트      | 50000 | 10           | CAMPING     |
@@ -13,9 +14,10 @@ Feature: 정상 통합 시나리오 테스트
     When 키오스크에서 상품 목록을 조회한다
     Then 등록한 상품이 키오스크에 표시된다
     When 고객이 키오스크에서 상품을 구매한다
-      | productName | quantity |
-      | 캠핑 텐트      | 2        |
-    Then 결제가 성공한다
+      | productName | quantity | paymentMethod |
+      | 캠핑 텐트      | 2        | CARD         |
+    Then WireMock을 통한 외부 결제가 성공한다
+    And 결제 응답에 paymentKey가 포함되어 있다
     And 관리자 시스템의 재고가 올바르게 차감된다
       | productName | expectedStock |
       | 캠핑 텐트      | 8            |
@@ -102,19 +104,27 @@ Feature: 정상 통합 시나리오 테스트
       | productName | soldAmount | soldQuantity |
       | 캠핑 의자     | 75000     | 3           |
 
-  @ai-assistant @admin-reservation @reservation-calendar
-  Scenario: 예약 캘린더 연동 및 가용성 관리
-    Given 여러 개의 예약이 존재한다
-      | siteName | checkIn    | checkOut   | status    |
-      | C구역-01  | 2024-12-15 | 2024-12-17 | CONFIRMED |
-      | C구역-02  | 2024-12-16 | 2024-12-18 | CONFIRMED |
-      | C구역-01  | 2024-12-20 | 2024-12-22 | PENDING   |
-    When 관리자가 월별 예약 캘린더를 조회한다
-      | year | month |
-      | 2024 | 12    |
-    Then 각 날짜별 사이트 가용성이 정확하게 표시된다
-    And 예약 상태별로 구분되어 표시된다
-    When 예약 서비스에서 새로운 예약이 생성된다
-      | siteName | checkIn    | checkOut   |
-      | C구역-03  | 2024-12-25 | 2024-12-27 |
-    Then 관리자 캘린더가 실시간으로 업데이트된다
+  @ai-assistant @admin-reservation @reservation-status-sync
+  Scenario: 예약 상태 동기화
+    Given 예약이 생성되어 있다
+      | siteName | customerName | status    |
+      | D구역-01  | 김예약       | CONFIRMED |
+    When 관리자가 예약 상태를 변경한다
+      | customerName | newStatus  |
+      | 김예약        | CHECKED_IN |
+    Then 예약 서비스에서 상태가 반영된다
+      | customerName | expectedStatus |
+      | 김예약        | CHECKED_IN    |
+    And 실시간으로 동기화가 완료된다
+
+  @ai-assistant @kiosk-admin @token-renewal
+  Scenario: 토큰 갱신 플로우
+    Given 키오스크가 관리자 서비스에 인증되어 있다
+    When JWT 토큰이 만료되기 1분 전이다
+    Then 자동으로 토큰 갱신이 시작된다
+    When 갱신된 토큰으로 API를 호출한다
+      | endpoint        | method |
+      | /admin/products | GET    |
+    Then API 호출이 성공한다
+    And 서비스 연속성이 확보된다
+

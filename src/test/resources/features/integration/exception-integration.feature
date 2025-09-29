@@ -122,7 +122,7 @@ Feature: 예외 상황 통합 시나리오 테스트
 
   @ai-assistant @kiosk-admin @transaction-rollback
   Scenario: 트랜잭션 실패 시 롤백 처리
-    Given 고객이 키오스크에서 결제를 시작한다
+    Given 고객이 결제를 시작한다
       | productName | quantity | totalAmount |
       | 백팩         | 1       | 80000      |
     When 결제는 성공하지만 재고 업데이트가 실패한다
@@ -144,7 +144,7 @@ Feature: 예외 상황 통합 시나리오 테스트
       | expectedMessage |
       | 결제 서비스가 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요. |
     And Admin 서비스의 재고는 변경되지 않는다
-    When 고객이 결제를 재시도한다
+    When 고객이 결제를 시작한다
     Then 새로운 결제 세션이 시작된다
 
   @ai-assistant @kiosk-admin @payment-timeout
@@ -210,3 +210,42 @@ Feature: 예외 상황 통합 시나리오 테스트
     Then 올바른 최종 가격이 표시된다
       | productName | expectedPrice |
       | 캠핑테이블    | 45000        |
+
+  @ai-assistant @kiosk-external @payment-gateway-failure
+  Scenario: 결제 게이트웨이 장애 처리 (WireMock)
+    Given 상품이 준비되어 있다
+      | name     | price | stockQuantity |
+      | 등산화    | 150000| 3            |
+    And 고객이 결제를 시도한다
+      | productName | quantity | amount |
+      | 등산화       | 1       | 150000 |
+    Then 결제 시스템 오류가 발생한다
+    And 사용자에게 적절한 안내가 표시된다
+      | expectedMessage |
+      | 결제 시스템에 일시적 문제가 발생했습니다. 잠시 후 다시 시도해주세요. |
+    And 재고는 차감되지 않는다
+      | productName | expectedStock |
+      | 등산화       | 3            |
+    When WireMock 서버가 정상 응답하도록 복구된다
+    And 고객이 재시도한다
+      | productName | quantity | amount |
+      | 등산화       | 1       | 150000 |
+    Then 결제가 성공한다
+    And 재고가 정상 차감된다
+
+  @ai-assistant @kiosk-external @payment-network-partition
+  Scenario: 네트워크 파티션으로 인한 결제 시스템 분리
+    Given 고객이 결제를 시작한다
+      | productName | quantity | amount |
+      | 휴대용가스   | 2       | 8000   |
+    When 키오스크와 결제 시스템 간 네트워크가 단절된다
+    Then 연결 타임아웃이 발생한다
+    And 결제 상태가 불명확하게 된다
+    And 임시 대기 상태로 처리된다
+      | expectedStatus |
+      | PAYMENT_PENDING |
+    When 네트워크가 복구된다
+    And 결제 상태 확인을 재시도한다
+    Then WireMock에서 실제 결제 결과를 확인한다
+    And 결제가 성공했다면 재고를 차감한다
+    And 결제가 실패했다면 재시도 옵션을 제공한다

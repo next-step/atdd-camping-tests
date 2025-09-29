@@ -141,7 +141,7 @@ Feature: 경계 조건 통합 시나리오 테스트
       | field      | expectedMessage        |
       | price      | 가격은 0보다 커야 합니다    |
       | stockQuantity | 재고는 음수일 수 없습니다 |
-    When 키오스크에서 상품을 조회한다
+    When 키오스크에서 상품 목록을 조회한다
     Then 기존 상품 정보가 유지되고 있다
       | name | expectedPrice | expectedStock |
       | 쿨러  | 120000       | 5            |
@@ -160,3 +160,16 @@ Feature: 경계 조건 통합 시나리오 테스트
     Then 인증 오류가 발생한다
     And 자동으로 재인증을 시도한다
     Then 재인증 후 API 호출이 성공한다
+
+  @ai-assistant @kiosk-external @payment-boundary
+  Scenario: 결제 금액 경계값 처리 (WireMock)
+    Given WireMock 결제 서버가 실행 중이다
+    And 상품이 등록되어 있다
+      | name    | price | stockQuantity |
+      | 등반용품 | 25000 | 5            |
+    When 유효하지 않은 금액으로 결제를 요청한다
+    Then 결제가 실패한다
+    And 실패 메시지가 "결제 생성 실패"이다
+    When 정상 금액으로 결제를 요청한다
+    Then 결제가 성공한다
+    And 결제 응답에 paymentKey가 포함되어 있다
