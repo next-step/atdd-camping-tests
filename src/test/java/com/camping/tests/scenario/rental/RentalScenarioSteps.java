@@ -57,4 +57,16 @@ public class RentalScenarioSteps {
             AdminRentalTestSteps.렌탈_상태가_반납완료로_변경되었다(렌탈_반납_응답);
         }
     }
+
+    @Then("{string} 상품의 재고가 {string}개로 감소한다")
+    public void 상품의_재고가_감소한다(String productName, String expectedStock) {
+        var 상품_목록_응답 = AdminProductTestSteps.모든_상품을_조회한다();
+        AdminRentalTestSteps.상품_재고가_확인된다(상품_목록_응답, productName, Integer.parseInt(expectedStock));
+    }
+
+    @Then("{string} 상품의 재고가 {string}개로 복구된다")
+    public void 상품의_재고가_복구된다(String productName, String expectedStock) {
+        var 상품_목록_응답 = AdminProductTestSteps.모든_상품을_조회한다();
+        AdminRentalTestSteps.상품_재고가_확인된다(상품_목록_응답, productName, Integer.parseInt(expectedStock));
+    }
 }

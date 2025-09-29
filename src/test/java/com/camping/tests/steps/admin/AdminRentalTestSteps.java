@@ -77,4 +77,19 @@ public class AdminRentalTestSteps {
         }
         throw new AssertionError("상품을 찾을 수 없습니다: " + productName);
     }
+
+    public static void 상품_재고가_확인된다(Response response, String productName, Integer expectedStock) {
+        response.then().statusCode(HttpStatus.SC_OK);
+
+        Object[] products = response.as(Object[].class);
+        for (Object productObj : products) {
+            Map<String, Object> product = (Map<String, Object>) productObj;
+            if (productName.equals(product.get("name"))) {
+                Integer actualStock = ((Number) product.get("stockQuantity")).intValue();
+                assertThat(actualStock).isEqualTo(expectedStock);
+                return;
+            }
+        }
+        throw new AssertionError("상품을 찾을 수 없습니다: " + productName);
+    }
 }
