@@ -1,12 +1,16 @@
 package com.camping.tests.steps.admin;
 
+import com.camping.tests.RunCucumberTest;
 import com.camping.tests.Service;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.config.ObjectMapperConfig;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+
 import java.util.List;
 
 public class AdminClient {
@@ -18,6 +22,11 @@ public class AdminClient {
             List.of(
                 new RequestLoggingFilter(),
                 new ResponseLoggingFilter()
+            )
+        )
+        .setConfig(
+            new RestAssuredConfig().objectMapperConfig(
+                new ObjectMapperConfig().jackson2ObjectMapperFactory((cls, charset) -> RunCucumberTest.objectMapper)
             )
         )
         .build();

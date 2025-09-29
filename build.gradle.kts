@@ -24,6 +24,9 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
 
+    // Jackson modules
+    testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0")
+
     // JUnit Jupiter
     testImplementation("org.junit.platform:junit-platform-suite:1.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
