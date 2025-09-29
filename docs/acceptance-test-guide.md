@@ -18,6 +18,10 @@
 ### 📍 위치
 ```
 src/test/resources/features/
+├── integration/             # 통합 시나리오 (2개 이상 서비스 연동)
+│   ├── normal-integration.feature    # 정상 통합 시나리오
+│   ├── boundary-integration.feature  # 경계 통합 시나리오
+│   └── exception-integration.feature # 예외 통합 시나리오
 ├── e2e.feature              # 통합 테스트
 ├── payment-e2e.feature      # 결제 E2E 테스트
 └── smoke.feature            # 스모크 테스트
@@ -203,10 +207,13 @@ src/test/java/com/camping/tests/support/fixture/
 ```java
 public class ExampleTestFixture {
 
-    // API 호출 메서드
+    // API 호출 메서드 (빌더 패턴 사용)
     public static ExtractableResponse<Response> API_호출_메서드() {
         ExtractableResponse<Response> response = ApiClientFactory.serviceType()
-            .httpMethod("/api/endpoint", requestBody, needAuth);
+            .httpMethod("/api/endpoint")
+            .body(requestBody)
+            .needAuth()  // 인증이 필요한 경우
+            .execute();
         assertThat(response.statusCode()).isEqualTo(expectedStatusCode);
         return response;
     }
@@ -227,7 +234,9 @@ public class KioskTestFixture {
     // API 호출 메서드
     public static ExtractableResponse<Response> 키오스크_상품_목록_조회() {
         ExtractableResponse<Response> response = ApiClientFactory.kiosk()
-            .get("/api/products", true);  // 인증 필요
+            .get("/api/products")
+            .needAuth()  // 인증 필요
+            .execute();
         assertThat(response.statusCode()).isEqualTo(200);
         return response;
     }
@@ -277,7 +286,9 @@ public class PaymentTestFixture {
 
         // API 호출 (결제는 인증 불필요)
         return ApiClientFactory.kiosk()
-            .post("/api/payments", paymentRequest);
+            .post("/api/payments")
+            .body(paymentRequest)
+            .execute();
     }
 
     public static ExtractableResponse<Response> 유효하지_않은_금액으로_결제_요청() {
@@ -287,7 +298,9 @@ public class PaymentTestFixture {
         );
 
         return ApiClientFactory.kiosk()
-            .post("/api/payments", paymentRequest);
+            .post("/api/payments")
+            .body(paymentRequest)
+            .execute();
     }
 
     // 검증 메서드들
@@ -397,12 +410,12 @@ public class Hooks {
 
 ```java
 // ✅ 인증 필요한 API
-ApiClientFactory.admin().get("/admin/products", true);      // Admin API
-ApiClientFactory.kiosk().get("/api/products", true);        // Kiosk 상품조회
+ApiClientFactory.admin().get("/admin/products").needAuth().execute();      // Admin API
+ApiClientFactory.kiosk().get("/api/products").needAuth().execute();        // Kiosk 상품조회
 
 // 🔓 인증 불필요한 API
-ApiClientFactory.kiosk().post("/api/payments", data);       // 결제 API
-ApiClientFactory.reservation().post("/api/reservations", data); // 예약 API
+ApiClientFactory.kiosk().post("/api/payments").body(data).execute();       // 결제 API
+ApiClientFactory.reservation().post("/api/reservations").body(data).execute(); // 예약 API
 ```
 
 ---
@@ -417,28 +430,30 @@ ApiClient adminClient = ApiClientFactory.admin();        // Admin 서비스
 ApiClient kioskClient = ApiClientFactory.kiosk();        // Kiosk 서비스
 ApiClient reservationClient = ApiClientFactory.reservation(); // Reservation 서비스
 
-// 메서드 체이닝 방식
+// 메서드 체이닝 방식 (빌더 패턴)
 ExtractableResponse<Response> response = ApiClientFactory.admin()
-    .get("/admin/products", true);  // 인증 필요
+    .get("/admin/products")
+    .needAuth()  // 인증 필요
+    .execute();
 ```
 
 ### 🔄 HTTP 메서드 사용
 
 ```java
 // GET 요청
-ApiClientFactory.kiosk().get("/api/products", true);
+ApiClientFactory.kiosk().get("/api/products").needAuth().execute();
 
 // POST 요청
-ApiClientFactory.admin().post("/admin/products", productData, true);
+ApiClientFactory.admin().post("/admin/products").body(productData).needAuth().execute();
 
 // PUT 요청
-ApiClientFactory.admin().put("/admin/products/1", updateData, true);
+ApiClientFactory.admin().put("/admin/products/1").body(updateData).needAuth().execute();
 
 // PATCH 요청
-ApiClientFactory.admin().patch("/admin/reservations/1/status", statusData, true);
+ApiClientFactory.admin().patch("/admin/reservations/1/status").body(statusData).needAuth().execute();
 
-// DELETE 요청
-ApiClientFactory.reservation().delete("/api/reservations/1?confirmationCode=ABC");
+// DELETE 요청 (인증 불필요한 경우)
+ApiClientFactory.reservation().delete("/api/reservations/1?confirmationCode=ABC").execute();
 ```
 
 ---
