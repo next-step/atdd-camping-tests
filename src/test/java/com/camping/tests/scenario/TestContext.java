@@ -10,6 +10,7 @@ public class TestContext {
     public static void clear() {
         Product.context.clear();
         Payment.context.clear();
+        Rental.context.clear();
         Reservation.context.clear();
     }
 
@@ -103,6 +104,49 @@ public class TestContext {
 
         public static void 예약_상태_변경_응답(Response 예약_상태_변경_응답) {
             context.put(Key.예약_상태_변경_응답, 예약_상태_변경_응답);
+        }
+    }
+
+    public static class Rental {
+        private static Map<Key, Object> context = new EnumMap<>(Key.class);
+
+        private enum Key {
+            렌탈_등록_응답,
+            렌탈_반납_응답,
+            렌탈_ID,
+            상품_ID,
+        }
+
+        public static Response 렌탈_등록_응답() {
+            return (Response) context.get(Key.렌탈_등록_응답);
+        }
+
+        public static void 렌탈_등록_응답(Response 렌탈_등록_응답) {
+            context.put(Key.렌탈_등록_응답, 렌탈_등록_응답);
+        }
+
+        public static Response 렌탈_반납_응답() {
+            return (Response) context.get(Key.렌탈_반납_응답);
+        }
+
+        public static void 렌탈_반납_응답(Response 렌탈_반납_응답) {
+            context.put(Key.렌탈_반납_응답, 렌탈_반납_응답);
+        }
+
+        public static Long 렌탈_ID() {
+            return (Long) context.get(Key.렌탈_ID);
+        }
+
+        public static void 렌탈_ID(Long 렌탈_ID) {
+            context.put(Key.렌탈_ID, 렌탈_ID);
+        }
+
+        public static Long 상품_ID() {
+            return (Long) context.get(Key.상품_ID);
+        }
+
+        public static void 상품_ID(Long 상품_ID) {
+            context.put(Key.상품_ID, 상품_ID);
         }
     }
 }

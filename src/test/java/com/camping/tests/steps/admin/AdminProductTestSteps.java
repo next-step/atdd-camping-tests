@@ -31,6 +31,13 @@ public class AdminProductTestSteps {
         response.then().statusCode(HttpStatus.SC_OK);
     }
 
+    // 상품 조회
+    public static Response 모든_상품을_조회한다() {
+        return AdminClient.given()
+            .when().get("/admin/products")
+            .thenReturn();
+    }
+
     // 데이터 변환
     public static AdminProductDetail 상품_정보를_가져온다(Response response) {
         return response.as(AdminProductDetail.class);
