@@ -1,5 +1,10 @@
 {
-  "paymentKey": "tgen_20240101120000_ABCD1234",
-  "orderId": "order_{{randomValue length=8 type='ALPHANUMERIC'}}",
-  "status": "READY"
+  "success": true,
+  "paymentKey": "payment_{{randomValue type='ALPHANUMERIC' length=20}}",
+  "orderId": "order_{{now format='yyyyMMddHHmmss'}}",
+  "amount": "{{request.body jsonPath='$.amount'}}",
+  "method": "CARD",
+  "status": "CONFIRMED",
+  "approvedAt": "{{now format='yyyy-MM-dd HH:mm:ss'}}",
+  "message": "결제가 성공적으로 완료되었습니다."
 }

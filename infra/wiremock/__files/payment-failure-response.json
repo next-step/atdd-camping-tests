@@ -1,5 +1,6 @@
 {
-  "paymentKey": null,
-  "orderId": null,
-  "status": "FAILED"
+  "success": false,
+  "errorCode": "INVALID_AMOUNT",
+  "message": "결제 생성 실패",
+  "details": "결제 금액이 유효하지 않습니다. 0원 이상이어야 합니다."
 }

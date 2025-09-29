@@ -1,24 +1,19 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/v1/payments",
-    "headers": {
-      "Content-Type": {
-        "equalTo": "application/json"
-      }
-    },
+    "url": "/api/external/payment/confirm",
     "bodyPatterns": [
       {
-        "matchesJsonPath": "$[?(@.amount == 0)]"
+        "matchesJsonPath": "$.amount",
+        "equalTo": "0"
       }
     ]
   },
   "response": {
-    "status": 200,
+    "status": 400,
     "headers": {
       "Content-Type": "application/json"
     },
     "bodyFileName": "payment-failure-response.json"
-  },
-  "priority": 1
+  }
 }

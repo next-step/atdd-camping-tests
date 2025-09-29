@@ -1,21 +1,14 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/v1/payments",
+    "url": "/api/external/payment/confirm",
     "headers": {
-      "Content-Type": {
-        "equalTo": "application/json"
-      }
+      "Content-Type": {"equalTo": "application/json"}
     },
     "bodyPatterns": [
       {
-        "matchesJsonPath": "$.paymentKey"
-      },
-      {
-        "matchesJsonPath": "$.orderId"
-      },
-      {
-        "matchesJsonPath": "$.amount"
+        "matchesJsonPath": "$.amount",
+        "doesNotMatch": "0"
       }
     ]
   },
@@ -25,6 +18,5 @@
       "Content-Type": "application/json"
     },
     "bodyFileName": "payment-success-response.json"
-  },
-  "priority": 2
+  }
 }
