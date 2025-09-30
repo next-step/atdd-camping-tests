@@ -50,3 +50,14 @@ tasks.register<Exec>("cloneKioskRepository") {
     }
     commandLine("git", "clone", "--branch", "main", "--single-branch", "https://github.com/next-step/atdd-camping-kiosk", "repos/atdd-camping-kiosk")
 }
+
+tasks.register<Exec>("dockerComposeUp") {
+    description = "Starts the services using Docker Compose in detached mode."
+    commandLine("/usr/local/bin/docker", "compose", "-f", "infra/docker-compose.yml", "up", "--build", "-d")
+}
+
+tasks.register<Exec>("dockerComposeDown") {
+    description = "Stops the services using Docker Compose."
+    commandLine("/usr/local/bin/docker", "compose", "-f", "infra/docker-compose.yml", "down")
+}
+
