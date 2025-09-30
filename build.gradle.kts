@@ -36,3 +36,17 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Exec>("cloneKioskRepository") {
+    description = "Clones the atdd-camping-kiosk repository"
+    if (!file("repos").exists()) {
+        println("create repos directory")
+        file("repos").mkdir()
+    }
+
+    if (file("repos/atdd-camping-kiosk").exists()) {
+        commandLine("git", "-C", "repos/atdd-camping-kiosk", "pull")
+        return@register
+    }
+    commandLine("git", "clone", "--branch", "main", "--single-branch", "https://github.com/next-step/atdd-camping-kiosk", "repos/atdd-camping-kiosk")
+}
