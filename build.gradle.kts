@@ -20,8 +20,8 @@ dependencies {
     testImplementation("io.cucumber:cucumber-junit-platform-engine:$cucumberVersion")
 
     // RestAssured
-    testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    testImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 
     // JUnit Jupiter
     testImplementation("org.junit.platform:junit-platform-suite:1.10.0")
@@ -39,91 +39,82 @@ tasks.test {
 }
 
 // Kiosk Infrastructure Tasks
+val kioskRepoDir = file("repos/atdd-camping-kiosk")
+val adminRepoDir = file("repos/atdd-camping-admin")
+val reservationRepoDir = file("repos/atdd-camping-reservation")
+val composeProject = "atdd-infra"
+val composeFile = "infra/docker-compose.yml"
+
+fun dockerCompose(vararg args: String) = listOf("docker", "compose", "-p", composeProject, "-f", composeFile) + args
+
+fun createCloneTasks(
+    prefix: String,
+    repoDir: File,
+    repoUrl: String,
+) {
+    tasks.register<Exec>("${prefix}CloneNew") {
+        group = "infra"
+        description = "Clone $prefix repository (if not exists)"
+        onlyIf { !repoDir.resolve(".git").exists() }
+        commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1", repoUrl, repoDir.absolutePath)
+    }
+
+    tasks.register<Exec>("${prefix}Fetch") {
+        group = "infra"
+        description = "Fetch $prefix repository updates"
+        onlyIf { repoDir.resolve(".git").exists() }
+        workingDir = repoDir
+        commandLine("git", "fetch", "origin", "main")
+    }
+
+    tasks.register<Exec>("${prefix}Switch") {
+        group = "infra"
+        description = "Switch to main branch"
+        dependsOn("${prefix}Fetch")
+        onlyIf { repoDir.resolve(".git").exists() }
+        workingDir = repoDir
+        commandLine("git", "switch", "main")
+    }
+
+    tasks.register<Exec>("${prefix}Pull") {
+        group = "infra"
+        description = "Pull latest changes"
+        dependsOn("${prefix}Switch")
+        onlyIf { repoDir.resolve(".git").exists() }
+        workingDir = repoDir
+        commandLine("git", "pull", "--rebase")
+    }
+
+    tasks.register("${prefix}Clone") {
+        group = "infra"
+        description = "Clone or update $prefix repository"
+        dependsOn("${prefix}CloneNew", "${prefix}Pull")
+        doLast { println("[OK] $prefix repo synced.") }
+    }
+}
+
+createCloneTasks("kiosk", kioskRepoDir, "https://github.com/next-step/atdd-camping-kiosk")
+createCloneTasks("admin", adminRepoDir, "https://github.com/next-step/atdd-camping-admin")
+createCloneTasks("reservation", reservationRepoDir, "https://github.com/next-step/atdd-camping-reservation")
+
 tasks.register<Exec>("kioskCheckDocker") {
     group = "infra"
     description = "Check Docker daemon is running"
     commandLine("docker", "info")
 }
 
-tasks.register<Exec>("kioskCloneNew") {
+tasks.register("cloneAll") {
     group = "infra"
-    description = "Clone kiosk repository (if not exists)"
-
-    onlyIf {
-        !file("repos/atdd-camping-kiosk/.git").exists()
-    }
-
-    commandLine(
-        "git", "clone",
-        "--branch", "main",
-        "--single-branch",
-        "--depth", "1",
-        "https://github.com/next-step/atdd-camping-kiosk",
-        "repos/atdd-camping-kiosk"
-    )
-}
-
-tasks.register<Exec>("kioskFetch") {
-    group = "infra"
-    description = "Fetch kiosk repository updates"
-
-    onlyIf {
-        file("repos/atdd-camping-kiosk/.git").exists()
-    }
-
-    workingDir = file("repos/atdd-camping-kiosk")
-    commandLine("git", "fetch", "origin", "main")
-}
-
-tasks.register<Exec>("kioskSwitch") {
-    group = "infra"
-    description = "Switch to main branch"
-    dependsOn("kioskFetch")
-
-    onlyIf {
-        file("repos/atdd-camping-kiosk/.git").exists()
-    }
-
-    workingDir = file("repos/atdd-camping-kiosk")
-    commandLine("git", "switch", "main")
-}
-
-tasks.register<Exec>("kioskPull") {
-    group = "infra"
-    description = "Pull latest changes"
-    dependsOn("kioskSwitch")
-
-    onlyIf {
-        file("repos/atdd-camping-kiosk/.git").exists()
-    }
-
-    workingDir = file("repos/atdd-camping-kiosk")
-    commandLine("git", "pull", "--rebase")
-}
-
-tasks.register("kioskClone") {
-    group = "infra"
-    description = "Clone or update kiosk repository"
-    dependsOn("kioskCloneNew", "kioskPull")
-
-    doLast {
-        println("[OK] kiosk repo synced.")
-    }
+    description = "Clone or update all repositories (admin, reservation, kiosk)"
+    dependsOn("adminClone", "reservationClone", "kioskClone")
 }
 
 tasks.register<Exec>("kioskBuild") {
     group = "infra"
     description = "Build kiosk JAR"
     dependsOn("kioskClone")
-
-    doFirst {
-        val gradlewPath = file("repos/atdd-camping-kiosk/gradlew")
-        if (gradlewPath.exists()) {
-            gradlewPath.setExecutable(true)
-        }
-    }
-
-    workingDir = file("repos/atdd-camping-kiosk")
+    doFirst { kioskRepoDir.resolve("gradlew").takeIf { it.exists() }?.setExecutable(true) }
+    workingDir = kioskRepoDir
     commandLine("./gradlew", "clean", "build", "-x", "test", "--warning-mode", "all")
 }
 
@@ -131,36 +122,20 @@ tasks.register<Exec>("kioskComposeUp") {
     group = "infra"
     description = "Start kiosk via docker compose"
     dependsOn("kioskBuild")
-
     workingDir = projectDir
-    commandLine(
-        "docker", "compose",
-        "-p", "atdd-infra",
-        "-f", "infra/docker-compose.yml",
-        "up", "-d", "--build", "--remove-orphans"
-    )
+    commandLine(dockerCompose("up", "-d", "--build", "--remove-orphans"))
 }
 
 tasks.register<Exec>("kioskStatus") {
     group = "infra"
     description = "Show kiosk container status"
-    commandLine(
-        "docker", "compose",
-        "-p", "atdd-infra",
-        "-f", "infra/docker-compose.yml",
-        "ps"
-    )
+    commandLine(dockerCompose("ps"))
 }
 
 tasks.register<Exec>("kioskLogs") {
     group = "infra"
     description = "Show kiosk logs"
-    commandLine(
-        "docker", "compose",
-        "-p", "atdd-infra",
-        "-f", "infra/docker-compose.yml",
-        "logs", "kiosk", "--tail=100"
-    )
+    commandLine(dockerCompose("logs", "kiosk", "--tail=100"))
     isIgnoreExitValue = true
 }
 
@@ -168,43 +143,23 @@ tasks.register("kioskUp") {
     group = "infra"
     description = "Clone, build, and start kiosk service via docker compose"
     dependsOn("kioskCheckDocker", "kioskComposeUp", "kioskStatus", "kioskLogs")
-
-    doLast {
-        println("[OK] kiosk up.")
-    }
+    doLast { println("[OK] kiosk up.") }
 }
 
 tasks.register<Exec>("kioskDown") {
     group = "infra"
     description = "Stop kiosk compose and remove volumes"
-    commandLine(
-        "docker", "compose",
-        "-f", "infra/docker-compose.yml",
-        "down", "-v"
-    )
-
-    doLast {
-        println("[OK] kiosk down.")
-    }
+    commandLine(dockerCompose("down", "-v"))
+    doLast { println("[OK] kiosk down.") }
 }
 
 tasks.register<Test>("testSmoke") {
     group = "verification"
-    description = "Run smoke tests (Cucumber features)"
+    description = "Run smoke tests"
     useJUnitPlatform()
-
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
-
-    filter {
-        includeTestsMatching("com.camping.tests.RunCucumberTest")
-    }
-
-    doFirst {
-        println("[INFO] Running smoke tests...")
-    }
-
-    doLast {
-        println("[OK] Smoke tests completed.")
-    }
+    filter { includeTestsMatching("com.camping.tests.RunCucumberTest") }
+    doFirst { println("[INFO] Running smoke tests...") }
+    doLast { println("[OK] Smoke tests completed.") }
 }
