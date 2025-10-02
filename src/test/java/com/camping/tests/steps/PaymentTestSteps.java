@@ -2,7 +2,7 @@ package com.camping.tests.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.camping.tests.context.CommonContext;
+import com.camping.tests.context.CommonContextHolder;
 import com.camping.tests.helpers.KioskPaymentApiHelper;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -12,8 +12,8 @@ public class PaymentTestSteps {
     private String paymentKey;
     private String orderId;
 
-    private CommonContext context() {
-        return CommonContext.getInstance();
+    private CommonContextHolder context() {
+        return CommonContextHolder.getInstance();
     }
 
     @When("키오스크에 결제 생성을 요청한다")

@@ -6,7 +6,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.And;
 import io.restassured.response.Response;
-import com.camping.tests.context.CommonContext;
+import com.camping.tests.context.CommonContextHolder;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +17,8 @@ public class E2ETestSteps {
         this.kioskBaseUrl = System.getProperty("KIOSK_BASE_URL");
     }
 
-    private CommonContext context() {
-        return CommonContext.getInstance();
+    private CommonContextHolder context() {
+        return CommonContextHolder.getInstance();
     }
 
     @When("키오스크 서비스의 상품 목록을 조회한다")
