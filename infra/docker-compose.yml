@@ -18,6 +18,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=secret
+      - KIOSK_ADMIN_BASE_URL=http://admin:8080
     networks:
       - atdd-net
     healthcheck:
