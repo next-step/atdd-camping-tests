@@ -1,0 +1,8 @@
+# language: ko
+기능: Kiosk 서비스 Smoke Test
+
+  시나리오: Kiosk 헬스 체크
+    만약 "Kiosk" 서비스의 "/"에 요청을 보낸다
+    그러면 성공 응답을 받는다
+
+

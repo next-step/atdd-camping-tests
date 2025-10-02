@@ -49,24 +49,6 @@ services:
       start_period: 30s
 
   # Admin Service
-  admin-db:
-    image: mysql:8.0
-    container_name: admin-db
-    environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=admin
-      - MYSQL_ROOT_HOST=%
-    ports:
-      - "13307:3306"
-    networks:
-      - atdd-net
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
-
   admin:
     build:
       context: ../repos/atdd-camping-admin
@@ -77,14 +59,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
-      - SPRING_DATASOURCE_URL=jdbc:mysql://admin-db:3306/admin
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=secret
     networks:
       - atdd-net
-    depends_on:
-      admin-db:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s
@@ -93,24 +69,6 @@ services:
       start_period: 30s
 
   # Reservation Service
-  reservation-db:
-    image: mysql:8.0
-    container_name: reservation-db
-    environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=reservation
-      - MYSQL_ROOT_HOST=%
-    ports:
-      - "13308:3306"
-    networks:
-      - atdd-net
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
-
   reservation:
     build:
       context: ../repos/atdd-camping-reservation
@@ -121,14 +79,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
-      - SPRING_DATASOURCE_URL=jdbc:mysql://reservation-db:3306/reservation
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=secret
     networks:
       - atdd-net
-    depends_on:
-      reservation-db:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 10s

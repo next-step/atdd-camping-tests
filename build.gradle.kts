@@ -118,10 +118,34 @@ tasks.register<Exec>("kioskBuild") {
     commandLine("./gradlew", "clean", "build", "-x", "test", "--warning-mode", "all")
 }
 
+tasks.register<Exec>("adminBuild") {
+    group = "infra"
+    description = "Build admin JAR"
+    dependsOn("adminClone")
+    doFirst { adminRepoDir.resolve("gradlew").takeIf { it.exists() }?.setExecutable(true) }
+    workingDir = adminRepoDir
+    commandLine("./gradlew", "clean", "build", "-x", "test", "--warning-mode", "all")
+}
+
+tasks.register<Exec>("reservationBuild") {
+    group = "infra"
+    description = "Build reservation JAR"
+    dependsOn("reservationClone")
+    doFirst { reservationRepoDir.resolve("gradlew").takeIf { it.exists() }?.setExecutable(true) }
+    workingDir = reservationRepoDir
+    commandLine("./gradlew", "clean", "build", "-x", "test", "--warning-mode", "all")
+}
+
+tasks.register("buildAll") {
+    group = "infra"
+    description = "Build all service JARs"
+    dependsOn("kioskBuild", "adminBuild", "reservationBuild")
+}
+
 tasks.register<Exec>("kioskComposeUp") {
     group = "infra"
-    description = "Start kiosk via docker compose"
-    dependsOn("kioskBuild")
+    description = "Start all services via docker compose"
+    dependsOn("buildAll")
     workingDir = projectDir
     commandLine(dockerCompose("up", "-d", "--build", "--remove-orphans"))
 }
