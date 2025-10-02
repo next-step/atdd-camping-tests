@@ -39,9 +39,9 @@ public class SampleSteps {
 
     @Then("성공 응답을 받는다")
     public void 성공응답을받는다() {
-        // 최대 60초, 1초 간격으로 재시도
+        // 최대 15초, 1초 간격으로 재시도
         Awaitility.await()
-                .atMost(Duration.ofSeconds(60))
+                .atMost(Duration.ofSeconds(15))
                 .pollInterval(Duration.ofSeconds(1))
                 .ignoreExceptions() // Connection refused, 404 등 무시하고 재시도
                 .untilAsserted(() -> {
