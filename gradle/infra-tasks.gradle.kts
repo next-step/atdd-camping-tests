@@ -6,6 +6,8 @@ val reservationRepoDir = file("repos/atdd-camping-reservation")
 val composeProject = "atdd-infra"
 val composeFile = "infra/docker-compose.yml"
 
+val targetBranch = project.findProperty("branch")?.toString() ?: "main"
+
 fun dockerCompose(vararg args: String) = listOf("docker", "compose", "-p", composeProject, "-f", composeFile) + args
 
 fun createCloneTasks(
@@ -17,7 +19,8 @@ fun createCloneTasks(
         group = "infra"
         description = "Clone $prefix repository (if not exists)"
         onlyIf { !repoDir.resolve(".git").exists() }
-        commandLine("git", "clone", "--branch", "main", "--single-branch", "--depth", "1", repoUrl, repoDir.absolutePath)
+        commandLine("git", "clone", "--branch", targetBranch, "--single-branch", "--depth", "1", repoUrl, repoDir.absolutePath)
+        doLast { println("[OK] Cloned $prefix on branch: $targetBranch") }
     }
 
     tasks.register<Exec>("${prefix}Fetch") {
@@ -25,16 +28,17 @@ fun createCloneTasks(
         description = "Fetch $prefix repository updates"
         onlyIf { repoDir.resolve(".git").exists() }
         workingDir = repoDir
-        commandLine("git", "fetch", "origin", "main")
+        commandLine("git", "fetch", "origin", targetBranch)
     }
 
     tasks.register<Exec>("${prefix}Switch") {
         group = "infra"
-        description = "Switch to main branch"
+        description = "Switch to target branch"
         dependsOn("${prefix}Fetch")
         onlyIf { repoDir.resolve(".git").exists() }
         workingDir = repoDir
-        commandLine("git", "switch", "main")
+        commandLine("git", "switch", targetBranch)
+        doLast { println("[OK] Switched $prefix to branch: $targetBranch") }
     }
 
     tasks.register<Exec>("${prefix}Pull") {
@@ -50,7 +54,7 @@ fun createCloneTasks(
         group = "infra"
         description = "Clone or update $prefix repository"
         dependsOn("${prefix}CloneNew", "${prefix}Pull")
-        doLast { println("[OK] $prefix repo synced.") }
+        doLast { println("[OK] $prefix repo synced on branch: $targetBranch") }
     }
 }
 

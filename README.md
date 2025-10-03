@@ -34,8 +34,12 @@ MySQL DB가 `atdd-net` 네트워크에서 기동됩니다.
 #### Gradle 태스크 사용 (권장)
 
 ```bash
-# 모든 서비스 Clone → Build → 기동
+# 모든 서비스 Clone → Build → 기동 (기본: main 브랜치)
 ./gradlew kioskUp
+
+# 특정 브랜치로 테스트 환경 구축
+./gradlew kioskUp -Pbranch=develop
+./gradlew kioskUp -Pbranch=feature/new-payment
 
 # 전체 서비스 빌드
 ./gradlew buildAll
@@ -44,6 +48,11 @@ MySQL DB가 `atdd-net` 네트워크에서 기동됩니다.
 ./gradlew kioskStatus
 
 ```
+
+#### 브랜치 지정 옵션
+`-Pbranch=<브랜치명>` 옵션으로 각 서비스의 특정 브랜치를 사용하여 테스트 환경을 구축할 수 있습니다.
+- 기본값: `main`
+- 예시: `-Pbranch=develop`, `-Pbranch=feature/payment`
  
 ### 2단계: 테스트 실행
 
@@ -81,8 +90,18 @@ MySQL DB가 `atdd-net` 네트워크에서 기동됩니다.
 - `buildAll`: 모든 서비스 JAR 빌드
 - `kioskUp`: Kiosk 서비스 전체 기동 (Clone → Build → Up)
 - `kioskDown`: Kiosk Compose 종료 및 볼륨 삭제
+- `kioskStatus`: 컨테이너 상태 확인
+- `kioskLogs`: Kiosk 로그 확인
+
+### 개별 서비스 관리
+- `kioskClone` / `adminClone` / `reservationClone`: 개별 저장소 Clone/업데이트
+- `kioskBuild` / `adminBuild` / `reservationBuild`: 개별 서비스 빌드
 
 ### 테스트
 - `testSmoke`: Smoke Test 실행
 - `test`: 전체 테스트 실행 (E2E 포함)
+
+### 프로젝트 구조
+- 인프라 태스크는 `gradle/infra-tasks.gradle.kts`에 정의되어 있습니다
+- Docker Compose 설정은 `infra/docker-compose.yml`에 정의되어 있습니다
 
