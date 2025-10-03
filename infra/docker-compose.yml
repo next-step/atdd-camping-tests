@@ -29,9 +29,13 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: secret
       KIOSK_ADMIN_BASE_URL: http://admin:8080
+      PAYMENTS_BASE_URL: http://payments-mock:8080
     networks:
       - atdd-net
     healthcheck: *common-healthcheck
+    depends_on:
+      payments-mock:
+        condition: service_healthy
 
   # Admin Service
   admin:
