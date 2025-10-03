@@ -19,7 +19,7 @@ services:
   kiosk:
     build:
       context: ../repos/atdd-camping-kiosk
-      dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
+      dockerfile: ../../infra/dockerfiles/Dockerfile
     container_name: kiosk
     ports:
       - "18081:8080"
@@ -37,7 +37,7 @@ services:
   admin:
     build:
       context: ../repos/atdd-camping-admin
-      dockerfile: ../../infra/dockerfiles/Dockerfile-admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile
     container_name: admin
     ports:
       - "18082:8080"
@@ -50,7 +50,7 @@ services:
   reservation:
     build:
       context: ../repos/atdd-camping-reservation
-      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile
     container_name: reservation
     ports:
       - "18083:8080"
