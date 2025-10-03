@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/payments/.*/confirm"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "status": "CONFIRMED",
+      "paymentId": "{{request.pathSegments.[1]}}",
+      "confirmedAt": "{{now format='yyyy-MM-dd HH:mm:ss'}}"
+    }
+  }
+}

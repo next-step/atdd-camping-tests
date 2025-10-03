@@ -1,0 +1,23 @@
+{
+  "priority": 2,
+  "request": {
+    "method": "POST",
+    "urlPath": "/payments",
+    "headers": {
+      "X-Simulate-Failure": {
+        "equalTo": "true"
+      }
+    }
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "status": "DECLINED",
+      "errorCode": "PAYMENT_FAILED",
+      "message": "Payment failed"
+    }
+  }
+}
