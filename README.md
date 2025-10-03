@@ -1,7 +1,7 @@
-# ATDD Kiosk Smoke Test
+# ATDD Camping - test
 
-이 문서는 **kiosk 서비스의 컨테이너 기동 및 스모크 테스트(200 응답 확인)** 방법을 안내합니다.  
-모든 과정은 스크립트로 자동화되어 있으며, 이 문서만 따라 하면 누구나 재현할 수 있습니다.
+이 문서는 **ATDD Camping 프로젝트의 테스트 환경 구성 및 실행 방법**을 안내합니다.
+Smoke Test부터 E2E Test까지 단계별로 실행할 수 있습니다.
 
 ---
 
@@ -12,44 +12,77 @@
 
 ---
 
-## 🚀 실행 절차
+## 📦 프로젝트 구조
 
-### 1. kiosk 컨테이너 기동
-``` bash
-./scripts/kiosk-up.sh
-```
-atdd-tests/infra/docker-compose.yml을 기반으로 kiosk 컨테이너가 기동됩니다.
+### 서비스 구성
+- **kiosk**: 키오스크 서비스 (포트 18081)
+- **admin**: 관리자 서비스 (포트 18082)
+- **reservation**: 예약 서비스 (포트 18083)
+- **atdd-db**: MySQL 8.0 (포트 3306)
 
-호스트 포트 18081 → 컨테이너 포트 8080 매핑
+### 네트워크
+- `atdd-net`: 모든 서비스가 공유하는 Docker 네트워크
 
-2. 스모크 테스트 실행
+---
 
-``` bash
-./scripts/test-smoke.sh
-```
-Rest Assured + Awaitility 기반의 테스트가 실행됩니다.
+## 🚀 실행 방법
 
-엔드포인트(/, /actuator/health)를 호출하여 HTTP 200 OK 확인
+MySQL DB가 `atdd-net` 네트워크에서 기동됩니다.
 
-최대 60초 동안 1초 간격으로 재시도하여 컨테이너 준비 지연도 커버
+### 1단계: 서비스 기동
 
-3. kiosk 컨테이너 종료
-``` bash 
-./scripts/kiosk-down.sh
-```
- 환경 변수
-`KIOSK_BASE_URL`
-
-테스트 대상 베이스 URL (기본값: http://localhost:18081)
-
-`KIOSK_HEALTH_PATH`
-
-엔드포인트 경로 (기본값: /actuator/health)
-
-예시:
+#### Gradle 태스크 사용 (권장)
 
 ```bash
-export KIOSK_BASE_URL=http://localhost:18081
-export KIOSK_HEALTH_PATH=/
-./scripts/test-smoke.sh
+# 모든 서비스 Clone → Build → 기동
+./gradlew kioskUp
+
+# 전체 서비스 빌드
+./gradlew buildAll
+
+# 서비스 상태 확인
+./gradlew kioskStatus
+
 ```
+ 
+### 2단계: 테스트 실행
+
+#### Smoke Test
+서비스가 정상적으로 응답하는지 확인하는 기본 헬스 체크 테스트
+
+```bash
+./gradlew testSmoke
+```
+
+**테스트 시나리오:**
+- Kiosk 헬스 체크: `GET /`
+- Admin 헬스 체크: `GET /admin`
+- Reservation 헬스 체크: `GET /`
+
+```bash
+./gradlew test
+```
+
+**테스트 시나리오:**
+- 상품 조회: Admin 인증 → Kiosk 상품 목록 조회
+
+---
+
+2. **서비스 재기동:**
+   ```bash
+   ./gradlew kioskDown
+   ./gradlew kioskUp
+   ```
+
+## 🛠️ Gradle 태스크 목록
+
+### Infra 관리
+- `cloneAll`: 모든 저장소 Clone/업데이트
+- `buildAll`: 모든 서비스 JAR 빌드
+- `kioskUp`: Kiosk 서비스 전체 기동 (Clone → Build → Up)
+- `kioskDown`: Kiosk Compose 종료 및 볼륨 삭제
+
+### 테스트
+- `testSmoke`: Smoke Test 실행
+- `test`: 전체 테스트 실행 (E2E 포함)
+

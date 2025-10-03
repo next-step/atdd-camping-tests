@@ -1,4 +1,10 @@
+networks:
+  atdd-net:
+    name: atdd-net
+    external: true
+
 services:
+  # Kiosk Service
   kiosk:
     build:
       context: ../repos/atdd-camping-kiosk
@@ -9,3 +15,55 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - KIOSK_ADMIN_BASE_URL=http://admin:8080
+    networks:
+      - atdd-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Admin Service
+  admin:
+    build:
+      context: ../repos/atdd-camping-admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile-admin
+    container_name: admin
+    ports:
+      - "18082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SERVER_PORT=8080
+    networks:
+      - atdd-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Reservation Service
+  reservation:
+    build:
+      context: ../repos/atdd-camping-reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation
+    container_name: reservation
+    ports:
+      - "18083:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SERVER_PORT=8080
+    networks:
+      - atdd-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
