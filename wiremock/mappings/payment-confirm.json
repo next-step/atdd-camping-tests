@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPathPattern": "/payments/.*/confirm"
+    "urlPath": "/v1/payments/confirm"
   },
   "response": {
     "status": 200,
@@ -9,9 +9,12 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "status": "CONFIRMED",
-      "paymentId": "{{request.pathSegments.[1]}}",
-      "confirmedAt": "{{now format='yyyy-MM-dd HH:mm:ss'}}"
+      "paymentKey": "{{jsonPath request.body '$.paymentKey'}}",
+      "orderId": "{{jsonPath request.body '$.orderId'}}",
+      "method": "CARD",
+      "approvedAt": "{{now format='yyyy-MM-dd HH:mm:ss'}}",
+      "totalAmount": "{{jsonPath request.body '$.amount'}}",
+      "status": "DONE"
     }
   }
 }

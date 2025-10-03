@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/payments"
+    "urlPath": "/v1/payments"
   },
   "response": {
     "status": 200,
@@ -9,10 +9,9 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "status": "APPROVED",
-      "paymentId": "{{randomValue type='UUID'}}",
-      "amount": "{{jsonPath request.body '$.amount'}}",
-      "timestamp": "{{now format='yyyy-MM-dd HH:mm:ss'}}"
+      "paymentKey": "{{jsonPath request.body '$.paymentKey'}}",
+      "orderId": "{{jsonPath request.body '$.orderId'}}",
+      "status": "APPROVED"
     }
   }
 }

@@ -33,9 +33,6 @@ services:
     networks:
       - atdd-net
     healthcheck: *common-healthcheck
-    depends_on:
-      payments-mock:
-        condition: service_healthy
 
   # Admin Service
   admin:
