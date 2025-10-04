@@ -38,52 +38,40 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// kiosk 저장소를 repos 하위 경로에 clone 한다
-// url은 https://github.com/MoonJeWoong/atdd-camping-kiosk 를 사용한다
-// clone 시 기본적으로 main 브랜치를 사용하도록 한다
-tasks.register<Exec>("cloneKioskRepository") {
+data class Repository(
+    val name: String,
+    val url: String,
+    val branch: String,
+)
+
+val repositoriesToClone = listOf(
+    Repository("kiosk", "https://github.com/MoonJeWoong/atdd-camping-kiosk", "main"),
+    Repository("admin", "https://github.com/MoonJeWoong/atdd-camping-admin", "main"),
+    Repository("reservation", "https://github.com/MoonJeWoong/atdd-camping-reservation", "main")
+)
+
+tasks.register("cloneRepositories") {
     group = "setup"
-    description = "Clones the kiosk repository."
+    description = "Clones or pulls all repositories."
 
-    val repoDir = file("repos/kiosk")
-
-    onlyIf { !repoDir.exists() }
-
-    doFirst {
-        repoDir.parentFile.mkdirs()
+    doLast {
+        repositoriesToClone.forEach { repository ->
+            val repoDir = file("repos/${repository.name}")
+            if (!repoDir.exists()) {
+                logger.info("Cloning ${repository.name} repository from ${repository.url}")
+                repoDir.parentFile.mkdirs()
+                project.exec {
+                    commandLine("git", "clone", "--branch", repository.branch, repository.url, repoDir)
+                }
+            } else {
+                logger.info("${repository.name} repository already exists. Pulling latest changes.")
+                project.exec {
+                    workingDir = repoDir
+                    commandLine("git", "pull")
+                }
+            }
+        }
     }
-
-    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-kiosk", repoDir)
-}
-
-tasks.register<Exec>("cloneAdminRepository") {
-    group = "setup"
-    description = "Clones the admin repository."
-
-    val repoDir = file("repos/admin")
-
-    onlyIf { !repoDir.exists() }
-
-    doFirst {
-        repoDir.parentFile.mkdirs()
-    }
-
-    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-admin", repoDir)
-}
-
-tasks.register<Exec>("cloneReservationRepository") {
-    group = "setup"
-    description = "Clones the reservation repository."
-
-    val repoDir = file("repos/reservation")
-
-    onlyIf { !repoDir.exists() }
-
-    doFirst {
-        repoDir.parentFile.mkdirs()
-    }
-
-    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-reservation", repoDir)
 }
 
 tasks.register<Exec>("dockerComposeUp") {
