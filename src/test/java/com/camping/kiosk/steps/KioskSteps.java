@@ -2,8 +2,8 @@ package com.camping.kiosk.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.camping.common.support.ApiHelper;
 import com.camping.common.support.CommonContext;
-import com.camping.common.support.KioskApiHelper;
 import io.cucumber.core.options.CurlOption.HttpMethod;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.When;
@@ -20,14 +20,14 @@ public class KioskSteps {
 
     @When("키오스크 컨테이너에 요청을 보낸다")
     public void 키오스크컨테이너에요청을보낸다() {
-        CommonContext.lastResponse = KioskApiHelper.request(HttpMethod.GET, "/", null)
+        CommonContext.lastResponse = ApiHelper.request(HttpMethod.GET, "/", null)
                 .then().log().all()
                 .extract().response();
     }
 
     @When("키오스크에서 전체 상품 조회를 요청한다")
     public void 키오스크에서전체상품조회를요청한다() {
-        CommonContext.lastResponse = KioskApiHelper.request(HttpMethod.GET, "api/products", null);
+        CommonContext.lastResponse = ApiHelper.request(HttpMethod.GET, "api/products", null);
     }
 
     @And("{int}개 이상의 상품 정보가 확인된다")
