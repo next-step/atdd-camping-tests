@@ -10,19 +10,11 @@
 
 ### 1. MSA 저장소 클론
 
-각 MSA의 소스 코드를 `repos` 디렉토리 아래에 클론합니다.
+각 MSA의 소스 코드를 `repos` 디렉토리 아래에 클론하거나 최신 코드로 업데이트합니다.
 
-- **Kiosk 저장소 클론**:
+- **모든 저장소 클론 또는 업데이트**:
   ```bash
-  ./gradlew cloneKioskRepository
-  ```
-- **Admin 저장소 클론**:
-  ```bash
-  ./gradlew cloneAdminRepository
-  ```
-- **Reservation 저장소 클론**:
-  ```bash
-  ./gradlew cloneReservationRepository
+  ./gradlew cloneRepositories
   ```
 
 ### 2. 인프라 서비스 실행 및 종료
