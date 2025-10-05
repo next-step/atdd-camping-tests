@@ -54,3 +54,14 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - SPRING_SQL_INIT_MODE=never
+
+  payments-mock:
+    image: wiremock/wiremock:3.5.2
+    container_name: payments-mock
+    networks:
+      - atdd-net
+    ports:
+      - "18083:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+    command: "--verbose"
