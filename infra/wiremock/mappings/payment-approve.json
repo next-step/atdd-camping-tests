@@ -3,7 +3,12 @@
     {
       "request": {
         "method": "POST",
-        "urlPath": "/v1/payments"
+        "urlPath": "/v1/payments",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.[?(@.amount == 30000)]"
+          }
+        ]
       },
       "response": {
         "status": 200,
@@ -20,7 +25,12 @@
     {
       "request": {
         "method": "POST",
-        "urlPath": "/v1/payments/confirm"
+        "urlPath": "/v1/payments/confirm",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.[?(@.amount == 30000)]"
+          }
+        ]
       },
       "response": {
         "status": 200,
@@ -37,6 +47,27 @@
           "receipt": {
             "url": "https://pay.local/receipts/pay_123"
           }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/v1/payments/confirm",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.[?(@.amount != 30000)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 409,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "AMOUNT_MISMATCH",
+          "message": "Different amount or orderId for same paymentKey"
         }
       }
     }

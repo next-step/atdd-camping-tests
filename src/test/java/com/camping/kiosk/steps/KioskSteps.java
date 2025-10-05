@@ -98,6 +98,27 @@ public class KioskSteps {
         Map<String, Object> selectedProduct = products.get(0);
         CommonContext.lastParams.put("selectedProduct", selectedProduct);
     }
+
+    @And("키오스크에서 결제 생성 금액과 다른 금액으로 결제 승인을 요청한다")
+    public void 키오스크에서결제생성금액과다른금액으로결제승인을요청한다() {
+        Map<String, Object> body = new HashMap<>();
+        body.put("paymentKey", CommonContext.lastParams.get("paymentKey"));
+        body.put("orderId", CommonContext.lastParams.get("orderId"));
+        body.put("items", CommonContext.lastParams.get("items"));
+
+        // Intentionally use a different amount
+        int originalAmount = (int) CommonContext.lastParams.get("amount");
+        body.put("amount", originalAmount + 100);
+
+        CommonContext.lastResponse = ApiHelper.request(HttpMethod.POST, "api/payments/confirm", body);
+    }
+
+    @Then("결제 승인 요청이 실패한다")
+    public void 결제승인요청이실패한다() {
+        assertThat(CommonContext.lastResponse.statusCode()).isEqualTo(200);
+        JsonPath jsonPath = CommonContext.lastResponse.jsonPath();
+        assertThat(jsonPath.getBoolean("success")).isFalse();
+    }
 }
 
 
