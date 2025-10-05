@@ -48,5 +48,5 @@ MSA를 구성하는 애플리케이션 컨테이너를 관리합니다.
 ## 테스트 실행 방법
 
 ```bash
- KIOSK_BASE_URL=http://localhost:18080 ADMIN_BASE_URL=http://localhost:18081 RESERVATION_BASE_URL=http://localhost:18082 ./gradlew test
+ KIOSK_BASE_URL=http://localhost:18080 ADMIN_BASE_URL=http://localhost:18081 RESERVATION_BASE_URL=http://localhost:18082 PAYMENTS_MOCK_DEFAULT_URL=http://localhost:18083 ./gradlew test
 ```

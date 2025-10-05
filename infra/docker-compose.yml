@@ -16,6 +16,7 @@ services:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
       - KIOSK_ADMIN_BASE_URL=http://admin:8081
+      - KIOSK_PAYMENT_BASE_URL=http://payments-mock:8080
 
   admin:
     networks:
