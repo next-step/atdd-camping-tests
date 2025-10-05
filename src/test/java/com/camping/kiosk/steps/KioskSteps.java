@@ -43,18 +43,14 @@ public class KioskSteps {
         assertThat(products.size()).isGreaterThanOrEqualTo(count);
     }
 
-    @Given("키오스크에서 결제 생성을 요청한다")
+    @When("키오스크에서 결제 생성을 요청한다")
     public void 키오스크에서결제생성을요청한다() {
-        // Get product info to create a payment
-        JsonPath productJsonPath = ApiHelper.request(HttpMethod.GET, "api/products", null).jsonPath();
-        List<Map<String, Object>> products = productJsonPath.getList("$");
-        Map<String, Object> product = products.get(0);
-
         // Create CartItem
+        Map<String, Object> selectedProduct = (Map<String, Object>) CommonContext.lastParams.get("selectedProduct");
         Map<String, Object> cartItem = new HashMap<>();
-        cartItem.put("productId", product.get("id"));
-        cartItem.put("productName", product.get("name"));
-        cartItem.put("unitPrice", product.get("price"));
+        cartItem.put("productId", selectedProduct.get("id"));
+        cartItem.put("productName", selectedProduct.get("name"));
+        cartItem.put("unitPrice", selectedProduct.get("price"));
         cartItem.put("quantity", 1);
         List<Map<String, Object>> items = Collections.singletonList(cartItem);
         CommonContext.lastParams.put("items", items);
@@ -87,6 +83,20 @@ public class KioskSteps {
         assertThat(CommonContext.lastResponse.statusCode()).isEqualTo(200);
         JsonPath jsonPath = CommonContext.lastResponse.jsonPath();
         assertThat(jsonPath.getBoolean("success")).isTrue();
+    }
+
+    @Given("키오스크에서 전체 상품 목록을 확인한다")
+    public void 키오스크에서전체상품목록을확인한다() {
+        List<Map<String, Object>> products = ApiHelper.request(HttpMethod.GET, "api/products", null)
+                .jsonPath().getList("$");
+        CommonContext.lastParams.put("products", products);
+    }
+
+    @And("전체 상품 목록 중 구매할 상품을 선택한다")
+    public void 전체상품목록중구매할상품을선택한다() {
+        List<Map<String, Object>> products = (List<Map<String, Object>>) CommonContext.lastParams.get("products");
+        Map<String, Object> selectedProduct = products.get(0);
+        CommonContext.lastParams.put("selectedProduct", selectedProduct);
     }
 }
 
