@@ -1,19 +1,44 @@
 {
-  "request": {
-    "method": "POST",
-    "urlPath": "/v1/payments"
-  },
-  "response": {
-    "status": 200,
-    "headers": {
-      "Content-Type": "application/json"
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/v1/payments"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "paymentKey": "pay_mock",
+          "orderId": "ord_mock",
+          "status": "APPROVED"
+        }
+      }
     },
-    "jsonBody": {
-      "paymentKey": "pay_mock",
-      "orderId": "ord_mock",
-      "status": "APPROVED"
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/v1/payments/confirm"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "paymentKey": "pay_mock",
+          "orderId": "ord_mock",
+          "method": "CARD",
+          "approvedAt": "2024-01-01T12:34:56Z",
+          "totalAmount": 30000,
+          "status": "APPROVED",
+          "receipt": {
+            "url": "https://pay.local/receipts/pay_123"
+          }
+        }
+      }
     }
-  }
+  ]
 }
-
-

@@ -16,7 +16,7 @@ services:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
       - KIOSK_ADMIN_BASE_URL=http://admin:8081
-      - KIOSK_PAYMENT_BASE_URL=http://payments-mock:8080
+      - KIOSK_PAYMENT_BASE_URL=http://payments-mock:8083
 
   admin:
     networks:
@@ -62,7 +62,7 @@ services:
     networks:
       - atdd-net
     ports:
-      - "18083:8080"
+      - "18083:8083"
     volumes:
       - ./wiremock/mappings:/home/wiremock/mappings
-    command: "--verbose"
+    command: "--verbose --port 8083"
