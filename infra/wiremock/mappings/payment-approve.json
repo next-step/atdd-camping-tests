@@ -3,6 +3,18 @@
     {
       "request": {
         "method": "POST",
+        "urlPath": "/payments-mock-smoke-test"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
         "urlPath": "/v1/payments",
         "bodyPatterns": [
           {

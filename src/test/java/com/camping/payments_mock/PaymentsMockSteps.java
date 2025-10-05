@@ -12,8 +12,8 @@ public class PaymentsMockSteps {
         RestAssured.baseURI = CommonContext.PAYMENTS_MOCK_BASE_URL;
     }
 
-    @When("결제 Mocking 시스템에 요청한다")
-    public void 결제Mocking시스템에요청한다() {
-        CommonContext.lastResponse = ApiHelper.request(HttpMethod.POST, "v1/payments", null);
+    @When("결제 Mocking 시스템에 헬스체크를 요청한다")
+    public void 결제Mocking시스템에헬스체크를요청한다() {
+        CommonContext.lastResponse = ApiHelper.request(HttpMethod.POST, "/payments-mock-smoke-test", null);
     }
 }
