@@ -1,7 +1,8 @@
 package com.camping.common.support;
 
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
+
+import java.util.Map;
 
 public final class CommonContext {
 
@@ -22,8 +23,8 @@ public final class CommonContext {
     public static String PAYMENTS_MOCK_BASE_URL;
 
     public static String adminToken;
-    public static RequestSpecification requestSpec;
     public static Response lastResponse;
+    public static Map<String, Object> lastParams;
 
     static {
         KIOSK_BASE_URL = System.getProperty(KIOSK_BASE_URL_PROPERTY_KEY, System.getenv().getOrDefault(KIOSK_BASE_URL_PROPERTY_KEY, KIOSK_DEFAULT_URL));

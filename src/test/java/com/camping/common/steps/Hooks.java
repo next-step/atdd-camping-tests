@@ -10,6 +10,7 @@ import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Hooks {
@@ -17,6 +18,11 @@ public class Hooks {
     @BeforeAll
     public static void beforeAll() {
         initAdminToken();
+    }
+
+    @Before
+    public void before() {
+        initCommonContext();
     }
 
     private static void initAdminToken() {
@@ -28,8 +34,12 @@ public class Hooks {
                 .build();
 
         CommonContext.adminToken = given().spec(spec)
-                .body(Map.of("username","admin","password","admin123"))
+                .body(Map.of("username", "admin", "password", "admin123"))
                 .post("/auth/login").then().extract().cookie("AUTH_TOKEN");
     }
 
+    private static void initCommonContext() {
+        CommonContext.lastResponse = null;
+        CommonContext.lastParams = new HashMap<>();
+    }
 }

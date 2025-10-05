@@ -11,11 +11,12 @@ public final class ApiHelper {
 
     public static Response request(HttpMethod httpMethod, String url, Object body) {
         RequestSpecification requestSpec = prepareRequest(body);
-        return perform(httpMethod, url, requestSpec);
+        return perform(httpMethod, url, requestSpec).then().log().all()
+                .extract().response();
     }
 
     private static RequestSpecification prepareRequest(Object body) {
-        RequestSpecification preparedRequestSpec = given();
+        RequestSpecification preparedRequestSpec = given(RequestSpecFactory.create());
 
         if (body != null) {
             preparedRequestSpec.body(body);
@@ -26,11 +27,12 @@ public final class ApiHelper {
 
     public static Response adminRequest(HttpMethod httpMethod, String url, Object body) {
         RequestSpecification requestSpec = prepareAdminRequest(CommonContext.adminToken, body);
-        return perform(httpMethod, url, requestSpec);
+        return perform(httpMethod, url, requestSpec).then().log().all()
+                .extract().response();
     }
 
     private static RequestSpecification prepareAdminRequest(String authToken, Object body) {
-        RequestSpecification authorizedRequestSpec = given()
+        RequestSpecification authorizedRequestSpec = given(RequestSpecFactory.create())
                 .header("Authorization", "Bearer " + authToken);
 
         if (body != null) {
@@ -42,15 +44,15 @@ public final class ApiHelper {
 
     private static Response perform(HttpMethod httpMethod, String url, RequestSpecification requestSpec) {
         if (httpMethod == HttpMethod.GET) {
-            return requestSpec.get(url);
+            return requestSpec.log().all().get(url);
         } else if (httpMethod == HttpMethod.POST) {
-            return requestSpec.post(url);
+            return requestSpec.log().all().post(url);
         } else if (httpMethod == HttpMethod.PUT) {
-            return requestSpec.put(url);
+            return requestSpec.log().all().put(url);
         } else if (httpMethod == HttpMethod.DELETE) {
-            return requestSpec.delete(url);
+            return requestSpec.log().all().delete(url);
         } else if (httpMethod == HttpMethod.PATCH) {
-            return requestSpec.patch(url);
+            return requestSpec.log().all().patch(url);
         } else {
             throw new IllegalArgumentException("Http method " + httpMethod + " is not supported.");
         }
