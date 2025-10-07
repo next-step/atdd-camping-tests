@@ -6,9 +6,27 @@
 
 ## 테스트 전 환경 구축 방법
 
-테스트를 실행하기 전에 다음 단계를 순서대로 진행하여 개발 환경을 구축합니다.
+테스트를 실행하기 전에 다음 명령어를 사용하여 개발 환경을 구축합니다.
 
-### 1. MSA 저장소 클론
+### 한번에 모든 환경 구축하기
+`setupForAcceptanceTest` task 하나로 모든 MSA 저장소를 clone 및 pull하고, 테스트에 필요한 인프라 및 애플리케이션 서비스를 한번에 실행할 수 있습니다.
+```bash
+./gradlew setupForAcceptanceTest
+```
+위 명령어를 실행하면 다음 작업들이 순서대로 실행됩니다.
+1. `repos` 디렉토리 아래에 모든 MSA 저장소를 클론 (`cloneRepositories`)
+2. DB, wiremock 등 인프라 서비스 실행 (`startInfraContainer`)
+3. 모든 애플리케이션 서비스 실행 (`dockerComposeUp`)
+
+### 환경 종료하기
+실행 중인 모든 서비스를 중지하고 컨테이너를 삭제합니다.
+```bash
+./gradlew dockerComposeDown stopInfraContainers
+```
+
+### (참고) 개별적으로 환경 구축 및 종료하기
+
+#### 1. MSA 저장소 클론
 
 각 MSA의 소스 코드를 `repos` 디렉토리 아래에 클론하거나 최신 코드로 업데이트합니다.
 
@@ -17,7 +35,7 @@
   ./gradlew cloneRepositories
   ```
 
-### 2. 인프라 서비스 실행 및 종료
+#### 2. 인프라 서비스 실행 및 종료
 
 테스트에 필요한 데이터베이스(MySQL) 컨테이너를 관리합니다.
 
@@ -31,7 +49,7 @@
   ./gradlew stopInfraContainers
   ```
 
-### 3. 애플리케이션 서비스 실행 및 종료
+#### 3. 애플리케이션 서비스 실행 및 종료
 
 MSA를 구성하는 애플리케이션 컨테이너를 관리합니다.
 
