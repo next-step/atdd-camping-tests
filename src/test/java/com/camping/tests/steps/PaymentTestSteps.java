@@ -19,12 +19,24 @@ public class PaymentTestSteps {
     @When("키오스크에 결제 생성을 요청한다")
     public void requestPaymentCreation() {
         Response response = KioskPaymentApiHelper.createPayment();
+        context().setResponse(response);
 
         if (response.getStatusCode() == 200) {
             paymentKey = response.jsonPath().getString("paymentKey");
             orderId = response.jsonPath().getString("orderId");
         }
-        context().setResponse(response);
+    }
+
+    @Then("결제 생성이 성공한다")
+    public void verifyPaymentCreationSuccess() {
+        Response response = context().getResponse();
+        response.then().statusCode(200);
+    }
+
+    @Then("결제 키와 주문 ID가 반환된다")
+    public void verifyPaymentKeyAndOrderId() {
+        assertThat(paymentKey).isNotNull();
+        assertThat(orderId).isNotNull();
     }
 
     @When("키오스크에 결제 확정을 요청한다")

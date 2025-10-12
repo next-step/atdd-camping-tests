@@ -50,7 +50,7 @@ All services ──> atdd-db (3306) [MySQL]
 2. **Response는 반드시 `CommonContextHolder`에 저장** (스텝 간 데이터 공유)
 3. **상태 코드 + 비즈니스 로직 모두 검증** (AssertJ 사용)
 4. **Base URL은 System Property 사용** (`KIOSK_BASE_URL` 등)
-5. **Gherkin 스텝은 한국어 사용** (프로젝트 표준)
+5. **Gherkin은 영어 키워드(Given/When/Then) + 한국어 스텝 내용 사용** (프로젝트 표준)
 
 ### 인증
 - `@Before` 훅에서 자동으로 admin 토큰 초기화됨 (수동 로그인 불필요)

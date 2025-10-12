@@ -3,7 +3,6 @@ package com.camping.tests.steps;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.java.en.When;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.And;
 import io.restassured.response.Response;
 import com.camping.tests.context.CommonContextHolder;
@@ -31,18 +30,6 @@ public class E2ETestSteps {
         context().setResponse(response);
     }
 
-    @Then("상품 목록이 정상적으로 조회된다")
-    public void verifyProductListResponse() {
-        context().getResponse().then()
-                .statusCode(200);
-    }
-
-    @And("최소 1개 이상의 상품이 존재한다")
-    public void verifyProductListNotEmpty() {
-        Response response = context().getResponse();
-        List<Map<String, Object>> products = response.jsonPath().getList("$");
-        assertThat(products).isNotEmpty();
-    }
 
     @And("각 상품은 필수 필드를 포함한다")
     public void verifyProductFields() {
