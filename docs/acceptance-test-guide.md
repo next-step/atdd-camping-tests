@@ -355,6 +355,93 @@ public class KioskApiHelper {
                 .get(KIOSK_BASE_URL + "/api/campings");
     }
 }
+
+// ReservationApiHelper.java
+public class ReservationApiHelper {
+    private static final String RESERVATION_BASE_URL = System.getProperty("RESERVATION_BASE_URL");
+
+    public static Response createReservation(String campingId, String startDate, String endDate) {
+        Map<String, Object> requestBody = Map.of(
+            "campingId", campingId,
+            "startDate", startDate,
+            "endDate", endDate
+        );
+
+        return given()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .when()
+                .post(RESERVATION_BASE_URL + "/api/reservations");
+    }
+
+    public static Response getReservation(String reservationId) {
+        return given()
+                .when()
+                .get(RESERVATION_BASE_URL + "/api/reservations/" + reservationId);
+    }
+}
+```
+
+## 데이터 격리 전략
+
+### 시나리오 간 격리
+
+**원칙**: 각 시나리오는 독립적으로 실행 가능해야 함
+
+**전략**:
+1. **유니크 데이터 생성**: 타임스탬프, UUID 활용
+2. **테스트 후 정리**: DB 초기 상태로 복원 (필요 시)
+3. **격리된 컨텍스트**: `CommonContextHolder`는 시나리오마다 초기화됨
+
+**예시**:
+```java
+@Given("고유한 캠핑장을 생성한다")
+public void createUniqueCamping() {
+    String uniqueName = "캠핑장_" + System.currentTimeMillis();
+    Response response = AdminApiHelper.createCamping(uniqueName);
+
+    campingId = response.jsonPath().getLong("id");
+    CommonContextHolder.getInstance().setResponse(response);
+}
+```
+
+### 병렬 실행 대비
+
+**현재 제약**: ThreadLocal 기반 컨텍스트는 순차 실행만 지원
+
+**향후 병렬 실행 시 고려사항**:
+- Scenario 레벨에서 `@Serial` 태그 사용
+- 또는 시나리오별 독립 DB 스키마 사용
+
+### DB 상태 관리
+
+**기본 원칙**: `init.sql`로 시딩된 데이터는 읽기 전용으로 취급
+
+**테스트 데이터 생성**:
+```java
+// ✅ 올바름: 테스트에서 새로운 데이터 생성
+@Given("관리자가 {string} 캠핑장을 생성한다")
+public void createCamping(String name) {
+    Response response = AdminApiHelper.createCamping(name);
+    // 생성된 데이터는 시나리오 종료 후 남아있을 수 있음
+}
+
+// ❌ 피할 것: init.sql 데이터에 의존
+@Given("캠핑장 ID 1을 조회한다")
+public void getCampingById() {
+    // ID 1이 항상 존재한다고 가정하면 불안정
+}
+```
+
+**정리가 필요한 경우**:
+```java
+// @After 훅에서 테스트 데이터 삭제 (선택적)
+@After
+public void cleanupTestData() {
+    if (createdCampingId != null) {
+        AdminApiHelper.deleteCamping(createdCampingId);
+    }
+}
 ```
 
 ## AI 작성 가이드라인
