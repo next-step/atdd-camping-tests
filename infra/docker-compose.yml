@@ -9,9 +9,7 @@ services:
   kiosk:
     build:
       context: ../repo/atdd-camping-kiosk
-      dockerfile: ../../dockerfiles/Dockerfile-kiosk
-      args:
-        - JAR_FILE=build/libs/*.jar
+      dockerfile: Dockerfile
     image: atdd/kiosk:latest
     container_name: atdd-kiosk
     ports:
@@ -20,15 +18,14 @@ services:
       - KIOSK_PORT=18081
       - KIOSK_BASE_URL=http://localhost:18081
       - KIOSK_ADMIN_BASE_URL=http://atdd-admin:8082
+      - KIOSK_PAYMENT_BASE_URL=http://wiremock-atdd-payments:9090
     networks:
       - atdd-net
 
   admin:
     build:
       context: ../repo/atdd-camping-admin
-      dockerfile: ../../dockerfiles/Dockerfile-admin
-      args:
-        - JAR_FILE=build/libs/*.jar
+      dockerfile: Dockerfile
     image: atdd/admin:latest
     container_name: atdd-admin
     ports:
@@ -45,9 +42,7 @@ services:
   reservation:
     build:
       context: ../repo/atdd-camping-reservation
-      dockerfile: ../../dockerfiles/Dockerfile-reservation
-      args:
-        - JAR_FILE=build/libs/*.jar
+      dockerfile: Dockerfile
     image: atdd/reservation:latest
     container_name: atdd-reservation
     ports:
@@ -58,5 +53,16 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/camping?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root1234
+    networks:
+      - atdd-net
+
+  wiremock-payments:
+    image: wiremock/wiremock:2.35.0
+    container_name: wiremock-atdd-payments
+    ports:
+      - "19090:9090"
+    volumes:
+      - ./wiremock/payments:/home/wiremock/mappings:ro
+    command: ["--port", "9090", "--verbose"]
     networks:
       - atdd-net
