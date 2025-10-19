@@ -14,7 +14,7 @@ public class KioskPaymentApiHelper {
 
     public static Response createPayment() {
         Map<String, Object> item = new HashMap<>();
-        item.put("productId", 1);
+        item.put("productId", 999);
         item.put("productName", "테스트 상품");
         item.put("unitPrice", 10000);
         item.put("quantity", 1);
@@ -31,17 +31,11 @@ public class KioskPaymentApiHelper {
     }
 
     public static Response confirmPayment(String paymentKey, String orderId, int amount) {
-        Map<String, Object> item = new HashMap<>();
-        item.put("productId", 1);
-        item.put("productName", "테스트 상품");
-        item.put("unitPrice", amount);
-        item.put("quantity", 1);
-
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("paymentKey", paymentKey);
         requestBody.put("orderId", orderId);
         requestBody.put("amount", amount);
-        requestBody.put("items", List.of(item));
+        requestBody.put("items", List.of());
 
         return given()
                 .contentType(ContentType.JSON)

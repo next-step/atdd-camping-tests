@@ -4,17 +4,17 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.response.Response;
 import io.restassured.http.ContentType;
 
-public class CommonContext {
-    private static final ThreadLocal<CommonContext> context = new ThreadLocal<>();
+public class CommonContextHolder {
+    private static final ThreadLocal<CommonContextHolder> context = new ThreadLocal<>();
 
     private RequestSpecification requestSpec;
     private String adminToken;
     private Response response;
 
-    public static CommonContext getInstance() {
-        CommonContext ctx = context.get();
+    public static CommonContextHolder getInstance() {
+        CommonContextHolder ctx = context.get();
         if (ctx == null) {
-            ctx = new CommonContext();
+            ctx = new CommonContextHolder();
             context.set(ctx);
         }
         return ctx;
