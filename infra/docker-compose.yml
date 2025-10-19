@@ -1,0 +1,8 @@
+services:
+  kiosk:
+    build:
+      context: ../repos/atdd-camping-kiosk
+      dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
+    container_name: kiosk
+    ports:
+      - "8080:8080"

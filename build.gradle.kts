@@ -36,3 +36,28 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Exec>("cloneKioskRepository") {
+    description = "Clones the atdd-camping-kiosk repository"
+    if (!file("repos").exists()) {
+        println("create repos directory")
+        file("repos").mkdir()
+    }
+
+    if (file("repos/atdd-camping-kiosk").exists()) {
+        commandLine("git", "-C", "repos/atdd-camping-kiosk", "pull")
+        return@register
+    }
+    commandLine("git", "clone", "--branch", "main", "--single-branch", "https://github.com/next-step/atdd-camping-kiosk", "repos/atdd-camping-kiosk")
+}
+
+tasks.register<Exec>("dockerComposeUp") {
+    description = "Starts the services using Docker Compose in detached mode."
+    commandLine("/usr/local/bin/docker", "compose", "-f", "infra/docker-compose.yml", "up", "--build", "-d")
+}
+
+tasks.register<Exec>("dockerComposeDown") {
+    description = "Stops the services using Docker Compose."
+    commandLine("/usr/local/bin/docker", "compose", "-f", "infra/docker-compose.yml", "down")
+}
+
