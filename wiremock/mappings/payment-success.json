@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "paymentKey": "{{jsonPath request.body '$.paymentKey'}}",
+      "orderId": "{{jsonPath request.body '$.orderId'}}",
+      "status": "APPROVED"
+    }
+  }
+}
