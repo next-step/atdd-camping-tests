@@ -1,3 +1,11 @@
+import java.io.ByteArrayOutputStream
+import javax.inject.Inject
+import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
+
+
 plugins {
     java
 }
@@ -38,59 +46,47 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// kiosk 저장소를 repos 하위 경로에 clone 한다
-// url은 https://github.com/MoonJeWoong/atdd-camping-kiosk 를 사용한다
-// clone 시 기본적으로 main 브랜치를 사용하도록 한다
-tasks.register<Exec>("cloneKioskRepository") {
+data class Repository(
+    val name: String,
+    val url: String,
+    val branch: String,
+)
+
+val repositoriesToClone = listOf(
+    Repository("kiosk", "https://github.com/MoonJeWoong/atdd-camping-kiosk", "main"),
+    Repository("admin", "https://github.com/MoonJeWoong/atdd-camping-admin", "main"),
+    Repository("reservation", "https://github.com/MoonJeWoong/atdd-camping-reservation", "main")
+)
+
+tasks.register("cloneRepositories") {
     group = "setup"
-    description = "Clones the kiosk repository."
+    description = "Clones or pulls all repositories."
 
-    val repoDir = file("repos/kiosk")
-
-    onlyIf { !repoDir.exists() }
-
-    doFirst {
-        repoDir.parentFile.mkdirs()
+    doLast {
+        repositoriesToClone.forEach { repository ->
+            val repoDir = file("repos/${repository.name}")
+            if (!repoDir.exists()) {
+                logger.info("Cloning ${repository.name} repository from ${repository.url}")
+                repoDir.parentFile.mkdirs()
+                project.exec {
+                    commandLine("git", "clone", "--branch", repository.branch, repository.url, repoDir)
+                }
+            } else {
+                logger.info("${repository.name} repository already exists. Pulling latest changes.")
+                project.exec {
+                    workingDir = repoDir
+                    commandLine("git", "pull")
+                }
+            }
+        }
     }
-
-    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-kiosk", repoDir)
-}
-
-tasks.register<Exec>("cloneAdminRepository") {
-    group = "setup"
-    description = "Clones the admin repository."
-
-    val repoDir = file("repos/admin")
-
-    onlyIf { !repoDir.exists() }
-
-    doFirst {
-        repoDir.parentFile.mkdirs()
-    }
-
-    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-admin", repoDir)
-}
-
-tasks.register<Exec>("cloneReservationRepository") {
-    group = "setup"
-    description = "Clones the reservation repository."
-
-    val repoDir = file("repos/reservation")
-
-    onlyIf { !repoDir.exists() }
-
-    doFirst {
-        repoDir.parentFile.mkdirs()
-    }
-
-    commandLine("git", "clone", "--branch", "main", "https://github.com/MoonJeWoong/atdd-camping-reservation", repoDir)
 }
 
 tasks.register<Exec>("dockerComposeUp") {
     group = "docker"
     description = "Starts the services using docker-compose."
-    dependsOn("startInfraContainer")
-    mustRunAfter("startInfraContainer")
+    dependsOn("waitForDbContainer")
+    mustRunAfter("waitForDbContainer")
     commandLine("sh", "-c", "docker compose -f infra/docker-compose.yml up -d")
 }
 
@@ -106,8 +102,61 @@ tasks.register<Exec>("startInfraContainer") {
     commandLine("sh", "-c", "docker compose -f infra/docker-compose-infra.yml up -d db")
 }
 
+tasks.register<WaitForDbTask>("waitForDbContainer") {
+    group = "docker"
+    description = "Waits for the DB container to be healthy with a timeout."
+    dependsOn("startInfraContainer")
+    mustRunAfter("startInfraContainer")
+}
+
+abstract class WaitForDbTask : DefaultTask() {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
+    @TaskAction
+    fun exec() {
+
+        val maxRetries = 20
+        var isReady = false
+
+        logger.lifecycle("Waiting for DB container to be ready for queries (max 20 seconds)...")
+
+        for (i in 1..maxRetries) {
+            // Suppress standard output to keep logs clean, but show errors.
+            val standardOutput = ByteArrayOutputStream()
+
+            val result = execOperations.exec {
+                commandLine("sh", "-c", "docker exec atdd-db mysql -uroot -psecret -e 'SELECT 1'")
+                isIgnoreExitValue = true
+                this.standardOutput = standardOutput
+                errorOutput = System.err
+            }
+
+            if (result.exitValue == 0) {
+                isReady = true
+                logger.lifecycle("DB container is ready for queries.")
+                break
+            } else {
+                logger.lifecycle("Waiting for DB... (Attempt ${i}/${maxRetries})")
+                // Use a longer sleep interval to give the DB more time to initialize.
+                Thread.sleep(1000)
+            }
+        }
+
+        if (!isReady) {
+            throw GradleException("DB container 'atdd-db' did not become ready for queries within 100 seconds.")
+        }
+    }
+}
+
 tasks.register<Exec>("stopInfraContainers") {
     group = "docker"
     description = "Stops the services from docker-compose-infra.yml."
     commandLine("sh", "-c", "docker compose -f infra/docker-compose-infra.yml down")
+}
+
+tasks.register("setupForAcceptanceTest") {
+    group = "setup"
+    description = "Runs all setup tasks in order: cloneRepositories, startInfraContainer, waitForDbContainer, dockerComposeUp"
+    dependsOn(tasks.named("cloneRepositories"), tasks.named("dockerComposeUp"))
 }

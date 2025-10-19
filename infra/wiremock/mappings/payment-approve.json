@@ -1,19 +1,87 @@
 {
-  "request": {
-    "method": "POST",
-    "urlPath": "/v1/payments"
-  },
-  "response": {
-    "status": 200,
-    "headers": {
-      "Content-Type": "application/json"
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/payments-mock-smoke-test"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
     },
-    "jsonBody": {
-      "paymentKey": "pay_mock",
-      "orderId": "ord_mock",
-      "status": "APPROVED"
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/v1/payments",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.[?(@.amount == 30000)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "paymentKey": "pay_mock",
+          "orderId": "ord_mock",
+          "status": "APPROVED"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/v1/payments/confirm",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.[?(@.amount == 30000)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "paymentKey": "pay_mock",
+          "orderId": "ord_mock",
+          "method": "CARD",
+          "approvedAt": "2024-01-01T12:34:56Z",
+          "totalAmount": 30000,
+          "status": "APPROVED",
+          "receipt": {
+            "url": "https://pay.local/receipts/pay_123"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/v1/payments/confirm",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": "$.[?(@.amount != 30000)]"
+          }
+        ]
+      },
+      "response": {
+        "status": 409,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "code": "AMOUNT_MISMATCH",
+          "message": "Different amount or orderId for same paymentKey"
+        }
+      }
     }
-  }
+  ]
 }
-
-
