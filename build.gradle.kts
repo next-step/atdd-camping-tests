@@ -41,17 +41,5 @@ tasks.test {
 // Apply infrastructure tasks
 apply(from = "gradle/infra-tasks.gradle.kts")
 
-// Test tasks
-tasks.register<Test>("testSmoke") {
-    group = "verification"
-    description = "Run smoke tests"
-    useJUnitPlatform()
-    testClassesDirs = sourceSets["test"].output.classesDirs
-    classpath = sourceSets["test"].runtimeClasspath
-    filter { includeTestsMatching("com.camping.tests.RunCucumberTest") }
-
-    environment(System.getenv())
-
-    doFirst { println("[INFO] Running smoke tests...") }
-    doLast { println("[OK] Smoke tests completed.") }
-}
+// Apply test tasks
+apply(from = "gradle/test-tasks.gradle.kts")
