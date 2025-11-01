@@ -1,14 +1,11 @@
 package com.camping.tests.steps;
 
 import com.camping.tests.helpers.ContextHelper;
-import io.cucumber.java.ko.그리고;
-import io.cucumber.java.ko.그러면;
-import io.cucumber.java.ko.만약;
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class PaymentSteps {
 
@@ -16,7 +13,7 @@ public class PaymentSteps {
     private static final String PAYMENT_ID_KEY = "paymentId";
     private static final String PAYMENT_RESPONSE_KEY = "paymentResponse";
 
-    @만약("키오스크에 결제 생성을 요청한다")
+    @Given("키오스크에 결제 생성을 요청한다")
     public void 키오스크에_결제_생성을_요청한다() {
         String items = "[{\"productId\":1,\"productName\":\"랜턴\",\"unitPrice\":30000,\"quantity\":1}]";
         String requestBody = "{"
@@ -41,7 +38,7 @@ public class PaymentSteps {
         ContextHelper.set("items", items);
     }
 
-    @그리고("키오스크에 결제 확정을 요청한다")
+    @And("키오스크에 결제 확정을 요청한다")
     public void 키오스크에_결제_확정을_요청한다() {
         String paymentKey = ContextHelper.get("paymentKey", String.class);
         String orderId = ContextHelper.get("orderId", String.class);
@@ -65,7 +62,7 @@ public class PaymentSteps {
         ContextHelper.set(PAYMENT_RESPONSE_KEY, response);
     }
 
-    @만약("키오스크에 큰 금액으로 결제 생성을 요청한다")
+    @Given("키오스크에 큰 금액으로 결제 생성을 요청한다")
     public void 키오스크에_큰_금액으로_결제_생성을_요청한다() {
         String items = "[{\"productId\":1,\"productName\":\"랜턴\",\"unitPrice\":999999,\"quantity\":1}]";
         String requestBody = "{"
@@ -90,7 +87,7 @@ public class PaymentSteps {
         ContextHelper.set("items", items);
     }
 
-    @그러면("결제가 성공이어야 한다")
+    @Then("결제가 성공이어야 한다")
     public void 결제가_성공이어야_한다() {
         Response response = ContextHelper.get(PAYMENT_RESPONSE_KEY, Response.class);
 
@@ -104,7 +101,7 @@ public class PaymentSteps {
         assert transactionId != null && !transactionId.isEmpty() : "Expected transactionId to be present";
     }
 
-    @그러면("결제가 실패이어야 한다")
+    @Then("결제가 실패이어야 한다")
     public void 결제가_실패이어야_한다() {
         Response response = ContextHelper.get(PAYMENT_RESPONSE_KEY, Response.class);
 

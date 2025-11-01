@@ -2,16 +2,9 @@ package com.camping.tests.steps;
 
 import com.camping.tests.helpers.ApiTestHelper;
 import com.camping.tests.helpers.ContextHelper;
-import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.java.ko.그리고;
-import io.cucumber.java.ko.그러면;
-import io.cucumber.java.ko.만약;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.awaitility.Awaitility;
-
-import java.time.Duration;
 
 public class AdminSteps {
 
