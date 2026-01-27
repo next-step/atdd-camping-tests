@@ -1,0 +1,17 @@
+services:
+  kiosk:
+    build:
+      context: ../../atdd-camping-kiosk
+      dockerfile: ../atdd-camping-tests/infra/dockerfiles/Dockerfile-kiosk
+    container_name: atdd-kiosk
+    ports:
+      - "${KIOSK_PORT:-8081}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - SERVER_PORT=8080

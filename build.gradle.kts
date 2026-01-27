@@ -31,8 +31,34 @@ dependencies {
 
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
+
+    // AssertJ
+    testImplementation("org.assertj:assertj-core:3.24.2")
+}
+
+tasks.register<Exec>("kioskComposeUp") {
+    group = "infra"
+    description = "Run kiosk via docker compose (build + up)"
+
+    commandLine(
+        "docker", "compose",
+        "-f", "infra/docker-compose.yml",
+        "up", "-d", "--build", "--wait"
+    )
+}
+
+tasks.register<Exec>("kioskComposeDown") {
+    group = "infra"
+    description = "Stop kiosk compose and remove volumes"
+    commandLine(
+        "docker", "compose",
+        "-f", "infra/docker-compose.yml",
+        "down", "-v"
+    )
 }
 
 tasks.test {
     useJUnitPlatform()
+    dependsOn("kioskComposeUp")
+    finalizedBy("kioskComposeDown")
 }
