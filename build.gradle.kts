@@ -36,3 +36,35 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// === Infra Tasks ===
+tasks.register<Exec>("composeUp") {
+    group = "infra"
+    description = "Start kiosk service via docker compose"
+    commandLine("docker-compose", "-f", "infra/docker-compose.yml", "up", "-d", "--build")
+}
+
+tasks.register<Exec>("composeDown") {
+    group = "infra"
+    description = "Stop kiosk service and remove volumes"
+    commandLine("docker-compose", "-f", "infra/docker-compose.yml", "down", "-v")
+}
+
+tasks.register<Exec>("composeLogs") {
+    group = "infra"
+    description = "Show kiosk service logs"
+    commandLine("docker-compose", "-f", "infra/docker-compose.yml", "logs", "-f", "kiosk")
+}
+
+tasks.register<Exec>("composePs") {
+    group = "infra"
+    description = "Show running containers status"
+    commandLine("docker-compose", "-f", "infra/docker-compose.yml", "ps")
+}
+
+tasks.register<Test>("smokeTest") {
+    group = "verification"
+    description = "Run smoke tests only"
+    useJUnitPlatform()
+    systemProperty("cucumber.filter.tags", "@smoke")
+}
