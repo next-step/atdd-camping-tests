@@ -1,0 +1,10 @@
+# dockerfiles/Dockerfile-kiosk (예시)
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+
+# 빌드된 JAR 복사(예: kiosk 프로젝트에서 만든 JAR)
+ARG JAR_FILE=build/libs/*.jar
+COPY ${JAR_FILE} app.jar
+
+ENV JAVA_OPTS=""
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
