@@ -1,9 +1,62 @@
+name: atdd-application
+
+networks:
+  atdd-net:
+    name: atdd-net
+    external: true
+
 services:
+  admin:
+    build:
+      context: ../repos/atdd-camping-admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile-admin
+    container_name: atdd-admin
+    networks:
+      - atdd-net
+    ports:
+      - "${ADMIN_PORT:-8082}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+
+  reservation:
+    build:
+      context: ../repos/atdd-camping-reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation
+    container_name: atdd-reservation
+    networks:
+      - atdd-net
+    ports:
+      - "${RESERVATION_PORT:-8083}:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+
   kiosk:
     build:
-      context: ../../atdd-camping-kiosk
-      dockerfile: ../atdd-camping-tests/infra/dockerfiles/Dockerfile-kiosk
+      context: ../repos/atdd-camping-kiosk
+      dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
     container_name: atdd-kiosk
+    networks:
+      - atdd-net
     ports:
       - "${KIOSK_PORT:-8081}:8080"
     healthcheck:
