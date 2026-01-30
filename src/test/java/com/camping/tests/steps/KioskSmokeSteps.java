@@ -15,8 +15,8 @@ public class KioskSmokeSteps {
                     : "http://localhost:18081";
 
 
-    @Then("kiosk 헬스 체크가 200 응답을 반환한다")
-    public void kiosk_헬스_체크가_200_응답을_반환한다() {
+    @Then("요청시 kiosk가 성공 응답을 반환한다")
+    public void 요청시_kiosk가_성공_응답을_반환한다() {
         Response response = RestAssured
                 .given().baseUri(KIOSK_BASE_URL)
                 .when().get("/health");
