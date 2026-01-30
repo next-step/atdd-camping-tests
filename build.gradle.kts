@@ -35,4 +35,25 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    environment("KIOSK_BASE_URL", System.getenv("KIOSK_BASE_URL") ?: "http://localhost:18081")
+}
+
+tasks.register<Exec>("kioskComposeUp") {
+    group = "infra"
+    description = "Run kiosk via docker compose (build + up)"
+    commandLine(
+        "/usr/local/bin/docker", "compose",
+        "-f", "infra/docker-compose.yml",
+        "up", "-d", "--build"
+    )
+}
+
+tasks.register<Exec>("kioskComposeDown") {
+    group = "infra"
+    description = "Stop kiosk compose and remove volumes"
+    commandLine(
+        "/usr/local/bin/docker", "compose",
+        "-f", "infra/docker-compose.yml",
+        "down", "-v"
+    )
 }
