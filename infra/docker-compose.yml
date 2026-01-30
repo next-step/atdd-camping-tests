@@ -2,7 +2,6 @@ name: atdd-application
 
 networks:
   atdd-net:
-    name: atdd-net
     external: true
 
 services:
@@ -27,7 +26,6 @@ services:
       - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=secret
-
   reservation:
     build:
       context: ../repos/atdd-camping-reservation
@@ -49,7 +47,6 @@ services:
       - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=secret
-
   kiosk:
     build:
       context: ../repos/atdd-camping-kiosk

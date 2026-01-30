@@ -3,7 +3,6 @@ name: atdd-infra
 networks:
   atdd-net:
     name: atdd-net
-    external: false
 
 services:
   db:

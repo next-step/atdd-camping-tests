@@ -1,11 +1,11 @@
 test
 
-```bash
+```shell
 mkdir repos
 cd mkdir repos
 ```
 
-```bash
+```shell
 cd /repos
 git clone https://github.com/yhh1056/atdd-camping-reservation.git --branch yhh1056 --single-branch
 git clone https://github.com/yhh1056/atdd-camping-admin.git --branch yhh1056 --single-branch
@@ -13,11 +13,16 @@ git clone https://github.com/yhh1056/atdd-camping-kiosk.git --branch main --sing
 ```
 
 DB 컨테이너 실행
-```bash
+```shell
 docker compose up -d
 ```
 
 애플리케이션 실행
-```bash
+```shell
 - docker compose up -d
+```
+
+테스트 실행
+```shell
+./gradlew test
 ```
