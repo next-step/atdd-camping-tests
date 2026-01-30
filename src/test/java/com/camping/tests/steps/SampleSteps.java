@@ -6,17 +6,17 @@ import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 
-import static com.camping.tests.config.ExternalAPIConfig.키오스크_시스템_호스트;
+import static com.camping.tests.config.ExternalAPIConfig.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("NonAsciiCharacters")
 public class SampleSteps {
     private ExtractableResponse<Response> response;
 
-    @When("키오스크에 요청을 보낸다")
-    public void 요청을보낸다() {
+    @When("{string}에 요청을 보낸다")
+    public void 요청을보낸다(String serviceName) {
         response = RestAssured.given()
-                .baseUri(키오스크_시스템_호스트())
+                .baseUri(getServiceHost(serviceName))
                 .when()
                 .get("/")
                 .then()
