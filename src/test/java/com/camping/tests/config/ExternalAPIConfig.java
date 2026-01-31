@@ -3,20 +3,9 @@ package com.camping.tests.config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Properties;
 
 public class ExternalAPIConfig {
-
-    private static final Map<String, String> applicationHost = Map.of(
-            "어드민시스템", adminHost(),
-            "키오스크시스템", kioskHost(),
-            "예약시스템", reservationHost()
-    );
-
-    public static String getServiceHost(String serviceName) {
-        return applicationHost.get(serviceName);
-    }
 
     public static String adminHost() {
         try {
