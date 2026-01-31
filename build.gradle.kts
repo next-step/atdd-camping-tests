@@ -13,6 +13,7 @@ repositories {
 val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
 val jacksonVersion = "2.17.2"
+val awaitilityVersion = "4.2.0"
 
 dependencies {
     // Cucumber
@@ -22,6 +23,9 @@ dependencies {
     // RestAssured
     testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+
+    // Awaitility
+    testImplementation("org.awaitility:awaitility:${awaitilityVersion}")
 
     // JUnit Jupiter
     testImplementation("org.junit.platform:junit-platform-suite:1.10.0")
@@ -36,3 +40,43 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Exec>("kioskComposeUp") {
+    group = "infra"
+    description = "Run kiosk via docker compose (build + up)"
+    commandLine(
+            "docker", "compose",
+            "-f", "infra/docker-compose.yml",
+            "up", "-d", "--build"
+    )
+}
+
+tasks.register<Exec>("kioskComposeDown") {
+    group = "infra"
+    description = "Stop kiosk compose and remove volumes"
+    commandLine(
+            "docker", "compose",
+            "-f", "infra/docker-compose.yml",
+            "down", "-v"
+    )
+}
+
+tasks.register<Exec>("kioskPs") {
+    group = "infra"
+    description = "Show kiosk container status"
+    commandLine(
+        "docker", "compose",
+        "-f", "infra/docker-compose.yml",
+        "ps"
+    )
+}
+
+tasks.register<Exec>("kioskLog") {
+    group = "infra"
+    description = "Show kiosk container log"
+    commandLine(
+            "docker", "logs", "atdd-kiosk",
+            "--tail", "100"
+    )
+}
+
