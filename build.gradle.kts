@@ -13,7 +13,6 @@ repositories {
 val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
 val jacksonVersion = "2.17.2"
-val awaitilityVersion = "4.2.0"
 
 dependencies {
     // Cucumber
@@ -24,14 +23,13 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
 
-    // Awaitility
-    testImplementation("org.awaitility:awaitility:${awaitilityVersion}")
-
     // JUnit Jupiter
     testImplementation("org.junit.platform:junit-platform-suite:1.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
+
+    testImplementation("org.assertj:assertj-core:3.27.6")
 
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
