@@ -29,6 +29,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
 
+    testImplementation("org.assertj:assertj-core:3.27.6")
+
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
@@ -36,3 +38,43 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.register<Exec>("kioskComposeUp") {
+    group = "infra"
+    description = "Run kiosk via docker compose (build + up)"
+    commandLine(
+            "docker", "compose",
+            "-f", "infra/docker-compose.yml",
+            "up", "-d", "--build"
+    )
+}
+
+tasks.register<Exec>("kioskComposeDown") {
+    group = "infra"
+    description = "Stop kiosk compose and remove volumes"
+    commandLine(
+            "docker", "compose",
+            "-f", "infra/docker-compose.yml",
+            "down", "-v"
+    )
+}
+
+tasks.register<Exec>("kioskPs") {
+    group = "infra"
+    description = "Show kiosk container status"
+    commandLine(
+        "docker", "compose",
+        "-f", "infra/docker-compose.yml",
+        "ps"
+    )
+}
+
+tasks.register<Exec>("kioskLog") {
+    group = "infra"
+    description = "Show kiosk container log"
+    commandLine(
+            "docker", "logs", "atdd-kiosk",
+            "--tail", "100"
+    )
+}
+
