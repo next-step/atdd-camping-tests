@@ -2,8 +2,8 @@ package com.camping.tests.api;
 
 import com.camping.tests.context.HttpContext;
 
-import static com.camping.tests.config.ExternalAPIConfig.kioskHost;
-import static com.camping.tests.config.ExternalAPIConfig.reservationHost;
+import static com.camping.tests.config.TestEnvironment.kioskHost;
+import static com.camping.tests.config.TestEnvironment.reservationHost;
 
 @SuppressWarnings("NonAsciiCharacters")
 public class ReservationApi extends BasicApi {

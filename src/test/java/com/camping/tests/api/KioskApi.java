@@ -2,7 +2,7 @@ package com.camping.tests.api;
 
 import com.camping.tests.context.HttpContext;
 
-import static com.camping.tests.config.ExternalAPIConfig.kioskHost;
+import static com.camping.tests.config.TestEnvironment.kioskHost;
 
 @SuppressWarnings("NonAsciiCharacters")
 public class KioskApi extends BasicApi {

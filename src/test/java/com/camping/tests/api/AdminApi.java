@@ -6,7 +6,7 @@ import com.camping.tests.context.HttpContext;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.camping.tests.config.ExternalAPIConfig.*;
+import static com.camping.tests.config.TestEnvironment.*;
 
 @SuppressWarnings("NonAsciiCharacters")
 public class AdminApi extends BasicApi {
@@ -19,8 +19,8 @@ public class AdminApi extends BasicApi {
     }
 
     public void 로그인_요청() {
-        String username = getAdminUsername();
-        String password = getAdminPassword();
+        String username = adminUsername();
+        String password = adminPassword();
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("username", username);
