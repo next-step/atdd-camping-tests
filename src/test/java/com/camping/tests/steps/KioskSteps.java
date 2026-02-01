@@ -21,7 +21,7 @@ public class KioskSteps {
     public KioskSteps(ScenarioContext context) {
         this.context = context;
         this.kioskBaseUrl = Optional.ofNullable(System.getenv("KIOSK_BASE_URL"))
-                .orElse("http://localhost:18081");
+                .orElse("http://localhost:8081");
     }
 
     @When("키오스크 서비스의 {string}에 GET 요청을 보낸다")

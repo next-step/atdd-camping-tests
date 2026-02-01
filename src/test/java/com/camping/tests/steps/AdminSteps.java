@@ -14,7 +14,7 @@ public class AdminSteps {
     public AdminSteps(ScenarioContext context) {
         this.context = context;
         this.adminBaseUrl = Optional.ofNullable(System.getenv("ADMIN_BASE_URL"))
-                .orElse("http://localhost:8081");
+                .orElse("http://localhost:8082");
     }
 
     @When("관리자 서비스의 {string}에 GET 요청을 보낸다")

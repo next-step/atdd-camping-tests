@@ -14,7 +14,7 @@ public class ReservationSteps {
     public ReservationSteps(ScenarioContext context) {
         this.context = context;
         this.reservationBaseUrl = Optional.ofNullable(System.getenv("RESERVATION_BASE_URL"))
-                .orElse("http://localhost:8082");
+                .orElse("http://localhost:8083");
     }
 
     @When("예약 서비스의 {string}에 GET 요청을 보낸다")
