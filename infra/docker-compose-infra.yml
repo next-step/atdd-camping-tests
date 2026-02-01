@@ -10,15 +10,18 @@ services:
     image: mysql:8.0
     container_name: atdd-db
     environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=atdd
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_ROOT_HOST=%
     ports:
       - "3306:3306"
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      # - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro  # 개발용 데이터 필요시
     networks:
       - atdd-net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_PASSWORD}"]
       interval: 5s
       timeout: 3s
       retries: 20
