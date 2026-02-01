@@ -1,9 +1,6 @@
-name: atdd-infra
-
 networks:
   atdd-net:
     name: atdd-net
-    external: false
 
 services:
   db:
@@ -13,10 +10,14 @@ services:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=atdd
       - MYSQL_ROOT_HOST=%
+      - MYSQL_USER=tester
+      - MYSQL_PASSWORD=1234
     ports:
       - "3306:3306"
     networks:
       - atdd-net
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
       interval: 5s
