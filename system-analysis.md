@@ -125,3 +125,14 @@ atdd-camping-tests/
 # 환경 종료
 ./gradlew composeDown
 ```
+
+### Gradle 태스크 설명
+
+| 태스크 | 설명 |
+|--------|------|
+| `composeUp` | Docker 환경 시작 (인프라 + 서비스) |
+| `waitForServices` | 서비스가 준비될 때까지 헬스체크 (최대 30회, 2초 간격) |
+| `test` | Cucumber 테스트 실행 |
+| `composeDown` | Docker 환경 종료 |
+
+`waitForServices`는 `http://localhost:8080`에 HTTP 요청을 보내 200 응답을 받을 때까지 대기합니다. 서비스가 60초 내에 준비되지 않으면 빌드가 실패합니다.
