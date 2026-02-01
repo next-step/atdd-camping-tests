@@ -1,11 +1,17 @@
 package com.camping.tests.steps;
 
 import com.camping.tests.context.ScenarioContext;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 
+import java.util.List;
 import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class KioskSteps {
 
@@ -24,6 +30,27 @@ public class KioskSteps {
                 .when()
                 .get(kioskBaseUrl + path);
         context.setResponse(response);
+    }
+
+    @When("키오스크로 상품 목록을 조회하면")
+    public void 키오스크로_상품_목록을_조회하면() {
+        ExtractableResponse<Response> response = RestAssured.given()
+                .log().all()
+                .baseUri(kioskBaseUrl)
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/api/products")
+                .then()
+                .log().all()
+                .extract();
+
+        context.setResponse(response.response());
+    }
+
+    @Then("상품 개수는 1개 이상이다")
+    public void 상품_개수는_1개_이상이다() {
+        List<Object> list = context.getResponse().jsonPath().getList(".");
+        assertThat(list).isNotEmpty();
     }
 }
 
