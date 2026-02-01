@@ -9,10 +9,6 @@ repositories {
     mavenCentral()
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 // Versions
 val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
@@ -41,4 +37,13 @@ dependencies {
 }
 
 apply(from = "gradle/tasks.gradle.kts")
+
+tasks.test {
+    useJUnitPlatform()
+    dependsOn("waitForServices") // 서비스가 준비될 때까지 기다림
+    finalizedBy("composeDown")
+    mustRunAfter("gitPullAll")
+}
+
+
 
