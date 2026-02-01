@@ -18,6 +18,7 @@ dependencies {
     // Cucumber
     testImplementation("io.cucumber:cucumber-java:$cucumberVersion")
     testImplementation("io.cucumber:cucumber-junit-platform-engine:$cucumberVersion")
+    testImplementation("io.cucumber:cucumber-picocontainer:$cucumberVersion")
 
     // RestAssured
     testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
@@ -35,46 +36,14 @@ dependencies {
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
 
+apply(from = "gradle/tasks.gradle.kts")
+
 tasks.test {
     useJUnitPlatform()
+    dependsOn("waitForServices") // 서비스가 준비될 때까지 기다림
+    finalizedBy("composeDown")
+    mustRunAfter("gitPullAll")
 }
 
-tasks.register<Exec>("kioskComposeUp") {
-    group = "infra"
-    description = "Run kiosk via docker compose (build + up)"
-    commandLine(
-            "docker", "compose",
-            "-f", "infra/docker-compose.yml",
-            "up", "-d", "--build"
-    )
-}
 
-tasks.register<Exec>("kioskComposeDown") {
-    group = "infra"
-    description = "Stop kiosk compose and remove volumes"
-    commandLine(
-            "docker", "compose",
-            "-f", "infra/docker-compose.yml",
-            "down", "-v"
-    )
-}
-
-tasks.register<Exec>("kioskPs") {
-    group = "infra"
-    description = "Show kiosk container status"
-    commandLine(
-        "docker", "compose",
-        "-f", "infra/docker-compose.yml",
-        "ps"
-    )
-}
-
-tasks.register<Exec>("kioskLog") {
-    group = "infra"
-    description = "Show kiosk container log"
-    commandLine(
-            "docker", "logs", "atdd-kiosk",
-            "--tail", "100"
-    )
-}
 

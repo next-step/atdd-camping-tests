@@ -1,16 +1,70 @@
+networks:
+  atdd-net:
+    external: true
+
 services:
   kiosk:
     build:
       context: ../repos/atdd-camping-kiosk
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
     container_name: atdd-kiosk
+    networks:
+      - atdd-net
     ports:
-      - "18081:8080"
+      - "8081:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
+      - KIOSK_BASE_URL=http://localhost:8081
+      - KIOSK_ADMIN_BASE_URL=http://atdd-admin:8080
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  admin:
+    build:
+      context: ../repos/atdd-camping-admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile-admin
+    container_name: atdd-admin
+    networks:
+      - atdd-net
+    ports:
+      - "8082:8080"
+    environment:
+      - SERVER_PORT=8080
+      - ADMIN_BASE_URL=http://localhost:8082
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
+      - SPRING_DATASOURCE_USERNAME=tester
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_PROFILES_ACTIVE=prod
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  reservation:
+    build:
+      context: ../repos/atdd-camping-reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation
+    container_name: atdd-reservation
+    networks:
+      - atdd-net
+    ports:
+      - "8083:8080"
+    environment:
+      - SERVER_PORT=8080
+      - RESERVATION_BASE_URL=http://localhost:8083
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
+      - SPRING_DATASOURCE_USERNAME=tester
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_PROFILES_ACTIVE=prod
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
       interval: 10s
       timeout: 5s
       retries: 10
