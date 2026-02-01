@@ -35,4 +35,46 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    dependsOn("composeUp", "waitForServices")
+    finalizedBy("composeDown")
+}
+
+// ========== Docker Compose Tasks ==========
+
+tasks.register<Exec>("composeUp") {
+    description = "Start test environment"
+    commandLine(
+        "sh", "-c",
+        "docker compose -f infra/docker-compose-infra.yml up -d && " +
+        "docker compose -f infra/docker-compose.yml up -d --build"
+    )
+}
+
+tasks.register<Exec>("waitForServices") {
+    description = "Wait for services to be ready"
+    dependsOn("composeUp")
+    commandLine(
+        "sh", "-c",
+        """
+        for i in $(seq 1 30); do
+            if curl -s -o /dev/null -w '%{http_code}' http://localhost:8080 | grep -q '200'; then
+                echo "Service is ready after ${'$'}i attempts"
+                exit 0
+            fi
+            echo "Waiting for service... attempt ${'$'}i/30"
+            sleep 2
+        done
+        echo "Service did not become ready in time"
+        exit 1
+        """.trimIndent()
+    )
+}
+
+tasks.register<Exec>("composeDown") {
+    description = "Stop test environment"
+    commandLine(
+        "sh", "-c",
+        "docker compose -f infra/docker-compose.yml down; " +
+        "docker compose -f infra/docker-compose-infra.yml down"
+    )
 }

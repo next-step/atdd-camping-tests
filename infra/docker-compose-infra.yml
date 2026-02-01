@@ -14,7 +14,7 @@ services:
       - MYSQL_DATABASE=atdd
       - MYSQL_ROOT_HOST=%
     ports:
-      - "3306:3306"
+      - "13306:3306"
     networks:
       - atdd-net
     healthcheck:
