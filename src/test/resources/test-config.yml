@@ -1,1 +1,6 @@
-kiosk-url: http://localhost:8081
+admin-url: http://localhost:8081
+reservation-url: http://localhost:8082
+kiosk-url: http://localhost:8083
+
+admin-username: admin
+admin-password: admin123
