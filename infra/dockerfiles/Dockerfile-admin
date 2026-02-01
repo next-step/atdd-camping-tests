@@ -1,4 +1,4 @@
-# Dockerfile-kiosk
+# Dockerfile-admin
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /workspace
 
