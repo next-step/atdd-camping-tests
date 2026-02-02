@@ -1,0 +1,22 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$[?(@.amount == 12345)]"
+      }
+    ]
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "INVALID_AMOUNT",
+      "message": "결제 금액이 일치하지 않습니다."
+    }
+  }
+}

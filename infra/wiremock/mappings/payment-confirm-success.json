@@ -1,0 +1,25 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "paymentKey": "{{jsonPath request.body '$.paymentKey'}}",
+      "orderId": "{{jsonPath request.body '$.orderId'}}",
+      "method": "CARD",
+      "approvedAt": "{{now}}",
+      "totalAmount": "{{jsonPath request.body '$.amount'}}",
+      "status": "APPROVED",
+      "receipt": {
+        "url": "https://pay.local/receipts/mock-receipt"
+      }
+    },
+    "transformers": ["response-template"]
+  }
+}
