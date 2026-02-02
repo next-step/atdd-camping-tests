@@ -3,7 +3,7 @@ data class RepoConfig(val dir: String, val repo: String, val branch: String)
 val repos = listOf(
     RepoConfig("atdd-camping-reservation", "https://github.com/yhh1056/atdd-camping-reservation.git", "yhh1056"),
     RepoConfig("atdd-camping-admin", "https://github.com/yhh1056/atdd-camping-admin.git", "yhh1056"),
-    RepoConfig("atdd-camping-kiosk", "https://github.com/yhh1056/atdd-camping-kiosk.git", "main")
+    RepoConfig("atdd-camping-kiosk", "https://github.com/yhh1056/atdd-camping-kiosk.git", "yhh1056")
 )
 
 fun runCommand(vararg args: String, workingDir: File): Int {
@@ -25,7 +25,7 @@ tasks.register("setup") {
         repos.forEach { config ->
             val repoDir = file("repos/${config.dir}")
             if (repoDir.resolve(".git").exists()) {
-                println("🔄 ${config.dir} 이미 존재 → pull")
+                println("a🔄 ${config.dir} 이미 존재 → pull")
                 runCommand("git", "fetch", "origin", workingDir = repoDir)
                 runCommand("git", "checkout", config.branch, workingDir = repoDir)
                 runCommand("git", "pull", "origin", config.branch, workingDir = repoDir)
