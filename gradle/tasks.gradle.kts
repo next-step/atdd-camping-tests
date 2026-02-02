@@ -116,29 +116,27 @@ tasks.register("waitForServices") {
             "admin" to "http://localhost:8082/login",
             "reservation" to "http://localhost:8083/"
         )
-        val timeout = 60 // seconds
-        val startTime = System.currentTimeMillis()
-        val healthyServices = mutableSetOf<String>()
+        val retries = 30
+        val delay = 2000L // 2 seconds
 
         println("Waiting for services to become healthy...")
 
-        while (System.currentTimeMillis() - startTime < timeout * 1000) {
-            services.forEach { (name, url) ->
-                if (!healthyServices.contains(name)) {
-                    try {
-                        val connection = URL(url).openConnection() as HttpURLConnection
-                        connection.requestMethod = "GET"
-                        connection.connectTimeout = 1000
-                        connection.readTimeout = 1000
-
-                        if (connection.responseCode == 200) {
-                            println("✅ Service '$name' is healthy.")
-                            healthyServices.add(name)
-                        }
-                        // Don't print for non-200, it's too noisy
-                    } catch (e: Exception) {
-                        // Don't print error message, it's too noisy
+        for (i in 1..retries) {
+            val healthyServices = services.filter { (name, url) ->
+                try {
+                    val connection = URL(url).openConnection() as HttpURLConnection
+                    connection.requestMethod = "GET"
+                    connection.connectTimeout = 1000
+                    connection.readTimeout = 1000
+                    val responseCode = connection.responseCode
+                    if (responseCode == 200) {
+                        println("✅ Service '$name' is healthy.")
+                        true
+                    } else {
+                        false
                     }
+                } catch (e: Exception) {
+                    false
                 }
             }
 
@@ -148,10 +146,10 @@ tasks.register("waitForServices") {
             }
 
             print(".")
-            Thread.sleep(2000) // wait 2 seconds before next poll
+            Thread.sleep(delay)
         }
 
-        throw GradleException("❌ Timeout: Not all services became healthy within $timeout seconds.")
+        throw GradleException("❌ Timeout: Not all services became healthy within the specified time.")
     }
 }
 
