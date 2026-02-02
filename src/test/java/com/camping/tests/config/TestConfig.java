@@ -45,6 +45,10 @@ public class TestConfig {
         return get("reservation.base-url");
     }
 
+    public static String getPaymentsBaseUrl() {
+        return get("payments.base-url");
+    }
+
     // Database
     public static String getDbUrl() {
         return get("db.url");
