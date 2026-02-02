@@ -49,6 +49,15 @@ public class TestConfig {
         return get("payments.base-url");
     }
 
+    // Admin Auth
+    public static String getAdminUsername() {
+        return get("admin.username");
+    }
+
+    public static String getAdminPassword() {
+        return get("admin.password");
+    }
+
     // Database
     public static String getDbUrl() {
         return get("db.url");
