@@ -1,3 +1,43 @@
+data class RepoConfig(val dir: String, val repo: String, val branch: String)
+
+val repos = listOf(
+    RepoConfig("atdd-camping-reservation", "https://github.com/yhh1056/atdd-camping-reservation.git", "yhh1056"),
+    RepoConfig("atdd-camping-admin", "https://github.com/yhh1056/atdd-camping-admin.git", "yhh1056"),
+    RepoConfig("atdd-camping-kiosk", "https://github.com/yhh1056/atdd-camping-kiosk.git", "main")
+)
+
+fun runCommand(vararg args: String, workingDir: File): Int {
+    return ProcessBuilder(*args)
+        .directory(workingDir)
+        .inheritIO()
+        .start()
+        .waitFor()
+}
+
+tasks.register("setup") {
+    group = "infra"
+    description = "Clone or update all project repositories"
+
+    doFirst {
+        val reposDir = file("repos")
+        reposDir.mkdirs()
+
+        repos.forEach { config ->
+            val repoDir = file("repos/${config.dir}")
+            if (repoDir.resolve(".git").exists()) {
+                println("🔄 ${config.dir} 이미 존재 → pull")
+                runCommand("git", "fetch", "origin", workingDir = repoDir)
+                runCommand("git", "checkout", config.branch, workingDir = repoDir)
+                runCommand("git", "pull", "origin", config.branch, workingDir = repoDir)
+            } else {
+                println("📦 ${config.dir} clone")
+                runCommand("git", "clone", config.repo, "--branch", config.branch, "--single-branch", workingDir = reposDir)
+            }
+        }
+        println("✅ 모든 프로젝트 최신 상태로 준비 완료")
+    }
+}
+
 tasks.register<Exec>("dbComposeUp") {
     group = "infra"
     description = "Start database containers"
@@ -20,7 +60,7 @@ tasks.register<Exec>("applicationComposeUp") {
         println("🧹 cleaning docker compose")
     }
 
-    dependsOn("dbComposeUp")
+    dependsOn("setup", "dbComposeUp")
     commandLine("docker", "compose", "-f", "infra/docker-compose.yml", "up", "-d", "--build", "--wait")
 }
 
