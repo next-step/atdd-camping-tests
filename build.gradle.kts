@@ -34,6 +34,9 @@ dependencies {
 
     // JDBC driver for test hooks
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
+
+    // WireMock
+    testImplementation("org.wiremock:wiremock:3.13.1")
 }
 
 apply(from = "gradle/tasks.gradle.kts")
