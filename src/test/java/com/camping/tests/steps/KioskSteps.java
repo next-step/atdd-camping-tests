@@ -1,12 +1,9 @@
 package com.camping.tests.steps;
 
+import com.camping.tests.clients.ApiClient;
 import com.camping.tests.context.ScenarioContext;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,25 +23,14 @@ public class KioskSteps {
 
     @When("키오스크 서비스의 {string}에 GET 요청을 보낸다")
     public void 키오스크_서비스의_GET_요청을_보낸다(String path) {
-        Response response = RestAssured.given()
-                .when()
-                .get(kioskBaseUrl + path);
+        var response = ApiClient.get(kioskBaseUrl + path);
         context.setResponse(response);
     }
 
     @When("키오스크로 상품 목록을 조회하면")
     public void 키오스크로_상품_목록을_조회하면() {
-        ExtractableResponse<Response> response = RestAssured.given()
-                .log().all()
-                .baseUri(kioskBaseUrl)
-                .contentType(ContentType.JSON)
-                .when()
-                .get("/api/products")
-                .then()
-                .log().all()
-                .extract();
-
-        context.setResponse(response.response());
+        var response = ApiClient.get(kioskBaseUrl + "/api/products");
+        context.setResponse(response);
     }
 
     @Then("상품 개수는 1개 이상이다")

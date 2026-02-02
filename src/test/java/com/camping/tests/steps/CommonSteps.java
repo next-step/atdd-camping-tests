@@ -15,11 +15,13 @@ public class CommonSteps {
 
     @Then("성공 응답을 받는다")
     public void 성공_응답을_받는다() {
-        assertThat(context.getResponse().statusCode()).isEqualTo(200);
+        var response = context.getResponse();
+        assertThat(response.statusCode()).isEqualTo(200);
     }
 
     @Then("응답 본문은 {string}이다")
     public void 응답_본문을_확인한다(String body) {
-        assertThat(context.getResponse().getBody().asString()).isEqualTo(body);
+        var response = context.getResponse();
+        assertThat(response.body().asString()).isEqualTo(body);
     }
 }
