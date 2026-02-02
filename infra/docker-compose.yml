@@ -50,13 +50,26 @@ services:
       - KIOSK_ADMIN_AUTH_PASSWORD=admin123
       - KIOSK_ADMIN_AUTH_LOGIN_PATH=/auth/login
       - KIOSK_ADMIN_AUTH_COOKIE_NAME=AUTH_TOKEN
-      # Payment 서버 연결 설정
-      - KIOSK_PAYMENT_BASE_URL=http://payments:9090
+      # Payment 서버 연결 설정 (WireMock)
+      - KIOSK_PAYMENT_BASE_URL=http://payments:8080
       - KIOSK_PAYMENT_SECRET_KEY=test_sk_dummy
       - KIOSK_DISCOUNT_PERCENT=10
     depends_on:
       admin:
         condition: service_started
+      payments:
+        condition: service_started
+    networks:
+      - atdd-net
+
+  payments:
+    image: wiremock/wiremock:3.3.1
+    ports:
+      - "19090:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+      - ./wiremock/__files:/home/wiremock/__files
+    command: --global-response-templating
     networks:
       - atdd-net
 
