@@ -8,10 +8,10 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
-      - JWT_SECRET=change-this-dev-secret-key-please
-      - JWT_EXPIRATION_MINUTES=30
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=admin123
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_MINUTES=${JWT_EXPIRATION_MINUTES}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       # DB 설정
       - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:${DB_PORT}/${DB_NAME}?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
@@ -46,17 +46,30 @@ services:
       - SERVER_PORT=8080
       # Admin 서버 연결 설정
       - KIOSK_ADMIN_BASE_URL=http://admin:8080
-      - KIOSK_ADMIN_AUTH_USERNAME=admin
-      - KIOSK_ADMIN_AUTH_PASSWORD=admin123
-      - KIOSK_ADMIN_AUTH_LOGIN_PATH=/auth/login
-      - KIOSK_ADMIN_AUTH_COOKIE_NAME=AUTH_TOKEN
-      # Payment 서버 연결 설정
-      - KIOSK_PAYMENT_BASE_URL=http://payments:9090
-      - KIOSK_PAYMENT_SECRET_KEY=test_sk_dummy
-      - KIOSK_DISCOUNT_PERCENT=10
+      - KIOSK_ADMIN_AUTH_USERNAME=${ADMIN_USERNAME}
+      - KIOSK_ADMIN_AUTH_PASSWORD=${ADMIN_PASSWORD}
+      - KIOSK_ADMIN_AUTH_LOGIN_PATH=${KIOSK_ADMIN_AUTH_LOGIN_PATH}
+      - KIOSK_ADMIN_AUTH_COOKIE_NAME=${KIOSK_ADMIN_AUTH_COOKIE_NAME}
+      # Payment 서버 연결 설정 (WireMock)
+      - KIOSK_PAYMENT_BASE_URL=http://payments:8080
+      - KIOSK_PAYMENT_SECRET_KEY=${PAYMENT_SECRET_KEY}
+      - KIOSK_DISCOUNT_PERCENT=${KIOSK_DISCOUNT_PERCENT}
     depends_on:
       admin:
         condition: service_started
+      payments:
+        condition: service_started
+    networks:
+      - atdd-net
+
+  payments:
+    image: wiremock/wiremock:3.3.1
+    ports:
+      - "19090:8080"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+      - ./wiremock/__files:/home/wiremock/__files
+    command: --global-response-templating
     networks:
       - atdd-net
 
