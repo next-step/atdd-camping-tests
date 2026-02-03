@@ -114,7 +114,8 @@ tasks.register("waitForServices") {
         val services = listOf(
             "kiosk" to "http://localhost:8081/health",
             "admin" to "http://localhost:8082/login",
-            "reservation" to "http://localhost:8083/"
+            "reservation" to "http://localhost:8083/",
+            "payment-mock" to "http://localhost:8084/__admin/mappings"
         )
         val retries = 30
         val delay = 2000L // 2 seconds
