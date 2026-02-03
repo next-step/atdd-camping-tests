@@ -2,6 +2,8 @@ package com.camping.tests.steps;
 
 import com.camping.tests.clients.ApiClient;
 import com.camping.tests.context.ScenarioContext;
+import com.camping.tests.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -23,6 +25,7 @@ public class KioskSteps {
 
     private final String kioskBaseUrl;
     private final ScenarioContext context;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public KioskSteps(ScenarioContext context) {
@@ -56,96 +59,49 @@ public class KioskSteps {
 
     @Given("키오스크에 결제 생성을 요청한다")
     public void 키오스크에_결제_생성을_요청한다() throws IOException {
+        var createResponse = new CreateResponse(paymentKey, orderId, "CREATED");
         stubFor(post(urlEqualTo("/v1/payments"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\"paymentKey\":\"dummy-payment-key\",\"orderId\":\"dummy-order-id\",\"status\":\"READY\"}")));
+                        .withBody(objectMapper.writeValueAsString(createResponse))));
 
-        // 2. Now, make the actual request to the Kiosk service.
-        String kioskRequestBody = "{\n" +
-                "  \"items\": [\n" +
-                "    {\n" +
-                "      \"productId\": 1,\n" +
-                "      \"productName\": \"캠핑의자\",\n" +
-                "      \"unitPrice\": 10000,\n" +
-                "      \"quantity\": 1\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"paymentMethod\": \"CARD\"\n" +
-                "}";
+        var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
+        var kioskRequestBody = new PaymentCreateRequest(List.of(cartItem), "CARD");
 
-        var response = ApiClient.post(kioskBaseUrl + "/api/payments", kioskRequestBody);
+        var response = ApiClient.post(kioskBaseUrl + "/api/payments", objectMapper.writeValueAsString(kioskRequestBody));
         context.setResponse(response);
     }
 
     @When("키오스크에 결제 확정을 요청한다")
     public void 키오스크에_결제_확정을_요청한다() throws IOException {
+        var confirmResponse = new ConfirmResponse(paymentKey, orderId, "CARD", "2026-02-02T10:00:00Z", 10000, "APPROVED", new ConfirmResponse.Receipt("http://receipt.url/123"));
         stubFor(post(urlEqualTo("/v1/payments/confirm"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"paymentKey\": \"" + paymentKey + "\",\n" +
-                                "  \"orderId\": \"" + orderId + "\",\n" +
-                                "  \"method\": \"CARD\",\n" +
-                                "  \"approvedAt\": \"2026-02-02T10:00:00Z\",\n" +
-                                "  \"totalAmount\": 10000,\n" +
-                                "  \"status\": \"APPROVED\",\n" +
-                                "  \"receipt\": {\n" +
-                                "    \"url\": \"http://receipt.url/123\"\n" +
-                                "  }\n" +
-                                "}")));
+                        .withBody(objectMapper.writeValueAsString(confirmResponse))));
 
-        String requestBody = "{\n" +
-                "  \"paymentKey\": \"" + paymentKey + "\",\n" +
-                "  \"orderId\": \"" + orderId + "\",\n" +
-                "  \"amount\": 10000,\n" +
-                "  \"items\": [\n" +
-                "    {\n" +
-                "      \"productId\": 1,\n" +
-                "      \"productName\": \"캠핑의자\",\n" +
-                "      \"unitPrice\": 10000,\n" +
-                "      \"quantity\": 1\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
+        var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
+        var requestBody = new PaymentConfirmRequest(paymentKey, orderId, 10000, List.of(cartItem));
 
-        var response = ApiClient.post(kioskBaseUrl + "/api/payments/confirm", requestBody);
+        var response = ApiClient.post(kioskBaseUrl + "/api/payments/confirm", objectMapper.writeValueAsString(requestBody));
         context.setResponse(response);
     }
 
     @When("키오스크에 금액 {int}원으로 결제 확정을 요청한다")
-    public void 키오스크에_금액_원으로_결제_확정을_요청한다(int amount) {
+    public void 키오스크에_금액_원으로_결제_확정을_요청한다(int amount) throws IOException {
+        var confirmResponse = new ConfirmResponse(paymentKey, orderId, "CARD", null, 0, "REJECTED", null);
         stubFor(post(urlEqualTo("/v1/payments/confirm"))
                 .willReturn(aResponse()
                         .withStatus(400)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\n" +
-                                "  \"paymentKey\": \"" + paymentKey + "\",\n" +
-                                "  \"orderId\": \"" + orderId + "\",\n" +
-                                "  \"method\": \"CARD\",\n" +
-                                "  \"approvedAt\": null,\n" +
-                                "  \"totalAmount\": 0,\n" +
-                                "  \"status\": \"REJECTED\",\n" +
-                                "  \"receipt\": null\n" +
-                                "}")));
+                        .withBody(objectMapper.writeValueAsString(confirmResponse))));
 
-        String requestBody = "{\n" +
-                "  \"paymentKey\": \"" + paymentKey + "\",\n" +
-                "  \"orderId\": \"" + orderId + "\",\n" +
-                "  \"amount\": " + amount + ",\n" +
-                "  \"items\": [\n" +
-                "    {\n" +
-                "      \"productId\": 1,\n" +
-                "      \"productName\": \"캠핑의자\",\n" +
-                "      \"unitPrice\": 10000,\n" +
-                "      \"quantity\": 1\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
+        var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
+        var requestBody = new PaymentConfirmRequest(paymentKey, orderId, amount, List.of(cartItem));
 
-        var response = ApiClient.post(kioskBaseUrl + "/api/payments/confirm", requestBody);
+        var response = ApiClient.post(kioskBaseUrl + "/api/payments/confirm", objectMapper.writeValueAsString(requestBody));
         context.setResponse(response);
     }
 
