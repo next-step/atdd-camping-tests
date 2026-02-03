@@ -1,5 +1,6 @@
 {
   "name": "결제 승인 요청",
+  "priority": 10,
   "request": {
     "method": "POST",
     "urlPath": "/v1/payments/confirm"

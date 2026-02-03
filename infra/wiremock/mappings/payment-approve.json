@@ -12,7 +12,7 @@
     "jsonBody": {
       "paymentKey": "pay_mock",
       "orderId": "ord_mock",
-      "status": "READY"
+      "status": "APPROVED"
     }
   }
 }

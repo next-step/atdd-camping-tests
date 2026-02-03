@@ -1,0 +1,25 @@
+{
+  "name": "결제 승인 요청 - 실패(특정 금액)",
+  "priority": 0,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"amount\": 12345}",
+        "ignoreExtraElements": true,
+        "ignoreArrayOrder": true
+      }
+    ]
+  },
+  "response": {
+    "status": 400,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "PAYMENT_CONFIRM_FAILED",
+      "message": "결제 승인 실패"
+    }
+  }
+}

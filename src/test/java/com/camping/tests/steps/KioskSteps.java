@@ -57,14 +57,13 @@ public class KioskSteps {
 
     @When("키오스크에 결제 확정을 요청한다")
     public void 키오스크에_결제_확정을_요청한다() {
-        List<CartItemDto> items = kioskContext.getCartItems();
         PaymentCreateResultDto createResult = httpContext.getResponse().as(PaymentCreateResultDto.class);
 
         kioskApi.결제_확정_요청(new PaymentConfirmRequestDto(
                 createResult.paymentKey(),
                 createResult.orderId(),
                 createResult.amount(),
-                items
+                List.of()
         ));
     }
 
@@ -75,5 +74,23 @@ public class KioskSteps {
         assertThat(confirmResponse.success()).isTrue();
         assertThat(confirmResponse.message()).isEqualTo("결제 성공");
         assertThat(confirmResponse.paidAmount()).isGreaterThanOrEqualTo(0);
+    }
+
+    @When("키오스크에 금액 {int}원으로 결제 확정을 요청한다")
+    public void 키오스크에_금액으로_결제_확정을_요청한다(int amount) {
+        PaymentCreateResultDto createResult = httpContext.getResponse().as(PaymentCreateResultDto.class);
+
+        kioskApi.결제_확정_요청(new PaymentConfirmRequestDto(
+                createResult.paymentKey(),
+                createResult.orderId(),
+                amount,
+                List.of()
+        ));
+    }
+
+    @Then("결제가 실패이어야 한다")
+    public void 결제가_실패이어야_한다() {
+        PaymentConfirmResponseDto confirmResponse = httpContext.getResponse().as(PaymentConfirmResponseDto.class);
+        assertThat(confirmResponse.success()).isFalse();
     }
 }

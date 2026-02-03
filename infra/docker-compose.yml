@@ -85,7 +85,7 @@ services:
     volumes:
       - ./wiremock:/home/wiremock
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__admin/health"]
       interval: 5s
       timeout: 5s
       retries: 5
