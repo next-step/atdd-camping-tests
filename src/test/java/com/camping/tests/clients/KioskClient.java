@@ -22,6 +22,10 @@ public class KioskClient {
         this.api = new ApiClient(TestConfig.getKioskBaseUrl());
     }
 
+    public ExtractableResponse<Response> get(String path) {
+        return api.get(path);
+    }
+
     public ExtractableResponse<Response> getProducts() {
         return api.get(PRODUCTS_ENDPOINT);
     }

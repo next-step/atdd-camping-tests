@@ -1,10 +1,12 @@
 package com.camping.tests.steps;
 
-import com.camping.tests.clients.ApiClient;
 import com.camping.tests.clients.KioskClient;
 import com.camping.tests.config.TestConfig;
 import com.camping.tests.context.ScenarioContext;
-import com.camping.tests.dto.*;
+import com.camping.tests.dto.ConfirmResponse;
+import com.camping.tests.dto.CreateResponse;
+import com.camping.tests.dto.PaymentConfirmRequest;
+import com.camping.tests.dto.PaymentCreateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.cucumber.java.After;
@@ -47,8 +49,7 @@ public class KioskSteps {
 
     @When("키오스크 서비스의 {string}에 GET 요청을 보낸다")
     public void 키오스크_서비스에_GET요청을_보낸다(String requestUrl) {
-        var apiClient = new ApiClient(TestConfig.getKioskBaseUrl());
-        var response = apiClient.get(requestUrl);
+        var response = kioskClient.get(requestUrl);
         context.setResponse(response);
     }
 
@@ -67,10 +68,8 @@ public class KioskSteps {
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(createResponse))));
 
-        var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
-        var kioskRequestBody = new PaymentCreateRequest(List.of(cartItem), "CARD");
-
-        var response = kioskClient.createPayment(kioskRequestBody);
+        var request = PaymentCreateRequest.forCardPaymentWithDefaultItem();
+        var response = kioskClient.createPayment(request);
         context.setResponse(response);
     }
 
@@ -83,10 +82,8 @@ public class KioskSteps {
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(confirmResponse))));
 
-        var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
-        var requestBody = new PaymentConfirmRequest(paymentKey, orderId, 10000, List.of(cartItem));
-
-        var response = kioskClient.confirmPayment(requestBody);
+        var request = PaymentConfirmRequest.defaultConfirm(paymentKey, orderId);
+        var response = kioskClient.confirmPayment(request);
         context.setResponse(response);
     }
 
@@ -99,10 +96,8 @@ public class KioskSteps {
                         .withHeader("Content-Type", "application/json")
                         .withBody(objectMapper.writeValueAsString(confirmResponse))));
 
-        var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
-        var requestBody = new PaymentConfirmRequest(paymentKey, orderId, amount, List.of(cartItem));
-
-        var response = kioskClient.confirmPayment(requestBody);
+        var request = PaymentConfirmRequest.withAmount(paymentKey, orderId, amount);
+        var response = kioskClient.confirmPayment(request);
         context.setResponse(response);
     }
 
