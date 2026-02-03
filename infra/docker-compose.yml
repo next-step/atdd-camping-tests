@@ -23,7 +23,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
   admin:
     build:
       context: ../repos/atdd-camping-admin
@@ -46,7 +45,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
   reservation:
     build:
       context: ../repos/atdd-camping-reservation
@@ -69,7 +67,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
   payments-mock:
     image: wiremock/wiremock:latest
     container_name: atdd-payments-mock
@@ -84,4 +81,3 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
