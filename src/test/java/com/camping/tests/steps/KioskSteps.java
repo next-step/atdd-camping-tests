@@ -15,12 +15,10 @@ import io.cucumber.java.ko.만약;
 import java.io.IOException;
 import java.util.List;
 
+import static com.camping.tests.common.TestConstants.DEFAULT_PAYMENT_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class KioskSteps {
-
-    private static final String orderId = "dummy-order-id";
-    private static final String paymentKey = "dummy-payment-key";
 
     private final ScenarioContext context;
     private final KioskClient kioskClient;
@@ -62,14 +60,14 @@ public class KioskSteps {
 
     @그리고("키오스크에 결제 확정을 요청한다")
     public void 키오스크에_결제_확정을_요청한다() throws IOException {
-        var request = PaymentConfirmRequest.defaultConfirm(paymentKey, orderId);
+        var request = PaymentConfirmRequest.defaultConfirm();
         var response = kioskClient.confirmPayment(request);
         context.setResponse(response);
     }
 
     @그리고("키오스크에 금액 {int}원으로 결제 확정을 요청한다")
     public void 키오스크에_금액_원으로_결제_확정을_요청한다(int amount) throws IOException {
-        var request = PaymentConfirmRequest.withAmount(paymentKey, orderId, amount);
+        var request = PaymentConfirmRequest.withAmount(amount);
         var response = kioskClient.confirmPayment(request);
         context.setResponse(response);
     }
@@ -80,7 +78,7 @@ public class KioskSteps {
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.jsonPath().getBoolean("success")).isTrue();
         assertThat(response.jsonPath().getString("message")).isEqualTo("결제 성공");
-        assertThat(response.jsonPath().getString("transactionId")).isEqualTo(paymentKey);
+        assertThat(response.jsonPath().getString("transactionId")).isEqualTo(DEFAULT_PAYMENT_KEY);
         assertThat(response.jsonPath().getInt("paidAmount")).isEqualTo(10000);
     }
 
