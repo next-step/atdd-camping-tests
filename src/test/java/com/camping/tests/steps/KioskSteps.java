@@ -24,14 +24,14 @@ public class KioskSteps {
     private static final String orderId = "dummy-order-id";
     private static final String paymentKey = "dummy-payment-key";
 
-    private final String kioskBaseUrl;
     private final ScenarioContext context;
+    private final KioskClient kioskClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     public KioskSteps(ScenarioContext context) {
         this.context = context;
-        this.kioskBaseUrl = TestConfig.getKioskBaseUrl();
+        this.kioskClient = new KioskClient();
     }
 
     @Before
@@ -47,13 +47,14 @@ public class KioskSteps {
 
     @When("키오스크 서비스의 {string}에 GET 요청을 보낸다")
     public void 키오스크_서비스에_GET요청을_보낸다(String requestUrl) {
-        var response = ApiClient.get(kioskBaseUrl + requestUrl);
+        var apiClient = new ApiClient(TestConfig.getKioskBaseUrl());
+        var response = apiClient.get(requestUrl);
         context.setResponse(response);
     }
 
     @When("키오스크로 상품 목록을 조회하면")
     public void 키오스크로_상품_목록을_조회하면() {
-        var response = KioskClient.getProducts(kioskBaseUrl);
+        var response = kioskClient.getProducts();
         context.setResponse(response);
     }
 
@@ -69,7 +70,7 @@ public class KioskSteps {
         var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
         var kioskRequestBody = new PaymentCreateRequest(List.of(cartItem), "CARD");
 
-        var response = KioskClient.createPayment(kioskBaseUrl, kioskRequestBody);
+        var response = kioskClient.createPayment(kioskRequestBody);
         context.setResponse(response);
     }
 
@@ -85,7 +86,7 @@ public class KioskSteps {
         var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
         var requestBody = new PaymentConfirmRequest(paymentKey, orderId, 10000, List.of(cartItem));
 
-        var response = KioskClient.confirmPayment(kioskBaseUrl, requestBody);
+        var response = kioskClient.confirmPayment(requestBody);
         context.setResponse(response);
     }
 
@@ -101,7 +102,7 @@ public class KioskSteps {
         var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
         var requestBody = new PaymentConfirmRequest(paymentKey, orderId, amount, List.of(cartItem));
 
-        var response = KioskClient.confirmPayment(kioskBaseUrl, requestBody);
+        var response = kioskClient.confirmPayment(requestBody);
         context.setResponse(response);
     }
 
