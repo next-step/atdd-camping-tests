@@ -9,6 +9,20 @@ repositories {
     mavenCentral()
 }
 
+// .env 파일에서 환경 변수 로드
+val envFile = file(".env")
+val envVars = mutableMapOf<String, String>()
+if (envFile.exists()) {
+    envFile.readLines()
+        .filter { it.isNotBlank() && !it.startsWith("#") }
+        .forEach { line ->
+            val parts = line.split("=", limit = 2)
+            if (parts.size == 2) {
+                envVars[parts[0].trim()] = parts[1].trim()
+            }
+        }
+}
+
 // Versions
 val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
@@ -35,27 +49,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    environment("KIOSK_BASE_URL", System.getenv("KIOSK_BASE_URL") ?: "http://localhost:18081")
-}
-
-tasks.register<Exec>("kioskComposeUp") {
-    group = "infra"
-    description = "Run kiosk via docker compose (build + up)"
-    commandLine(
-        "/usr/local/bin/docker", "compose",
-        "-f", "infra/docker-compose.yml",
-        "up", "-d", "--build"
-    )
-}
-
-tasks.register<Exec>("kioskComposeDown") {
-    group = "infra"
-    description = "Stop kiosk compose and remove volumes"
-    commandLine(
-        "/usr/local/bin/docker", "compose",
-        "-f", "infra/docker-compose.yml",
-        "down", "-v"
-    )
+    environment("KIOSK_BASE_URL", System.getenv("KIOSK_BASE_URL")
+        ?: envVars.getOrDefault("KIOSK_BASE_URL", "http://localhost:18081"))
 }
 
 tasks.register<Exec>("kioskComposeUp") {
@@ -63,6 +58,7 @@ tasks.register<Exec>("kioskComposeUp") {
     description = "Run kiosk via docker compose (build + up)"
     commandLine(
         "docker", "compose",
+        "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
         "up", "-d", "--build"
     )
@@ -73,6 +69,7 @@ tasks.register<Exec>("kioskComposeDown") {
     description = "Stop kiosk compose and remove volumes"
     commandLine(
         "docker", "compose",
+        "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
         "down", "-v"
     )

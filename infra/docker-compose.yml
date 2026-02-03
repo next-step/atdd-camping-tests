@@ -1,10 +1,10 @@
 services:
   kiosk:
     build:
-      context: ../repos/atdd-camping-kiosk #“빌드 중에 Docker가 볼 수 있는 파일 범위”, COPY, ADD가 여기 안에서만 가능
+      context: ../repos/atdd-camping-kiosk #"빌드 중에 Docker가 볼 수 있는 파일 범위", COPY, ADD가 여기 안에서만 가능
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
     container_name: atdd-kiosk
     ports:
-      - "18081:8080"
+      - "${KIOSK_HOST_PORT:-18081}:${KIOSK_CONTAINER_PORT:-8080}"
     environment:
-      - SERVER_PORT=8080
+      - SERVER_PORT=${KIOSK_CONTAINER_PORT:-8080}
