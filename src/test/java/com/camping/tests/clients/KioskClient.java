@@ -1,5 +1,6 @@
 package com.camping.tests.clients;
 
+import com.camping.tests.config.TestConfig;
 import com.camping.tests.dto.PaymentConfirmRequest;
 import com.camping.tests.dto.PaymentCreateRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,17 +16,21 @@ public class KioskClient {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static ExtractableResponse<Response> getProducts(String baseUrl) {
-        return ApiClient.get(baseUrl + PRODUCTS_ENDPOINT);
+    private final ApiClient api;
+
+    public KioskClient() {
+        this.api = new ApiClient(TestConfig.getKioskBaseUrl());
     }
 
-    public static ExtractableResponse<Response> createPayment(String baseUrl, PaymentCreateRequest request) throws JsonProcessingException {
-        String requestBody = objectMapper.writeValueAsString(request);
-        return ApiClient.post(baseUrl + PAYMENTS_ENDPOINT, requestBody);
+    public ExtractableResponse<Response> getProducts() {
+        return api.get(PRODUCTS_ENDPOINT);
     }
 
-    public static ExtractableResponse<Response> confirmPayment(String baseUrl, PaymentConfirmRequest request) throws JsonProcessingException {
-        String requestBody = objectMapper.writeValueAsString(request);
-        return ApiClient.post(baseUrl + PAYMENTS_CONFIRM_ENDPOINT, requestBody);
+    public ExtractableResponse<Response> createPayment(PaymentCreateRequest request) throws JsonProcessingException {
+        return api.post(PAYMENTS_ENDPOINT, objectMapper.writeValueAsString(request));
+    }
+
+    public ExtractableResponse<Response> confirmPayment(PaymentConfirmRequest request) throws JsonProcessingException {
+        return api.post(PAYMENTS_CONFIRM_ENDPOINT, objectMapper.writeValueAsString(request));
     }
 }

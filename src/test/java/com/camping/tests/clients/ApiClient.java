@@ -4,26 +4,33 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 
 public class ApiClient {
 
-    public static ExtractableResponse<Response> get(String url) {
-        return RestAssured.given()
-                .log().all()
-                .when()
-                    .get(url)
-                .then()
-                    .log().all()
-                    .extract();
+    private final RequestSpecification spec;
+
+    public ApiClient(String baseUrl) {
+        this.spec = RestAssured.given()
+                .baseUri(baseUrl)
+                .log().all();
     }
 
-    public static ExtractableResponse<Response> post(String url, String requestBody) {
-        return RestAssured.given()
+    public ExtractableResponse<Response> get(String path) {
+        return spec
+                .when()
+                .get(path)
+                .then()
                 .log().all()
+                .extract();
+    }
+
+    public ExtractableResponse<Response> post(String path, String requestBody) {
+        return spec
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .post(url)
+                .post(path)
                 .then()
                 .log().all()
                 .extract();
