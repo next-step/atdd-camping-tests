@@ -1,8 +1,8 @@
 package com.camping.tests.api;
 
 import com.camping.tests.context.HttpContext;
-
-import java.util.Map;
+import com.camping.tests.dto.PaymentConfirmRequestDto;
+import com.camping.tests.dto.PaymentCreateRequestDto;
 
 import static com.camping.tests.config.TestEnvironment.kioskHost;
 
@@ -21,12 +21,11 @@ public class KioskApi extends BasicApi {
         get(kioskHost(), "/");
     }
 
-    public void 결제_확정_요청(String paymentKey, String orderId, Integer amount) {
-        Map<String, Object> body = Map.of(
-                "paymentKey", paymentKey,
-                "orderId", orderId,
-                "amount", amount
-        );
-        post(kioskHost(), "/api/payments/confirm", body);
+    public void 결제_생성_요청(PaymentCreateRequestDto request) {
+        post(kioskHost(), "/api/payments", request);
+    }
+
+    public void 결제_확정_요청(PaymentConfirmRequestDto request) {
+        post(kioskHost(), "/api/payments/confirm", request);
     }
 }

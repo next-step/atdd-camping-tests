@@ -1,46 +1,18 @@
 {
-  "mappings": [
-    {
-      "name": "결제 요청",
-      "request": {
-        "method": "POST",
-        "urlPath": "/v1/payments"
-      },
-      "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "jsonBody": {
-          "paymentKey": "pay_mock",
-          "orderId": "ord_mock",
-          "status": "APPROVED"
-        }
-      }
+  "name": "결제 요청",
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
     },
-    {
-      "name": "결제 승인 요청",
-      "request": {
-        "method": "POST",
-        "urlPath": "/v1/payments/confirm"
-      },
-      "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "jsonBody": {
-          "paymentKey": "pay_mock",
-          "orderId": "ord_mock",
-          "status": "APPROVED",
-          "method": "CARD",
-          "approvedAt": "2025-01-01T00:00:00Z",
-          "totalAmount": 10000,
-          "receipt": {
-            "url": "https://mock-receipt.example.com"
-          }
-        }
-      }
+    "jsonBody": {
+      "paymentKey": "pay_mock",
+      "orderId": "ord_mock",
+      "status": "READY"
     }
-  ]
+  }
 }
