@@ -2,6 +2,7 @@ package com.camping.tests.steps;
 
 import com.camping.tests.clients.ApiClient;
 import com.camping.tests.clients.KioskClient;
+import com.camping.tests.config.TestConfig;
 import com.camping.tests.context.ScenarioContext;
 import com.camping.tests.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +15,6 @@ import io.cucumber.java.en.When;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,13 +31,12 @@ public class KioskSteps {
 
     public KioskSteps(ScenarioContext context) {
         this.context = context;
-        this.kioskBaseUrl = Optional.ofNullable(System.getenv("KIOSK_BASE_URL"))
-                .orElse("http://localhost:8081");
+        this.kioskBaseUrl = TestConfig.getKioskBaseUrl();
     }
 
     @Before
     public void setupWireMock() {
-        WireMock.configureFor("localhost", 8084);
+        WireMock.configureFor(TestConfig.getPaymentMockHost(), TestConfig.getPaymentMockPort());
         WireMock.reset();
     }
 

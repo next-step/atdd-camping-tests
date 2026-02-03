@@ -1,10 +1,9 @@
 package com.camping.tests.steps;
 
 import com.camping.tests.clients.ApiClient;
+import com.camping.tests.config.TestConfig;
 import com.camping.tests.context.ScenarioContext;
 import io.cucumber.java.en.When;
-
-import java.util.Optional;
 
 public class AdminSteps {
     private final String adminBaseUrl;
@@ -12,8 +11,7 @@ public class AdminSteps {
 
     public AdminSteps(ScenarioContext context) {
         this.context = context;
-        this.adminBaseUrl = Optional.ofNullable(System.getenv("ADMIN_BASE_URL"))
-                .orElse("http://localhost:8082");
+        this.adminBaseUrl = TestConfig.getAdminBaseUrl();
     }
 
     @When("관리자 서비스의 {string}에 GET 요청을 보낸다")

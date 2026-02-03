@@ -1,10 +1,9 @@
 package com.camping.tests.steps;
 
 import com.camping.tests.clients.ApiClient;
+import com.camping.tests.config.TestConfig;
 import com.camping.tests.context.ScenarioContext;
 import io.cucumber.java.en.When;
-
-import java.util.Optional;
 
 public class ReservationSteps {
     private final String reservationBaseUrl;
@@ -12,8 +11,7 @@ public class ReservationSteps {
 
     public ReservationSteps(ScenarioContext context) {
         this.context = context;
-        this.reservationBaseUrl = Optional.ofNullable(System.getenv("RESERVATION_BASE_URL"))
-                .orElse("http://localhost:8083");
+        this.reservationBaseUrl = TestConfig.getReservationBaseUrl();
     }
 
     @When("예약 서비스의 {string}에 GET 요청을 보낸다")
