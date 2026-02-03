@@ -17,7 +17,7 @@ services:
       - SERVER_PORT=8080
       - KIOSK_BASE_URL=http://kiosk:8081
       - KIOSK_ADMIN_BASE_URL=http://atdd-admin:8080
-      - PAYMENTS_BASE_URL=http://atdd-payments-mock:8080
+      - KIOSK_PAYMENT_BASE_URL=http://atdd-payments-mock:8080
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 10s
