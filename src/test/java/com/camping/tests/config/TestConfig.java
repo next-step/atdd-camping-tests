@@ -2,8 +2,7 @@ package com.camping.tests.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 import java.util.Properties;
 
 public class TestConfig {
@@ -43,9 +42,8 @@ public class TestConfig {
 
     public static String getPaymentMockHost() {
         try {
-            URL url = new URL(getPaymentBaseUrl());
-            return url.getHost();
-        } catch (MalformedURLException e) {
+            return URI.create(getPaymentBaseUrl()).getHost();
+        } catch (Exception e) {
             e.printStackTrace();
             return "localhost";
         }
@@ -53,10 +51,15 @@ public class TestConfig {
 
     public static int getPaymentMockPort() {
         try {
-            URL url = new URL(getPaymentBaseUrl());
-            int port = url.getPort();
-            return port == -1 ? url.getDefaultPort() : port;
-        } catch (MalformedURLException e) {
+            URI uri = URI.create(getPaymentBaseUrl());
+            int port = uri.getPort();
+
+            if (port == -1) {
+                return uri.toURL().getDefaultPort();
+            }
+
+            return port;
+        } catch (Exception e) {
             e.printStackTrace();
             return 8084;
         }
