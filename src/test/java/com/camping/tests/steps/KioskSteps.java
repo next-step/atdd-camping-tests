@@ -1,6 +1,7 @@
 package com.camping.tests.steps;
 
 import com.camping.tests.clients.ApiClient;
+import com.camping.tests.clients.KioskClient;
 import com.camping.tests.context.ScenarioContext;
 import com.camping.tests.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +54,7 @@ public class KioskSteps {
 
     @When("키오스크로 상품 목록을 조회하면")
     public void 키오스크로_상품_목록을_조회하면() {
-        var response = ApiClient.get(kioskBaseUrl + "/api/products");
+        var response = KioskClient.getProducts(kioskBaseUrl);
         context.setResponse(response);
     }
 
@@ -69,7 +70,7 @@ public class KioskSteps {
         var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
         var kioskRequestBody = new PaymentCreateRequest(List.of(cartItem), "CARD");
 
-        var response = ApiClient.post(kioskBaseUrl + "/api/payments", objectMapper.writeValueAsString(kioskRequestBody));
+        var response = KioskClient.createPayment(kioskBaseUrl, kioskRequestBody);
         context.setResponse(response);
     }
 
@@ -85,7 +86,7 @@ public class KioskSteps {
         var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
         var requestBody = new PaymentConfirmRequest(paymentKey, orderId, 10000, List.of(cartItem));
 
-        var response = ApiClient.post(kioskBaseUrl + "/api/payments/confirm", objectMapper.writeValueAsString(requestBody));
+        var response = KioskClient.confirmPayment(kioskBaseUrl, requestBody);
         context.setResponse(response);
     }
 
@@ -101,7 +102,7 @@ public class KioskSteps {
         var cartItem = new CartItem(1L, "캠핑의자", 10000, 1);
         var requestBody = new PaymentConfirmRequest(paymentKey, orderId, amount, List.of(cartItem));
 
-        var response = ApiClient.post(kioskBaseUrl + "/api/payments/confirm", objectMapper.writeValueAsString(requestBody));
+        var response = KioskClient.confirmPayment(kioskBaseUrl, requestBody);
         context.setResponse(response);
     }
 
