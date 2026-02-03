@@ -8,12 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 
+import static com.camping.tests.common.TestConstants.Kiosk.*;
+
 public class KioskClient {
-
-    private static final String PRODUCTS_ENDPOINT = "/api/products";
-    private static final String PAYMENTS_ENDPOINT = "/api/payments";
-    private static final String PAYMENTS_CONFIRM_ENDPOINT = "/api/payments/confirm";
-
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private final ApiClient api;
