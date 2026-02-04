@@ -9,6 +9,8 @@ repositories {
     mavenCentral()
 }
 
+
+//1단계: .env 파일 → envVars 맵 (Gradle 메모리)
 // .env 파일에서 환경 변수 로드
 val envFile = file(".env")
 val envVars = mutableMapOf<String, String>()
@@ -47,6 +49,8 @@ dependencies {
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
 
+
+//2단계: envVars 맵 → 테스트 프로세스의 OS 환경변수
 tasks.test {
     useJUnitPlatform()
     environment("KIOSK_BASE_URL", System.getenv("KIOSK_BASE_URL")
@@ -61,7 +65,7 @@ tasks.register<Exec>("kioskComposeUp") {
     group = "infra"
     description = "Run kiosk via docker compose (build + up)"
     commandLine(
-        "docker", "compose",
+        "/usr/local/bin/docker", "compose",
         "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
         "up", "-d", "--build", "kiosk"
@@ -72,7 +76,7 @@ tasks.register<Exec>("kioskComposeDown") {
     group = "infra"
     description = "Stop kiosk compose and remove volumes"
     commandLine(
-        "docker", "compose",
+        "/usr/local/bin/docker", "compose",
         "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
         "down", "-v"
@@ -83,7 +87,7 @@ tasks.register<Exec>("composeUp") {
     group = "infra"
     description = "Run all services via docker compose (build + up)"
     commandLine(
-        "docker", "compose",
+        "/usr/local/bin/docker", "compose",
         "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
         "up", "-d", "--build"
@@ -94,7 +98,7 @@ tasks.register<Exec>("composeDown") {
     group = "infra"
     description = "Stop all services and remove volumes"
     commandLine(
-        "docker", "compose",
+        "/usr/local/bin/docker", "compose",
         "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
         "down", "-v"
