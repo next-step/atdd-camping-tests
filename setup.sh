@@ -29,6 +29,6 @@ update_or_clone atdd-camping-admin \
   https://github.com/yhh1056/atdd-camping-admin.git yhh1056
 
 update_or_clone atdd-camping-kiosk \
-  https://github.com/yhh1056/atdd-camping-kiosk.git main
+  https://github.com/yhh1056/atdd-camping-kiosk.git yhh1056
 
 echo "✅ 모든 프로젝트 최신 상태로 준비 완료"

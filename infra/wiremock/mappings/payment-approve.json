@@ -1,4 +1,5 @@
 {
+  "name": "결제 요청",
   "request": {
     "method": "POST",
     "urlPath": "/v1/payments"
@@ -15,5 +16,3 @@
     }
   }
 }
-
-

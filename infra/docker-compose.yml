@@ -47,6 +47,9 @@ services:
       - SPRING_DATASOURCE_DRIVER=com.mysql.cj.jdbc.Driver
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=secret
+    depends_on:
+      admin:
+        condition: service_healthy
   kiosk:
     build:
       context: ../repos/atdd-camping-kiosk
@@ -66,3 +69,24 @@ services:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
       - KIOSK_ADMIN_BASE_URL=http://atdd-admin:8080
+      - PAYMENTS_BASE_URL=http://payments:8080
+    depends_on:
+      admin:
+        condition: service_healthy
+      payments:
+        condition: service_healthy
+  payments:
+    image: wiremock/wiremock:3.5.4
+    container_name: atdd-payments-mock
+    networks:
+      - atdd-net
+    ports:
+      - "8084:8080"
+    volumes:
+      - ./wiremock:/home/wiremock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__admin/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
