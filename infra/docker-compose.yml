@@ -13,7 +13,8 @@ services:
       - "${KIOSK_HOST_PORT:-18081}:${KIOSK_CONTAINER_PORT:-8080}"
     environment:
       - SERVER_PORT=${KIOSK_CONTAINER_PORT:-8080}
-    networks: # atdd-net 네트워크 사용
+      - KIOSK_ADMIN_BASE-URL=http://atdd-admin:${ADMIN_CONTAINER_PORT:-8080}
+    networks:
       - atdd-net
 
   admin:
@@ -25,6 +26,13 @@ services:
       - "${ADMIN_HOST_PORT:-18082}:${ADMIN_CONTAINER_PORT:-8080}"
     environment:
       - SERVER_PORT=${ADMIN_CONTAINER_PORT:-8080}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD:-secret}
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE-PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL-AUTO=validate
+      - SPRING_SQL_INIT_MODE=never
     networks:
       - atdd-net
 
@@ -37,5 +45,12 @@ services:
       - "${RESERVATION_HOST_PORT:-18083}:${RESERVATION_CONTAINER_PORT:-8080}"
     environment:
       - SERVER_PORT=${RESERVATION_CONTAINER_PORT:-8080}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD:-secret}
+      - SPRING_DATASOURCE_DRIVER-CLASS-NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE-PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL-AUTO=validate
+      - SPRING_SQL_INIT_MODE=never
     networks:
       - atdd-net
