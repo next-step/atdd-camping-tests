@@ -50,15 +50,16 @@ dependencies {
 }
 
 
-//2단계: envVars 맵 → 테스트 프로세스의 OS 환경변수
+//2단계: 포트 값에서 테스트 URL을 자동 조립 → 테스트 프로세스의 OS 환경변수
 tasks.test {
     useJUnitPlatform()
-    environment("KIOSK_BASE_URL", System.getenv("KIOSK_BASE_URL")
-        ?: envVars.getOrDefault("KIOSK_BASE_URL", "http://localhost:18081"))
-    environment("ADMIN_BASE_URL", System.getenv("ADMIN_BASE_URL")
-        ?: envVars.getOrDefault("ADMIN_BASE_URL", "http://localhost:18082"))
-    environment("RESERVATION_BASE_URL", System.getenv("RESERVATION_BASE_URL")
-        ?: envVars.getOrDefault("RESERVATION_BASE_URL", "http://localhost:18083"))
+    val kioskPort = envVars.getOrDefault("KIOSK_HOST_PORT", "18081")
+    val adminPort = envVars.getOrDefault("ADMIN_HOST_PORT", "18082")
+    val reservationPort = envVars.getOrDefault("RESERVATION_HOST_PORT", "18083")
+
+    environment("KIOSK_BASE_URL", "http://localhost:$kioskPort")
+    environment("ADMIN_BASE_URL", "http://localhost:$adminPort")
+    environment("RESERVATION_BASE_URL", "http://localhost:$reservationPort")
 }
 
 tasks.register<Exec>("kioskComposeUp") {
@@ -101,6 +102,28 @@ tasks.register<Exec>("composeDown") {
         "/usr/local/bin/docker", "compose",
         "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
+        "down", "-v"
+    )
+}
+
+tasks.register<Exec>("infraUp") {
+    group = "infra"
+    description = "Start infrastructure (DB + network)"
+    commandLine(
+        "/usr/local/bin/docker", "compose",
+        "--env-file", ".env",
+        "-f", "infra/docker-compose-infra.yml",
+        "up", "-d"
+    )
+}
+
+tasks.register<Exec>("infraDown") {
+    group = "infra"
+    description = "Stop infrastructure and remove volumes"
+    commandLine(
+        "/usr/local/bin/docker", "compose",
+        "--env-file", ".env",
+        "-f", "infra/docker-compose-infra.yml",
         "down", "-v"
     )
 }
