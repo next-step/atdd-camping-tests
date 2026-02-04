@@ -62,28 +62,6 @@ tasks.test {
     environment("RESERVATION_BASE_URL", "http://localhost:$reservationPort")
 }
 
-tasks.register<Exec>("kioskComposeUp") {
-    group = "infra"
-    description = "Run kiosk via docker compose (build + up)"
-    commandLine(
-        "/usr/local/bin/docker", "compose",
-        "--env-file", ".env",
-        "-f", "infra/docker-compose.yml",
-        "up", "-d", "--build", "kiosk"
-    )
-}
-
-tasks.register<Exec>("kioskComposeDown") {
-    group = "infra"
-    description = "Stop kiosk compose and remove volumes"
-    commandLine(
-        "/usr/local/bin/docker", "compose",
-        "--env-file", ".env",
-        "-f", "infra/docker-compose.yml",
-        "down", "-v"
-    )
-}
-
 tasks.register<Exec>("composeUp") {
     group = "infra"
     description = "Run all services via docker compose (build + up)"
