@@ -25,9 +25,15 @@ public class AdminClient {
         return this;
     }
 
-    public int createProduct(String name, int price) {
+    public ProductResult createProduct(String name, int price) {
         login();
-        return api.post(Admin.PRODUCTS, ProductRequest.sale(name, price))
-                .jsonPath().getInt("id");
+        String uniqueName = name + "_" + System.currentTimeMillis();
+        var response = api.post(Admin.PRODUCTS, ProductRequest.sale(uniqueName, price));
+        return new ProductResult(
+                response.jsonPath().getInt("id"),
+                response.jsonPath().getString("name")
+        );
     }
+
+    public record ProductResult(int id, String name) {}
 }

@@ -1,5 +1,5 @@
 # language: ko
-@api
+@e2e
 기능: Kiosk 상품 조회
 
   시나리오: 상품 목록을 조회한다
