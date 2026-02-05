@@ -1,5 +1,5 @@
 # language: ko
-@acceptance @ai-candidate @payment
+@acceptance @payment
 기능: 결제-매출-재고 인수 테스트
 
   배경:

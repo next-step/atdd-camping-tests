@@ -1,5 +1,5 @@
 # language: ko
-@acceptance @ai-candidate @reservation
+@acceptance @reservation
 기능: 예약 인수 테스트
 
   @happy-path
