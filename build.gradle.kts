@@ -24,6 +24,9 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
 
+    // AssertJ
+    testImplementation("org.assertj:assertj-core:3.25.3")
+
     // JUnit Jupiter
     testImplementation("org.junit.platform:junit-platform-suite:1.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
@@ -56,40 +59,6 @@ tasks.register<Exec>("composePs") {
     group = "infra"
     description = "Show running containers status"
     commandLine("docker-compose", "-f", "infra/docker-compose.yml", "ps")
-}
-
-// 서비스 준비 대기
-tasks.register("waitForKiosk") {
-    group = "infra"
-    description = "Wait for kiosk service to be ready"
-    doLast {
-        val maxRetries = 30
-        val retryInterval = 2000L
-        val kioskUrl = "http://localhost:18081/"
-
-        println("Waiting for Kiosk service at $kioskUrl...")
-
-        repeat(maxRetries) { i ->
-            try {
-                val exitCode = exec {
-                    commandLine("curl", "-f", "-s", "-o", "/dev/null", kioskUrl)
-                    isIgnoreExitValue = true
-                }.exitValue
-
-                if (exitCode == 0) {
-                    println("✓ Kiosk service is ready! (attempt: ${i + 1})")
-                    return@doLast
-                }
-            } catch (e: Exception) {
-                // continue
-            }
-
-            println("  Waiting... (${i + 1}/$maxRetries)")
-            Thread.sleep(retryInterval)
-        }
-
-        throw GradleException("Kiosk service did not become ready after $maxRetries attempts")
-    }
 }
 
 tasks.register<Test>("smokeTest") {
@@ -163,7 +132,8 @@ tasks.register("waitForServices") {
         val services = mapOf(
             "Kiosk" to "http://localhost:18081/",
             "Admin" to "http://localhost:18082/",
-            "Reservation" to "http://localhost:18083/"
+            "Reservation" to "http://localhost:18083/",
+            "payments-mock" to "http://localhost:18090/__admin/health"  // 추가
         )
 
         services.forEach { (name, url) ->
@@ -195,13 +165,38 @@ tasks.register("waitForServices") {
         }
     }
 }
+// WireMock(payments-mock) 준비 대기
+tasks.register("waitForPaymentsMock") {
+    group = "infra"
+    description = "Wait for payments-mock (WireMock) to be ready"
+    doLast {
+        val url = "http://localhost:18090/__admin/health"
+        val maxRetries = 15
+        val retryInterval = 2000L
 
-// 다중 서비스 Smoke 테스트
-tasks.register<Test>("multiSmokeTest") {
-    group = "verification"
-    description = "Run multi-service smoke tests"
-    useJUnitPlatform()
-    systemProperty("cucumber.filter.tags", "@multi-service")
+        println("Waiting for payments-mock (WireMock)...")
+
+        repeat(maxRetries) { i ->
+            try {
+                val exitCode = exec {
+                    commandLine("curl", "-f", "-s", "-o", "/dev/null", url)
+                    isIgnoreExitValue = true
+                }.exitValue
+
+                if (exitCode == 0) {
+                    println("✓ payments-mock is ready! (attempt: ${i + 1})")
+                    return@doLast
+                }
+            } catch (e: Exception) {
+                // continue
+            }
+
+            println("  Waiting... (${i + 1}/$maxRetries)")
+            Thread.sleep(retryInterval)
+        }
+
+        throw GradleException("payments-mock did not become ready")
+    }
 }
 
 // E2E 테스트

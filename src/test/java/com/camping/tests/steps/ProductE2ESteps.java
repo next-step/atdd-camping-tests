@@ -9,24 +9,16 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static com.camping.tests.config.TestConfig.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProductE2ESteps {
-
-    private static final String KIOSK_BASE_URL = getEnvOrDefault("KIOSK_BASE_URL", "http://localhost:18081");
-    private static final String ADMIN_BASE_URL = getEnvOrDefault("ADMIN_BASE_URL", "http://localhost:18082");
 
     private final SharedContext context;
     private String authToken;
 
     public ProductE2ESteps(SharedContext context) {
         this.context = context;
-    }
-
-    private static String getEnvOrDefault(String key, String defaultValue) {
-        String value = System.getenv(key);
-        return value != null ? value : defaultValue;
     }
 
     @그리고("Admin에 로그인하여 인증 토큰을 획득한다")
@@ -66,11 +58,10 @@ public class ProductE2ESteps {
     public void 응답에_상품_목록이_포함되어야_한다() {
         try {
             List<Map<String, Object>> products = context.getResponse().jsonPath().getList("$");
-            assertNotNull(products, "상품 목록이 null입니다");
-            assertFalse(products.isEmpty(), "상품 목록이 비어있습니다");
+            assertThat(products).as("상품 목록").isNotNull().isNotEmpty();
         } catch (Exception e) {
             String body = context.getResponse().getBody().asString();
-            assertFalse(body.isEmpty(), "응답 본문이 비어있습니다");
+            assertThat(body).as("응답 본문").isNotEmpty();
             System.out.println("응답 본문 (처음 200자): " + body.substring(0, Math.min(200, body.length())));
         }
     }

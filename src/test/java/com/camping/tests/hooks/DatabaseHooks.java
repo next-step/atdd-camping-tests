@@ -25,6 +25,9 @@ public class DatabaseHooks {
      * 1. 외래 키 제약 조건 비활성화
      * 2. 모든 테이블 데이터 삭제 (TRUNCATE)
      * 3. 외래 키 제약 조건 재활성화
+     * 4. 테스트용 초기 데이터 삽입
+     *
+     * 주의: 테이블 생성은 각 서비스(Admin, Reservation)의 Hibernate ddl-auto 설정으로 처리됨
      */
     @Before("@e2e")
     public void resetDatabase() throws Exception {
@@ -34,9 +37,10 @@ public class DatabaseHooks {
             // 외래 키 제약 조건 임시 비활성화
             stmt.executeUpdate("SET FOREIGN_KEY_CHECKS = 0");
 
-            // 모든 테이블 데이터 삭제 (실제 존재하는 테이블만)
+            // 모든 테이블 데이터 삭제
             stmt.executeUpdate("TRUNCATE TABLE products");
             stmt.executeUpdate("TRUNCATE TABLE campsites");
+            stmt.executeUpdate("TRUNCATE TABLE sales_records");
 
             // 외래 키 제약 조건 임시 재활성화
             stmt.executeUpdate("SET FOREIGN_KEY_CHECKS = 1");
