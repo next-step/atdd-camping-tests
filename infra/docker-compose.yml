@@ -1,10 +1,56 @@
+networks:
+  atdd-net:
+    name: atdd-net
+    external: true
+
 services:
   kiosk:
     build:
-      context: ../repos/atdd-camping-kiosk #“빌드 중에 Docker가 볼 수 있는 파일 범위”, COPY, ADD가 여기 안에서만 가능
+      context: ../repos/atdd-camping-kiosk #"빌드 중에 Docker가 볼 수 있는 파일 범위", COPY, ADD가 여기 안에서만 가능
       dockerfile: ../../infra/dockerfiles/Dockerfile-kiosk
     container_name: atdd-kiosk
     ports:
-      - "18081:8080"
+      - "${KIOSK_HOST_PORT:-18081}:${KIOSK_CONTAINER_PORT:-8080}"
     environment:
-      - SERVER_PORT=8080
+      - SERVER_PORT=${KIOSK_CONTAINER_PORT:-8080}
+      - KIOSK_ADMIN_BASEURL=http://atdd-admin:${ADMIN_CONTAINER_PORT:-8080}
+    networks:
+      - atdd-net
+
+  admin:
+    build:
+      context: ../repos/atdd-camping-admin
+      dockerfile: ../../infra/dockerfiles/Dockerfile-admin
+    container_name: atdd-admin
+    ports:
+      - "${ADMIN_HOST_PORT:-18082}:${ADMIN_CONTAINER_PORT:-8080}"
+    environment:
+      - SERVER_PORT=${ADMIN_CONTAINER_PORT:-8080}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD:-secret}
+      - SPRING_DATASOURCE_DRIVERCLASSNAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASEPLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDLAUTO=none
+      - SPRING_SQL_INIT_MODE=never
+    networks:
+      - atdd-net
+
+  reservation:
+    build:
+      context: ../repos/atdd-camping-reservation
+      dockerfile: ../../infra/dockerfiles/Dockerfile-reservation
+    container_name: atdd-reservation
+    ports:
+      - "${RESERVATION_HOST_PORT:-18083}:${RESERVATION_CONTAINER_PORT:-8080}"
+    environment:
+      - SERVER_PORT=${RESERVATION_CONTAINER_PORT:-8080}
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?characterEncoding=UTF-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD:-secret}
+      - SPRING_DATASOURCE_DRIVERCLASSNAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASEPLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDLAUTO=none
+      - SPRING_SQL_INIT_MODE=never
+    networks:
+      - atdd-net

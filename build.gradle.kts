@@ -9,6 +9,22 @@ repositories {
     mavenCentral()
 }
 
+
+//1단계: .env 파일 → envVars 맵 (Gradle 메모리)
+// .env 파일에서 환경 변수 로드
+val envFile = file(".env")
+val envVars = mutableMapOf<String, String>()
+if (envFile.exists()) {
+    envFile.readLines()
+        .filter { it.isNotBlank() && !it.startsWith("#") }
+        .forEach { line ->
+            val parts = line.split("=", limit = 2)
+            if (parts.size == 2) {
+                envVars[parts[0].trim()] = parts[1].trim()
+            }
+        }
+}
+
 // Versions
 val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
@@ -33,27 +49,59 @@ dependencies {
     testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
 
+
+//2단계: 포트 값에서 테스트 URL을 자동 조립 → 테스트 프로세스의 OS 환경변수
 tasks.test {
     useJUnitPlatform()
-    environment("KIOSK_BASE_URL", System.getenv("KIOSK_BASE_URL") ?: "http://localhost:18081")
+    val kioskPort = envVars.getOrDefault("KIOSK_HOST_PORT", "18081")
+    val adminPort = envVars.getOrDefault("ADMIN_HOST_PORT", "18082")
+    val reservationPort = envVars.getOrDefault("RESERVATION_HOST_PORT", "18083")
+
+    environment("KIOSK_BASE_URL", "http://localhost:$kioskPort")
+    environment("ADMIN_BASE_URL", "http://localhost:$adminPort")
+    environment("RESERVATION_BASE_URL", "http://localhost:$reservationPort")
 }
 
-tasks.register<Exec>("kioskComposeUp") {
+tasks.register<Exec>("composeUp") {
     group = "infra"
-    description = "Run kiosk via docker compose (build + up)"
+    description = "Run all services via docker compose (build + up)"
     commandLine(
         "/usr/local/bin/docker", "compose",
+        "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
         "up", "-d", "--build"
     )
 }
 
-tasks.register<Exec>("kioskComposeDown") {
+tasks.register<Exec>("composeDown") {
     group = "infra"
-    description = "Stop kiosk compose and remove volumes"
+    description = "Stop all services and remove volumes"
     commandLine(
         "/usr/local/bin/docker", "compose",
+        "--env-file", ".env",
         "-f", "infra/docker-compose.yml",
+        "down", "-v"
+    )
+}
+
+tasks.register<Exec>("infraUp") {
+    group = "infra"
+    description = "Start infrastructure (DB + network)"
+    commandLine(
+        "/usr/local/bin/docker", "compose",
+        "--env-file", ".env",
+        "-f", "infra/docker-compose-infra.yml",
+        "up", "-d"
+    )
+}
+
+tasks.register<Exec>("infraDown") {
+    group = "infra"
+    description = "Stop infrastructure and remove volumes"
+    commandLine(
+        "/usr/local/bin/docker", "compose",
+        "--env-file", ".env",
+        "-f", "infra/docker-compose-infra.yml",
         "down", "-v"
     )
 }

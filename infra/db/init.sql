@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS campsites (
   site_number VARCHAR(32) NOT NULL,
   description VARCHAR(255),
   max_people INT NOT NULL,
+  version BIGINT NOT NULL DEFAULT 0,
   UNIQUE KEY uk_campsites_site_number (site_number)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -26,6 +27,7 @@ CREATE TABLE IF NOT EXISTS reservations (
   phone_number VARCHAR(32),
   status VARCHAR(32) NOT NULL,
   confirmation_code VARCHAR(64),
+  version BIGINT NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uk_reservations_confirmation_code (confirmation_code),
   CONSTRAINT fk_reservation_campsite FOREIGN KEY (campsite_id) REFERENCES campsites(id)
@@ -49,6 +51,14 @@ CREATE TABLE IF NOT EXISTS rental_records (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_rental_reservation FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL,
   CONSTRAINT fk_rental_product FOREIGN KEY (product_id) REFERENCES products(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS customers (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(32),
+  UNIQUE KEY uk_customers_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Products (admin-init.sql)
