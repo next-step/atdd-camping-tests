@@ -26,13 +26,17 @@ public class KioskSteps {
     private Response response;
     private List<CartItem> cartItems = new ArrayList<>();
     private List<String> createdProductNames = new ArrayList<>();
+    private List<Integer> createdProductIds = new ArrayList<>();
     private PaymentResult paymentResult;
     private Response paymentResponse;
+
+    private int initialStockQuantity;
 
     @조건("Admin에 다음 상품이 등록되어 있다")
     public void registerProductsToAdmin(DataTable dataTable) {
         cartItems.clear();
         createdProductNames.clear();
+        createdProductIds.clear();
         for (Map<String, String> product : dataTable.asMaps()) {
             String name = product.get("name");
             int price = Integer.parseInt(product.get("price"));
@@ -40,6 +44,7 @@ public class KioskSteps {
             AdminClient.ProductResult result = adminClient.createProduct(name, price);
             cartItems.add(CartItem.of(result.id(), price));
             createdProductNames.add(result.name());
+            createdProductIds.add(result.id());
         }
     }
 
@@ -55,18 +60,70 @@ public class KioskSteps {
 
     @그리고("응답에 {int}개의 상품이 포함된다")
     public void verifyProductCount(int count) {
-        // 생성한 상품이 모두 포함되어 있는지 확인 (DB에 기존 상품이 있을 수 있으므로 최소 개수로 검증)
         response.then().body("$", hasSize(greaterThanOrEqualTo(count)));
     }
 
     @그리고("응답에 {string} 상품이 포함된다")
     public void verifyProductExists(String productName) {
-        // 생성된 상품 중 해당 이름으로 시작하는 상품이 있는지 확인
         String actualName = createdProductNames.stream()
                 .filter(name -> name.startsWith(productName))
                 .findFirst()
                 .orElse(productName);
         response.then().body("name", hasItem(actualName));
+    }
+
+    // ========== 재고 스텝 ==========
+
+    @그리고("해당 상품의 초기 재고를 기억한다")
+    public void rememberInitialStock() {
+        int productId = createdProductIds.get(0);
+        initialStockQuantity = adminClient.getProductStock(productId);
+    }
+
+    @그리고("Admin에서 해당 상품의 재고가 {int}만큼 감소해야 한다")
+    public void verifyStockDecreased(int expectedDecrease) {
+        int productId = createdProductIds.get(0);
+        int currentStock = adminClient.getProductStock(productId);
+        assertEquals(initialStockQuantity - expectedDecrease, currentStock,
+                "재고가 " + expectedDecrease + "만큼 감소해야 합니다. 초기: " + initialStockQuantity + ", 현재: " + currentStock);
+    }
+
+    @그리고("Admin에서 해당 상품의 재고가 감소하지 않아야 한다")
+    public void verifyStockUnchanged() {
+        int productId = createdProductIds.get(0);
+        int currentStock = adminClient.getProductStock(productId);
+        assertEquals(initialStockQuantity, currentStock,
+                "재고가 변경되지 않아야 합니다. 초기: " + initialStockQuantity + ", 현재: " + currentStock);
+    }
+
+    // ========== 매출 스텝 ==========
+
+    @그리고("Admin 매출에 해당 상품의 판매 기록이 존재해야 한다")
+    public void verifySalesRecordExists() {
+        String productName = createdProductNames.get(0);
+        Response salesResponse = adminClient.getSales();
+        List<String> salesProductNames = salesResponse.jsonPath().getList("productName");
+        assertTrue(salesProductNames.contains(productName),
+                "매출에 상품 '" + productName + "'의 판매 기록이 존재해야 합니다. 매출 목록: " + salesProductNames);
+    }
+
+    @그리고("Admin 매출에 판매 기록이 추가되지 않아야 한다")
+    public void verifySalesRecordNotAdded() {
+        String productName = createdProductNames.get(0);
+        Response salesResponse = adminClient.getSales();
+        List<String> salesProductNames = salesResponse.jsonPath().getList("productName");
+        assertFalse(salesProductNames.contains(productName),
+                "매출에 상품 '" + productName + "'의 판매 기록이 없어야 합니다. 매출 목록: " + salesProductNames);
+    }
+
+    @그리고("Admin 매출에 해당 상품의 판매 기록이 {int}건이어야 한다")
+    public void verifySalesRecordCount(int expectedCount) {
+        String productName = createdProductNames.get(0);
+        Response salesResponse = adminClient.getSales();
+        List<String> salesProductNames = salesResponse.jsonPath().getList("productName");
+        long count = salesProductNames.stream().filter(name -> name.equals(productName)).count();
+        assertEquals(expectedCount, count,
+                "매출에 상품 '" + productName + "'의 판매 기록이 " + expectedCount + "건이어야 합니다. 실제: " + count);
     }
 
     // ========== 결제 스텝 ==========
@@ -96,6 +153,16 @@ public class KioskSteps {
         );
     }
 
+    @만약("동일 결제 정보로 다시 결제 확정을 요청한다")
+    public void confirmPaymentAgain() {
+        paymentResponse = kioskClient.confirmPayment(
+                paymentResult.paymentKey(),
+                paymentResult.orderId(),
+                paymentResult.amount(),
+                cartItems
+        );
+    }
+
     @그러면("결제가 성공이어야 한다")
     public void verifyPaymentSuccess() {
         assertTrue(paymentResponse.jsonPath().getBoolean("success"),
@@ -106,5 +173,13 @@ public class KioskSteps {
     public void verifyPaymentFailure() {
         assertFalse(paymentResponse.jsonPath().getBoolean("success"),
                 "결제가 실패해야 합니다. 응답: " + paymentResponse.getBody().asString());
+    }
+
+    @그리고("결제 응답에 오류 메시지가 포함되어야 한다")
+    public void verifyPaymentErrorMessage() {
+        String body = paymentResponse.getBody().asString();
+        assertNotNull(body, "결제 응답 본문이 null이면 안됩니다");
+        assertTrue(body.contains("message") || body.contains("error") || body.contains("reason"),
+                "결제 응답에 오류 메시지가 포함되어야 합니다. 응답: " + body);
     }
 }
