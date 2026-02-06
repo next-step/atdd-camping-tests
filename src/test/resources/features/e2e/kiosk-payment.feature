@@ -1,5 +1,5 @@
 # language: ko
-@api
+@e2e
 기능: 키오스크 결제 E2E
 
   배경:

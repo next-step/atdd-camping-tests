@@ -33,6 +33,17 @@ public class ApiClient {
                 .post(baseUrl + path);
     }
 
+    public Response patch(String path, Object body) {
+        return request()
+                .body(toJson(body))
+                .patch(baseUrl + path);
+    }
+
+    public Response delete(String path) {
+        return request()
+                .delete(baseUrl + path);
+    }
+
     private RequestSpecification request() {
         RequestSpecification spec = given()
                 .contentType("application/json");

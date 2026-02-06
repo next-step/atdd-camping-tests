@@ -55,13 +55,16 @@ curl http://localhost:19090/__admin/mappings
 
 ## 서비스 구성
 
-| 서비스 | 포트 | 설명 |
-|--------|------|------|
-| admin | 18080 | 관리자 서비스 |
-| kiosk | 18081 | 키오스크 서비스 |
-| reservation | 18082 | 예약 서비스 |
-| payments (WireMock) | 19090 | 결제 Mock 서비스 |
-| atdd-db (MySQL) | 3306 | 데이터베이스 |
+| 서비스 | 호스트 포트 | 외부 URL (테스트 코드) | 내부 URL (Docker 서비스 간) |
+|--------|------------|----------------------|--------------------------|
+| admin | 18080 | `http://localhost:18080` | `http://admin:8080` |
+| kiosk | 18081 | `http://localhost:18081` | `http://kiosk:8080` |
+| reservation | 18082 | `http://localhost:18082` | `http://reservation:8080` |
+| payments (WireMock) | 19090 | `http://localhost:19090` | `http://payments:8080` |
+| atdd-db (MySQL) | 3306 | `jdbc:mysql://localhost:3306` | `jdbc:mysql://atdd-db:3306` |
+
+> **참고**: 모든 서비스의 컨테이너 내부 포트는 `8080`이며, 호스트 포트만 다릅니다.
+> 테스트 코드(호스트)에서는 `localhost:{호스트포트}`, Docker 컨테이너 간에는 `{서비스명}:8080`을 사용합니다.
 
 ## WireMock 구성
 
