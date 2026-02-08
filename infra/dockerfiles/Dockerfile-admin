@@ -1,4 +1,4 @@
-# dockerfiles/Dockerfile-kiosk
+# dockerfiles/Dockerfile-admin
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /app
 COPY . .
