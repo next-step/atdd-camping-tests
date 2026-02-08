@@ -8,6 +8,9 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=local
       - SERVER_PORT=8080
+      - KIOSK_ADMIN_BASE_URL=http://admin:8080
+    depends_on:
+      - admin
 
   admin:
     build:
