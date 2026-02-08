@@ -14,6 +14,9 @@ val cucumberVersion = "7.14.0"
 val restAssuredVersion = "5.3.2"
 val jacksonVersion = "2.17.2"
 
+// Environment
+val kioskBaseUrl: String = System.getenv("KIOSK_BASE_URL") ?: "http://localhost:18080"
+
 dependencies {
     // Cucumber
     testImplementation("io.cucumber:cucumber-java:$cucumberVersion")
@@ -37,6 +40,7 @@ tasks.test {
     useJUnitPlatform()
     dependsOn("composeUp", "waitForServices")
     finalizedBy("composeDown")
+    systemProperty("kiosk.base.url", kioskBaseUrl)
 }
 
 // ========== Docker Compose Tasks ==========
@@ -56,8 +60,9 @@ tasks.register<Exec>("waitForServices") {
     commandLine(
         "sh", "-c",
         """
+        BASE_URL="${kioskBaseUrl}"
         for i in $(seq 1 30); do
-            if curl -s -o /dev/null -w '%{http_code}' http://localhost:8080 | grep -q '200'; then
+            if curl -s -o /dev/null -w '%{http_code}' ${'$'}BASE_URL/health | grep -q '200'; then
                 echo "Service is ready after ${'$'}i attempts"
                 exit 0
             fi
