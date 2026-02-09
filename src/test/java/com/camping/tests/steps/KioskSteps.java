@@ -7,6 +7,7 @@ import io.restassured.response.Response;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
 
 public class KioskSteps {
     private static final Map<String, String> SERVICE_URLS = Map.of(
@@ -37,6 +38,12 @@ public class KioskSteps {
     @그러면("상품 목록이 정상적으로 조회된다")
     public void verifyProducts() {
         response.then()
-                .statusCode(200);
+                .statusCode(200)
+                .body("$.size()", greaterThanOrEqualTo(1))
+                .body("[0].id", notNullValue())
+                .body("[0].name", notNullValue())
+                .body("[0].price", notNullValue())
+                .body("[0].stockQuantity", notNullValue())
+                .body("[0].productType", notNullValue());
     }
 }
