@@ -116,3 +116,13 @@ tasks.register<Exec>("cloneRepos") {
         [ -d atdd-camping-reservation ] || git clone -b heeun98 https://github.com/next-step/atdd-camping-reservation.git
     """.trimIndent())
 }
+
+tasks.register("setupAndTest") {
+    group = "workflow"
+    description = "Full workflow: clone repos → start infra → start services → run tests"
+    dependsOn("cloneRepos", "infraUp", "composeUp", "test")
+
+    tasks.findByName("infraUp")?.mustRunAfter("cloneRepos")
+    tasks.findByName("composeUp")?.mustRunAfter("infraUp")
+    tasks.findByName("test")?.mustRunAfter("composeUp")
+}
