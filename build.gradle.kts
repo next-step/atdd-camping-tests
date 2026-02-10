@@ -105,3 +105,14 @@ tasks.register<Exec>("infraDown") {
         "down", "-v"
     )
 }
+
+tasks.register<Exec>("cloneRepos") {
+    group = "setup"
+    description = "Clone microservice repositories"
+    commandLine("bash", "-c", """
+        mkdir -p repos && cd repos
+        [ -d atdd-camping-kiosk ] || git clone https://github.com/next-step/atdd-camping-kiosk.git
+        [ -d atdd-camping-admin ] || git clone -b heeun98 https://github.com/next-step/atdd-camping-admin.git
+        [ -d atdd-camping-reservation ] || git clone -b heeun98 https://github.com/next-step/atdd-camping-reservation.git
+    """.trimIndent())
+}
