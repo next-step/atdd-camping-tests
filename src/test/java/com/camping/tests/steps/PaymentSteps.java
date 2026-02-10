@@ -1,12 +1,22 @@
 package com.camping.tests.steps;
 
-import io.cucumber.java.ko.만약;
+import com.camping.tests.api.PaymentApi;
+import com.camping.tests.factory.PaymentRequestFactory;
+import com.camping.tests.steps.context.TestContext;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.ko.그러면;
 import io.cucumber.java.ko.그리고;
-import io.restassured.RestAssured;
+import io.cucumber.java.ko.만약;
+import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PaymentSteps {
 
@@ -15,97 +25,92 @@ public class PaymentSteps {
                     ? System.getenv("KIOSK_BASE_URL")
                     : "http://localhost:18081";
 
-    private static final String CART_ITEM = """
-            {
-                "productId": 1,
-                "productName": "테스트상품",
-                "unitPrice": 10000,
-                "quantity": 1
-            }
-            """;
+    private static final int DEFAULT_CONFIRM_AMOUNT = 10000;
+    private static final String DEFAULT_PAYMENT_METHOD = "CARD";
 
-    private Response createResponse;
-    private Response confirmResponse;
-    private String paymentKey;
-    private String orderId;
+    @Autowired
+    private TestContext testContext;
+
+    @Autowired
+    private PaymentApi paymentApi;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @만약("키오스크에 결제 생성을 요청한다")
     public void 키오스크에_결제_생성을_요청한다() {
-        String requestBody = """
-                {
-                    "items": [%s],
-                    "paymentMethod": "CARD"
-                }
-                """.formatted(CART_ITEM);
+        ensureDefaultCartItem();
 
-        createResponse = RestAssured
-                .given()
-                    .baseUri(KIOSK_BASE_URL)
-                    .contentType("application/json")
-                    .body(requestBody)
-                .when()
-                    .post("/api/payments");
-
-        assertEquals(200, createResponse.statusCode());
-        paymentKey = createResponse.jsonPath().getString("paymentKey");
-        orderId = createResponse.jsonPath().getString("orderId");
-        assertNotNull(paymentKey);
+        ExtractableResponse<Response> createResponse = paymentApi.결제_생성(
+                KIOSK_BASE_URL,
+                testContext.getPayment().getCartItemFixture(),
+                DEFAULT_PAYMENT_METHOD
+        );
+        validatePaymentCreateResponse(createResponse);
+        testContext.setResponse(createResponse);
     }
 
     @그리고("키오스크에 결제 확정을 요청한다")
     public void 키오스크에_결제_확정을_요청한다() {
-        String requestBody = """
-                {
-                    "paymentKey": "%s",
-                    "orderId": "%s",
-                    "amount": 10000,
-                    "items": [%s]
-                }
-                """.formatted(paymentKey, orderId, CART_ITEM);
-
-        confirmResponse = RestAssured
-                .given()
-                    .baseUri(KIOSK_BASE_URL)
-                    .contentType("application/json")
-                    .body(requestBody)
-                .when()
-                    .post("/api/payments/confirm");
+        testContext.setResponse(paymentApi.결제_확정(
+                KIOSK_BASE_URL,
+                testContext.getPayment().getPaymentKey(),
+                testContext.getPayment().getOrderId(),
+                DEFAULT_CONFIRM_AMOUNT,
+                testContext.getPayment().getCartItemFixture()
+        ));
     }
 
     @그리고("키오스크에 금액 {int}원으로 결제 확정을 요청한다")
     public void 키오스크에_금액_N원으로_결제_확정을_요청한다(int amount) {
-        String requestBody = """
-                {
-                    "paymentKey": "%s",
-                    "orderId": "%s",
-                    "amount": %d,
-                    "items": [%s]
-                }
-                """.formatted(paymentKey, orderId, amount, CART_ITEM);
+        testContext.setResponse(paymentApi.결제_확정(
+                KIOSK_BASE_URL,
+                testContext.getPayment().getPaymentKey(),
+                testContext.getPayment().getOrderId(),
+                amount,
+                testContext.getPayment().getCartItemFixture()
+        ));
+    }
 
-        confirmResponse = RestAssured
-                .given()
-                    .baseUri(KIOSK_BASE_URL)
-                    .contentType("application/json")
-                    .body(requestBody)
-                .when()
-                    .post("/api/payments/confirm");
+    @그리고("결제 요청 body 아이템을 다음 값으로 설정한다")
+    public void 결제_요청_body_아이템을_다음_값으로_설정한다(String cartItemBody) {
+        try {
+            testContext.getPayment().setCartItemFixture(
+                    objectMapper.readValue(cartItemBody, new TypeReference<Map<String, Object>>() {})
+            );
+        } catch (Exception e) {
+            throw new AssertionError("결제 요청 body 아이템 JSON 파싱에 실패했습니다", e);
+        }
     }
 
     @그러면("결제가 성공이어야 한다")
     public void 결제가_성공이어야_한다() {
-        assertEquals(200, confirmResponse.statusCode());
-        Boolean success = confirmResponse.jsonPath().getBoolean("success");
-        assertTrue(success, "결제가 성공해야 합니다");
+        assertEquals(200, testContext.getResponse().statusCode());
+        assertTrue(testContext.getResponse().jsonPath().getBoolean("success"), "결제가 성공해야 합니다");
     }
 
     @그러면("결제가 실패이어야 한다")
     public void 결제가_실패이어야_한다() {
-        // 실패 시 400 에러 또는 success=false
-        assertTrue(
-            confirmResponse.statusCode() == 400 ||
-            !confirmResponse.jsonPath().getBoolean("success"),
-            "결제가 실패해야 합니다"
-        );
+        boolean statusFailure = testContext.getResponse().statusCode() == 400;
+        boolean bodyFailure = !Boolean.TRUE.equals(testContext.getResponse().jsonPath().getBoolean("success"));
+        assertTrue(statusFailure || bodyFailure, "결제가 실패해야 합니다");
+    }
+
+    private void ensureDefaultCartItem() {
+        if (testContext.getPayment().getCartItemFixture() == null) {
+            testContext.getPayment().setCartItemFixture(PaymentRequestFactory.defaultCartItemFixture());
+        }
+    }
+
+    private void validatePaymentCreateResponse(ExtractableResponse<Response> createResponse) {
+        assertEquals(200, createResponse.statusCode());
+
+        String paymentKey = createResponse.jsonPath().getString("paymentKey");
+        String orderId = createResponse.jsonPath().getString("orderId");
+
+        assertNotNull(paymentKey, "paymentKey는 null이면 안 됩니다");
+        assertNotNull(orderId, "orderId는 null이면 안 됩니다");
+
+        testContext.getPayment().setPaymentKey(paymentKey);
+        testContext.getPayment().setOrderId(orderId);
     }
 }

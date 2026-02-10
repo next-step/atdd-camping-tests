@@ -34,10 +34,13 @@ dependencies {
     // Cucumber
     testImplementation("io.cucumber:cucumber-java:$cucumberVersion")
     testImplementation("io.cucumber:cucumber-junit-platform-engine:$cucumberVersion")
+    testImplementation("io.cucumber:cucumber-spring:$cucumberVersion")
 
     // RestAssured
     testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
     testImplementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    testImplementation("org.springframework:spring-context:6.1.13")
+    testImplementation("org.springframework:spring-test:6.1.13")
 
     // JUnit Jupiter
     testImplementation("org.junit.platform:junit-platform-suite:1.10.0")
