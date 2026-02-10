@@ -56,10 +56,12 @@ tasks.test {
     val kioskPort = envVars.getOrDefault("KIOSK_HOST_PORT", "18081")
     val adminPort = envVars.getOrDefault("ADMIN_HOST_PORT", "18082")
     val reservationPort = envVars.getOrDefault("RESERVATION_HOST_PORT", "18083")
+    val paymentPort = envVars.getOrDefault("PAYMENT_HOST_PORT", "9090")
 
     environment("KIOSK_BASE_URL", "http://localhost:$kioskPort")
     environment("ADMIN_BASE_URL", "http://localhost:$adminPort")
     environment("RESERVATION_BASE_URL", "http://localhost:$reservationPort")
+    environment("PAYMENT_BASE_URL", "http://localhost:$paymentPort")
 }
 
 tasks.register<Exec>("composeUp") {
@@ -123,12 +125,14 @@ tasks.register<Exec>("waitForServices") {
     val kioskPort = envVars.getOrDefault("KIOSK_HOST_PORT", "18081")
     val adminPort = envVars.getOrDefault("ADMIN_HOST_PORT", "18082")
     val reservationPort = envVars.getOrDefault("RESERVATION_HOST_PORT", "18083")
+    val paymentPort = envVars.getOrDefault("PAYMENT_HOST_PORT", "9090")
     commandLine("bash", "-c", """
         echo "Waiting for services to be ready..."
         for i in {1..30}; do
             if curl -s http://localhost:$kioskPort/health > /dev/null 2>&1 && \
                curl -s http://localhost:$adminPort/health > /dev/null 2>&1 && \
-               curl -s http://localhost:$reservationPort/health > /dev/null 2>&1; then
+               curl -s http://localhost:$reservationPort/health > /dev/null 2>&1 && \
+               curl -s http://localhost:$paymentPort/__admin/mappings > /dev/null 2>&1; then
                 echo "All services are ready!"
                 exit 0
             fi
