@@ -117,12 +117,36 @@ tasks.register<Exec>("cloneRepos") {
     """.trimIndent())
 }
 
+tasks.register<Exec>("waitForServices") {
+    group = "infra"
+    description = "Wait for all services to be ready"
+    val kioskPort = envVars.getOrDefault("KIOSK_HOST_PORT", "18081")
+    val adminPort = envVars.getOrDefault("ADMIN_HOST_PORT", "18082")
+    val reservationPort = envVars.getOrDefault("RESERVATION_HOST_PORT", "18083")
+    commandLine("bash", "-c", """
+        echo "Waiting for services to be ready..."
+        for i in {1..30}; do
+            if curl -s http://localhost:$kioskPort/health > /dev/null 2>&1 && \
+               curl -s http://localhost:$adminPort/health > /dev/null 2>&1 && \
+               curl -s http://localhost:$reservationPort/health > /dev/null 2>&1; then
+                echo "All services are ready!"
+                exit 0
+            fi
+            echo "Attempt ${'$'}i/30: Services not ready yet, waiting..."
+            sleep 2
+        done
+        echo "Services failed to start within timeout"
+        exit 1
+    """.trimIndent())
+}
+
 tasks.register("setupAndTest") {
     group = "workflow"
-    description = "Full workflow: clone repos → start infra → start services → run tests"
-    dependsOn("cloneRepos", "infraUp", "composeUp", "test")
+    description = "Full workflow: clone repos → start infra → start services → wait → run tests"
+    dependsOn("cloneRepos", "infraUp", "composeUp", "waitForServices", "test")
 
     tasks.findByName("infraUp")?.mustRunAfter("cloneRepos")
     tasks.findByName("composeUp")?.mustRunAfter("infraUp")
-    tasks.findByName("test")?.mustRunAfter("composeUp")
+    tasks.findByName("waitForServices")?.mustRunAfter("composeUp")
+    tasks.findByName("test")?.mustRunAfter("waitForServices")
 }
