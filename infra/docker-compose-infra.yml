@@ -23,3 +23,14 @@ services:
       timeout: 3s
       retries: 20
     command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+
+  payments-mock:
+    image: wiremock/wiremock:3.3.1
+    container_name: payments-mock
+    ports:
+      - "${PAYMENT_HOST_PORT:-9090}:8080"
+    networks:
+      - atdd-net
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+    command: ["--verbose"]

@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/payments/confirm"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "paymentKey": "test-payment-key",
+      "orderId": "test-order-001",
+      "method": "CARD",
+      "approvedAt": "2024-01-15T10:30:00Z",
+      "totalAmount": 10000,
+      "status": "APPROVED",
+      "receipt": {
+        "url": "https://receipt.example.com/test"
+      }
+    }
+  }
+}
