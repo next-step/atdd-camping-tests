@@ -54,8 +54,7 @@ tasks.register<Exec>("composeUp") {
     description = "Start test environment"
     commandLine(
         "sh", "-c",
-        "docker compose -f infra/docker-compose-infra.yml up -d && " +
-        "docker compose -f infra/docker-compose.yml up -d --build"
+        "docker compose -f infra/docker-compose-infra.yml -f infra/docker-compose.yml up -d --build"
     )
 }
 
@@ -63,7 +62,6 @@ tasks.register<Exec>("composeDown") {
     description = "Stop test environment"
     commandLine(
         "sh", "-c",
-        "docker compose -f infra/docker-compose.yml down; " +
-        "docker compose -f infra/docker-compose-infra.yml down"
+        "docker compose -f infra/docker-compose-infra.yml -f infra/docker-compose.yml down"
     )
 }
