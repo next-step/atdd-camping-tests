@@ -29,10 +29,18 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-suite-engine:1.10.0")
 
-    // JDBC driver for test hooks
-    testImplementation("com.mysql:mysql-connector-j:8.3.0")
 }
 
 tasks.test {
     useJUnitPlatform()
+    // -Dcucumber.filter.tags 는 Gradle JVM에 설정되므로 테스트 JVM으로 명시적으로 전달
+    val tagFilter = System.getProperty("cucumber.filter.tags")
+    if (tagFilter != null) systemProperty("cucumber.filter.tags", tagFilter)
+}
+
+tasks.register<Test>("smokeTest") {
+    group = "smoke"
+    description = "@smoke 테스트 실행 (컨테이너 기동/종료는 SmokeHooks 자동 처리)"
+    useJUnitPlatform()
+    systemProperty("cucumber.filter.tags", "@smoke")
 }
