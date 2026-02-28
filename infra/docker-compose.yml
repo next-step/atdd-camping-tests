@@ -1,0 +1,23 @@
+name: atdd
+
+networks:
+  atdd-net:
+    name: atdd-net
+    external: true
+
+services:
+  kiosk:
+    build:
+      context: ../../atdd-camping-kiosk
+      dockerfile: Dockerfile-kiosk
+    container_name: atdd-kiosk
+    ports:
+      - "8080:8080"
+    networks:
+      - atdd-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
