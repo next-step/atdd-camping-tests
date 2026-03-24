@@ -3,9 +3,84 @@ name: atdd
 networks:
   atdd-net:
     name: atdd-net
-    external: true
 
 services:
+  db:
+    image: mysql:8.0
+    container_name: atdd-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=atdd
+      - MYSQL_ROOT_HOST=%
+    ports:
+      - "13306:3306"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - atdd-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-psecret"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+
+  admin:
+    build:
+      context: ../../atdd-camping-admin
+      dockerfile: Dockerfile-admin
+    container_name: atdd-admin
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useUnicode=true&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_SQL_INIT_MODE=never
+      - SPRING_H2_CONSOLE_ENABLED=false
+    networks:
+      - atdd-net
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+
+  reservation:
+    build:
+      context: ../../atdd-camping-reservation
+      dockerfile: Dockerfile-reservation
+    container_name: atdd-reservation
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://atdd-db:3306/atdd?useUnicode=true&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=secret
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_SQL_INIT_MODE=never
+      - SPRING_H2_CONSOLE_ENABLED=false
+    networks:
+      - atdd-net
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 30s
+
   kiosk:
     build:
       context: ../../atdd-camping-kiosk
@@ -13,8 +88,14 @@ services:
     container_name: atdd-kiosk
     ports:
       - "8080:8080"
+    environment:
+      - KIOSK_ADMIN_BASE_URL=http://atdd-admin:8080
+      - KIOSK_PAYMENT_BASE_URL=http://atdd-payments:9090
     networks:
       - atdd-net
+    depends_on:
+      admin:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
       interval: 5s
