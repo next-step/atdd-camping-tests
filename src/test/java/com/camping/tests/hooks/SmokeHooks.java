@@ -8,13 +8,13 @@ import io.restassured.RestAssured;
 import java.io.IOException;
 
 /**
- * @smoke 시나리오 실행 전 키오스크 준비를 보장한다.
+ * @smoke 시나리오 실행 전 전체 서비스 준비를 보장한다.
  *
  * 흐름:
  *  1. 키오스크가 이미 떠 있으면 → 그대로 진행
  *  2. 떠 있지 않으면 → docker compose up -d --build 실행
  *     + JVM 종료 시 docker compose down 자동 등록
- *  3. ServiceWaiter로 /health 폴링 → 준비 완료 후 테스트 시작
+ *  3. ServiceWaiter로 각 서비스 /health 폴링 → 준비 완료 후 테스트 시작
  */
 public class SmokeHooks {
 
@@ -23,50 +23,36 @@ public class SmokeHooks {
     private static volatile boolean prepared = false;
     private static volatile boolean composeManagedByHook = false;
 
-    @Before("@smoke")
-    public void ensureKioskReady() throws Exception {
+    @Before("@smoke or @e2e")
+    public void ensureServicesReady() throws Exception {
         if (prepared) return;
 
-        if (isKioskUp()) {
-            System.out.println("[SmokeHooks] 키오스크가 이미 실행 중입니다.");
+        if (isServiceUp(TestConfig.KIOSK_BASE_URL)) {
+            System.out.println("[SmokeHooks] 서비스가 이미 실행 중입니다.");
         } else {
-            System.out.println("[SmokeHooks] 키오스크가 감지되지 않아 docker compose를 기동합니다.");
+            System.out.println("[SmokeHooks] 서비스가 감지되지 않아 docker compose를 기동합니다.");
             composeUp();
             composeManagedByHook = true;
             registerShutdownHook();
         }
 
-        ServiceWaiter.waitFor(TestConfig.KIOSK_BASE_URL + "/health", 24, 5_000);
+        ServiceWaiter.waitFor(TestConfig.ADMIN_BASE_URL + "/health", 40, 5_000);
+        ServiceWaiter.waitFor(TestConfig.RESERVATION_BASE_URL + "/health", 40, 5_000);
+        ServiceWaiter.waitFor(TestConfig.KIOSK_BASE_URL + "/health", 40, 5_000);
         prepared = true;
     }
 
-    private static boolean isKioskUp() {
+    private static boolean isServiceUp(String baseUrl) {
         try {
             return RestAssured.given()
-                    .get(TestConfig.KIOSK_BASE_URL + "/health")
+                    .get(baseUrl + "/health")
                     .getStatusCode() == 200;
         } catch (Exception e) {
             return false;
         }
     }
 
-    private static void ensureNetworkExists() throws IOException, InterruptedException {
-        // 네트워크가 없으면 생성, 이미 존재하면 무시 (exit code 1 허용)
-        String networkName = "atdd-net";
-        System.out.println("[SmokeHooks] docker network create " + networkName);
-        int exit = new ProcessBuilder("docker", "network", "create", networkName)
-                .inheritIO()
-                .start()
-                .waitFor();
-        if (exit == 0) {
-            System.out.println("[SmokeHooks] 네트워크 생성 완료: " + networkName);
-        } else {
-            System.out.println("[SmokeHooks] 네트워크가 이미 존재합니다: " + networkName);
-        }
-    }
-
     private static void composeUp() throws IOException, InterruptedException {
-        ensureNetworkExists();
         runCompose("up", "-d", "--build");
     }
 

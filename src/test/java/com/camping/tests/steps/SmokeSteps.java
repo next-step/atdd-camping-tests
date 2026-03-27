@@ -12,4 +12,16 @@ public class SmokeSteps {
         TestContext.current().setLastResponse(
                 RestAssured.given().get(TestConfig.KIOSK_BASE_URL + "/health"));
     }
+
+    @만약("어드민 헬스 체크를 요청한다")
+    public void 어드민_헬스_체크() {
+        TestContext.current().setLastResponse(
+                RestAssured.given().get(TestConfig.ADMIN_BASE_URL + "/health"));
+    }
+
+    @만약("예약 서비스 헬스 체크를 요청한다")
+    public void 예약_서비스_헬스_체크() {
+        TestContext.current().setLastResponse(
+                RestAssured.given().get(TestConfig.RESERVATION_BASE_URL + "/health"));
+    }
 }

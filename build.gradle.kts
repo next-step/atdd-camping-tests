@@ -39,8 +39,22 @@ tasks.test {
 }
 
 tasks.register<Test>("smokeTest") {
-    group = "smoke"
+    group = "verification"
     description = "@smoke 테스트 실행 (컨테이너 기동/종료는 SmokeHooks 자동 처리)"
     useJUnitPlatform()
     systemProperty("cucumber.filter.tags", "@smoke")
+}
+
+tasks.register<Test>("e2eTest") {
+    group = "verification"
+    description = "@e2e 테스트 실행 (E2E 시나리오)"
+    useJUnitPlatform()
+    systemProperty("cucumber.filter.tags", "@e2e")
+}
+
+tasks.register<Test>("allTest") {
+    group = "verification"
+    description = "@smoke + @e2e 테스트 전체 실행"
+    useJUnitPlatform()
+    systemProperty("cucumber.filter.tags", "@smoke or @e2e")
 }

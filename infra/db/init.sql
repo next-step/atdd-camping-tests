@@ -1,3 +1,6 @@
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 -- Create tables if not exist (so we can seed before apps start)
 CREATE TABLE IF NOT EXISTS products (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -13,6 +16,7 @@ CREATE TABLE IF NOT EXISTS campsites (
   site_number VARCHAR(32) NOT NULL,
   description VARCHAR(255),
   max_people INT NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'AVAILABLE',
   UNIQUE KEY uk_campsites_site_number (site_number)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
